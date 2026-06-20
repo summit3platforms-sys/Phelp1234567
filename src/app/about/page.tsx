@@ -1,20 +1,20 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About Us - PrinterFix DB",
-  description: "Learn more about PrinterFix DB, your ultimate knowledge base for printer troubleshooting, setup, and error codes.",
+  title: "About Us - LibertyPrinterFix",
+  description: "Learn more about LibertyPrinterFix, your ultimate knowledge base for printer troubleshooting, setup, and error codes.",
 };
 
 export default function AboutPage() {
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 0' }}>
       <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1.5rem', letterSpacing: '-0.03em' }}>
-        About PrinterFix.db
+        About LibertyPrinterFix
       </h1>
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', color: '#334155', lineHeight: '1.75' }}>
         <p>
-          Welcome to <strong>PrinterFix.db</strong>, the internet's premier independent repository for printer troubleshooting, setup guides, and error code solutions. Our goal is to make printer repairs accessible, clear, and actionable for everyone.
+          Welcome to <strong>libertyprinterfix.com</strong>, the internet's premier independent repository for printer troubleshooting, setup guides, and error code solutions. Our goal is to make printer repairs accessible, clear, and actionable for everyone.
         </p>
 
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', marginTop: '1rem' }}>Our Mission</h2>
@@ -31,7 +31,7 @@ export default function AboutPage() {
 
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', marginTop: '1rem' }}>Independent Support</h2>
         <p>
-          Please note that PrinterFix.db is an independent resource and is not affiliated, endorsed, or partnered with any printer manufacturers mentioned on our site. All brand names, logos, and trademarks remain the property of their respective owners and are used purely for informational and reference purposes.
+          Please note that libertyprinterfix.com is an independent resource and is not affiliated, endorsed, or partnered with any printer manufacturers mentioned on our site. All brand names, logos, and trademarks remain the property of their respective owners and are used purely for informational and reference purposes.
         </p>
       </div>
     </div>

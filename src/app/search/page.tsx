@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Search Printer Errors - PrinterFix DB",
+  title: "Search Printer Errors - LibertyPrinterFix",
   description: "Search our database for printer error codes, models, and troubleshooting steps.",
 };
 

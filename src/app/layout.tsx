@@ -3,7 +3,7 @@ import "./globals.css";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Printer Troubleshooting & Error Codes Knowledge Base",
+  title: "LibertyPrinterFix - Printer Troubleshooting & Error Codes",
   description: "Find solutions, error codes, and troubleshooting steps for all major printer brands including HP, Canon, Epson, and Brother.",
 };
 
@@ -19,7 +19,7 @@ export default function RootLayout({
           <div className="container">
             <Link href="/" className="logo">
               <span className="logo-emoji">🖨️</span>
-              <span>PrinterFix<span style={{ color: 'var(--accent-color)' }}>.db</span></span>
+              <span>Liberty<span style={{ color: 'var(--accent-color)' }}>PrinterFix</span></span>
             </Link>
             <nav className="nav-links">
               <Link href="/" className="nav-link">Home</Link>
@@ -40,7 +40,7 @@ export default function RootLayout({
               <div className="footer-col footer-info">
                 <Link href="/" className="logo" style={{ marginBottom: '1rem' }}>
                   <span className="logo-emoji">🖨️</span>
-                  <span>PrinterFix<span style={{ color: 'var(--accent-color)' }}>.db</span></span>
+                  <span>Liberty<span style={{ color: 'var(--accent-color)' }}>PrinterFix</span></span>
                 </Link>
                 <p className="footer-desc">
                   The ultimate independent database for printer troubleshooting, setup guides, ink/toner fixes, and diagnostic error codes.
@@ -50,7 +50,7 @@ export default function RootLayout({
                     <span>📍</span> Global Support Database
                   </div>
                   <div className="footer-contact-item">
-                    <span>✉️</span> info@printerfixdb.com
+                    <span>✉️</span> info@libertyprinterfix.com
                   </div>
                 </div>
               </div>
@@ -93,7 +93,7 @@ export default function RootLayout({
 
             <div className="footer-bottom">
               <p className="footer-copyright">
-                &copy; {new Date().getFullYear()} PrinterFix.db. All rights reserved. Real-time solutions for printer errors.
+                &copy; {new Date().getFullYear()} libertyprinterfix.com. All rights reserved. Real-time solutions for printer errors.
               </p>
               <p className="footer-disclaimer">
                 Not affiliated with HP, Canon, Epson, Brother, or any OEM printer manufacturer.

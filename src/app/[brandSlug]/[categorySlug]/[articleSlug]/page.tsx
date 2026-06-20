@@ -43,10 +43,10 @@ export default async function ArticlePage({ params }: PageParams) {
       {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://printerfixdb.com/" },
-          { "@type": "ListItem", "position": 2, "name": article.brand.name, "item": `https://printerfixdb.com/brand/${article.brand.slug}/` },
-          { "@type": "ListItem", "position": 3, "name": article.category.name, "item": `https://printerfixdb.com/brand/${article.brand.slug}/` },
-          { "@type": "ListItem", "position": 4, "name": article.title, "item": `https://printerfixdb.com/${article.brand.slug}/${article.category.slug}/${article.slug}/` }
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://libertyprinterfix.com/" },
+          { "@type": "ListItem", "position": 2, "name": article.brand.name, "item": `https://libertyprinterfix.com/brand/${article.brand.slug}/` },
+          { "@type": "ListItem", "position": 3, "name": article.category.name, "item": `https://libertyprinterfix.com/brand/${article.brand.slug}/` },
+          { "@type": "ListItem", "position": 4, "name": article.title, "item": `https://libertyprinterfix.com/${article.brand.slug}/${article.category.slug}/${article.slug}/` }
         ]
       },
       {
@@ -56,7 +56,7 @@ export default async function ArticlePage({ params }: PageParams) {
         "dateModified": article.updatedAt.toISOString(),
         "author": {
           "@type": "Organization",
-          "name": "PrinterFix DB"
+          "name": "LibertyPrinterFix"
         }
       }
     ]

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard - PrinterFix DB",
+  title: "Admin Dashboard - LibertyPrinterFix",
   robots: { index: false, follow: false },
 };
 

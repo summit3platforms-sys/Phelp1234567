@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Contact Us - PrinterFix DB",
-  description: "Get in touch with the team at PrinterFix DB for support, feedback, or inquiries.",
+  title: "Contact Us - LibertyPrinterFix",
+  description: "Get in touch with the team at LibertyPrinterFix for support, feedback, or inquiries.",
 };
 
 export default function ContactPage() {
