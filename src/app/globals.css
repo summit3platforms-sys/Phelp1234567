@@ -649,3 +649,36 @@ a:hover {
   }
 }
 
+/* Responsive Logo Styling */
+.header-logo-img {
+  height: 35px;
+  width: auto;
+  display: block;
+  transition: height var(--transition-normal);
+}
+
+.footer-logo-img {
+  height: 30px;
+  width: auto;
+  display: block;
+  transition: height var(--transition-normal);
+}
+
+@media (min-width: 769px) {
+  .header-logo-img {
+    height: 50px;
+  }
+  .footer-logo-img {
+    height: 45px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .header-logo-img {
+    height: 58px;
+  }
+  .footer-logo-img {
+    height: 50px;
+  }
+}
+
