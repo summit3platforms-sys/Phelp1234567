@@ -40,8 +40,18 @@ export default async function Home() {
     if (key.includes('canon')) return '📷';
     if (key.includes('epson')) return '🎨';
     if (key.includes('brother')) return '🏢';
-    if (key.includes('samsung')) return '📱';
+    if (key.includes('lexmark')) return '💼';
     if (key.includes('xerox')) return '⚡';
+    if (key.includes('kodak')) return '🖼️';
+    if (key.includes('polaroid')) return '📸';
+    if (key.includes('fujifilm')) return '📷';
+    if (key.includes('dymo') || key.includes('rollo') || key.includes('munbyn') || key.includes('nelko') || key.includes('phomemo') || key.includes('niimbot') || key.includes('bixolon')) return '🏷️';
+    if (key.includes('zebra')) return '🦓';
+    if (key.includes('star')) return '⭐';
+    if (key.includes('citizen')) return '🏙️';
+    if (key.includes('seiko')) return '⌚';
+    if (key.includes('primera')) return '💿';
+    if (key.includes('samsung')) return '📱';
     return '🖨️';
   };
 
