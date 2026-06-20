@@ -37,15 +37,16 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     <div>
       <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Search Knowledge Base</h1>
       
-      <form action="/search" method="GET" style={{ marginBottom: '2rem', display: 'flex', gap: '0.5rem' }}>
+      <form action="/search" method="GET" className="search-form" style={{ marginBottom: '2rem' }}>
+        <div className="search-icon">🔍</div>
         <input 
           type="text" 
           name="q" 
           defaultValue={q} 
           placeholder="Search for error codes (e.g. 5100), brands, or problems..." 
-          style={{ flex: 1, padding: '0.8rem', fontSize: '1rem', border: '1px solid var(--border-color)', borderRadius: '4px' }}
+          className="search-input"
         />
-        <button type="submit" style={{ padding: '0.8rem 2rem', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '1rem' }}>
+        <button type="submit" className="search-button">
           Search
         </button>
       </form>

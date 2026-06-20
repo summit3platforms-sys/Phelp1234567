@@ -63,7 +63,7 @@ export default async function ArticlePage({ params }: PageParams) {
   };
 
   return (
-    <article style={{ background: '#fff', padding: '2rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+    <article className="article-page-container">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -76,7 +76,7 @@ export default async function ArticlePage({ params }: PageParams) {
       </nav>
 
       <header style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{article.title}</h1>
+        <h1 className="article-page-title">{article.title}</h1>
         <div style={{ color: '#666', fontSize: '0.9rem', display: 'flex', gap: '1rem' }}>
           <span>Updated: {new Date(article.updatedAt).toLocaleDateString()}</span>
           {article.errorCode && <span>Error Code: <strong style={{ color: '#c2185b' }}>{article.errorCode}</strong></span>}
