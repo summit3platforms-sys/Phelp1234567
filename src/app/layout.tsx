@@ -17,11 +17,14 @@ export default function RootLayout({
       <body>
         <header className="header">
           <div className="container">
-            <Link href="/" style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>
-              PrinterFix DB
+            <Link href="/" className="logo">
+              <span className="logo-emoji">🖨️</span>
+              <span>PrinterFix<span style={{ color: 'var(--accent-color)' }}>.db</span></span>
             </Link>
-            <nav>
-              <Link href="/search" style={{ marginLeft: '1rem' }}>Search</Link>
+            <nav className="nav-links">
+              <Link href="/" className="nav-link">Home</Link>
+              <Link href="/search" className="nav-link">Search Guides</Link>
+              <Link href="/admin" className="nav-link nav-btn">Admin Dashboard</Link>
             </nav>
           </div>
         </header>
@@ -31,8 +34,17 @@ export default function RootLayout({
         </main>
 
         <footer className="footer">
-          <div className="container">
-            <p>&copy; {new Date().getFullYear()} Printer Troubleshooting DB. All rights reserved.</p>
+          <div className="container footer-content">
+            <div className="logo" style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>
+              <span className="logo-emoji">🖨️</span>
+              <span>PrinterFix<span style={{ color: 'var(--accent-color)' }}>.db</span></span>
+            </div>
+            <p className="footer-text">&copy; {new Date().getFullYear()} Printer Troubleshooting DB. Real-time solutions for printer errors.</p>
+            <div className="footer-links">
+              <Link href="/" className="footer-link">Home</Link>
+              <Link href="/search" className="footer-link">Search</Link>
+              <Link href="/admin" className="footer-link">Admin Dashboard</Link>
+            </div>
           </div>
         </footer>
       </body>
