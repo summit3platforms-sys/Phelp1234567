@@ -23,8 +23,9 @@ export default function RootLayout({
             </Link>
             <nav className="nav-links">
               <Link href="/" className="nav-link">Home</Link>
-              <Link href="/search" className="nav-link">Search Guides</Link>
-              <Link href="/admin" className="nav-link nav-btn">Admin Dashboard</Link>
+              <Link href="/privacy-policy" className="nav-link">Privacy Policy</Link>
+              <Link href="/about" className="nav-link">About</Link>
+              <Link href="/contact" className="nav-link">Contact</Link>
             </nav>
           </div>
         </header>
@@ -40,10 +41,13 @@ export default function RootLayout({
               <span>PrinterFix<span style={{ color: 'var(--accent-color)' }}>.db</span></span>
             </div>
             <p className="footer-text">&copy; {new Date().getFullYear()} Printer Troubleshooting DB. Real-time solutions for printer errors.</p>
-            <div className="footer-links">
+            <div className="footer-links" style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
               <Link href="/" className="footer-link">Home</Link>
-              <Link href="/search" className="footer-link">Search</Link>
-              <Link href="/admin" className="footer-link">Admin Dashboard</Link>
+              <Link href="/search" className="footer-link">Search Guides</Link>
+              <Link href="/privacy-policy" className="footer-link">Privacy Policy</Link>
+              <Link href="/about" className="footer-link">About Us</Link>
+              <Link href="/contact" className="footer-link">Contact Us</Link>
+              <a href="/sitemap.xml" className="footer-link">Sitemap</a>
             </div>
           </div>
         </footer>
