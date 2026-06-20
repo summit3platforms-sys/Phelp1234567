@@ -2,24 +2,18 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
 export default async function Home() {
-  // Fetch brands with active articles count
+  // Get total count of brands
+  const totalBrandsCount = await prisma.brand.count();
+
+  // Fetch only the first 9 brands for homepage display
   const brands = await prisma.brand.findMany({
     orderBy: { name: 'asc' },
-    include: {
-      _count: {
-        select: { articles: { where: { status: 'published' } } }
-      }
-    }
+    take: 9
   });
 
-  // Fetch categories with active articles count
+  // Fetch categories
   const categories = await prisma.category.findMany({
-    orderBy: { name: 'asc' },
-    include: {
-      _count: {
-        select: { articles: { where: { status: 'published' } } }
-      }
-    }
+    orderBy: { name: 'asc' }
   });
 
   // Fetch recent articles
@@ -71,6 +65,20 @@ export default async function Home() {
     return '🛠️';
   };
 
+  const categoryDescriptions: Record<string, string> = {
+    "Connectivity Issues": "Resolve Wi-Fi, network, offline printer, and connection-related problems to restore seamless communication between your printer and devices.",
+    "Printing Problems": "Get solutions for print failures, incomplete print jobs, slow printing, and other document output issues.",
+    "Paper Handling Issues": "Find fixes for paper jams, feeding errors, paper detection problems, and other paper-related concerns.",
+    "Ink & Toner Issues": "Learn how to troubleshoot cartridge recognition, low ink warnings, toner errors, and replacement guidance.",
+    "Print Quality Issues": "Improve print results by resolving faded prints, streaks, color inconsistencies, blurry text, and image quality issues.",
+    "Scanning Issues": "Troubleshoot scanning failures, scan quality problems, document feeder issues, and scan destination errors.",
+    "Drivers, Software & Firmware": "Access guidance for driver installation, software configuration, compatibility issues, and firmware updates.",
+    "Mobile & Cloud Printing": "Set up and troubleshoot printing from smartphones, tablets, cloud services, and mobile applications.",
+    "Error Codes & Alerts": "Quickly identify printer error messages, warning lights, and diagnostic codes with step-by-step solutions.",
+    "Hardware & Maintenance": "Maintain printer performance with troubleshooting for hardware failures, cleaning procedures, and routine maintenance.",
+    "Setup & Installation": "Get assistance with initial printer setup, configuration, device registration, and first-time installation."
+  };
+
   return (
     <div>
       {/* Hero Section */}
@@ -112,25 +120,37 @@ export default async function Home() {
 
       {/* Brands Section */}
       <section style={{ marginBottom: '4rem' }}>
-        <div className="section-title-container">
+        <div className="section-title-container" style={{ alignItems: 'center' }}>
           <div>
             <h2 className="section-title">Browse by Brand</h2>
             <p className="section-desc">Select your printer manufacturer to find specific solutions.</p>
+          </div>
+          <div style={{ background: 'rgba(79, 70, 229, 0.08)', color: 'var(--primary-color)', padding: '0.4rem 1rem', borderRadius: '9999px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+            {totalBrandsCount} Brands Supported
           </div>
         </div>
         <div className="brand-grid">
           {brands.map(brand => (
             <Link href={`/brand/${brand.slug}`} key={brand.id}>
-              <div className="card">
-                <div className="card-emoji">{getBrandEmoji(brand.name)}</div>
+              <div className="card" style={{ padding: '1.25rem 1.5rem' }}>
+                <div className="card-emoji" style={{ width: '40px', height: '40px', fontSize: '1.35rem', borderRadius: 'var(--radius-sm)' }}>
+                  {getBrandEmoji(brand.name)}
+                </div>
                 <div className="card-info">
-                  <h3 className="card-title">{brand.name} Printers</h3>
-                  <p className="card-count">{brand._count.articles} troubleshooting guides</p>
+                  <h3 className="card-title" style={{ fontSize: '1.05rem', margin: 0 }}>{brand.name}</h3>
                 </div>
               </div>
             </Link>
           ))}
         </div>
+        
+        {totalBrandsCount > 9 && (
+          <div style={{ textAlign: 'center', marginTop: '-2rem', marginBottom: '2rem' }}>
+            <Link href="/brands" className="view-all-link" style={{ display: 'inline-flex', background: 'white', border: '1px solid var(--border-color)', padding: '0.75rem 2rem', borderRadius: 'var(--radius-md)', transition: 'all var(--transition-fast)' }}>
+              View All {totalBrandsCount} Brands ➔
+            </Link>
+          </div>
+        )}
       </section>
 
       {/* Categories Section */}
@@ -141,15 +161,17 @@ export default async function Home() {
             <p className="section-desc">Explore help guides grouped by typical printer issues.</p>
           </div>
         </div>
-        <div className="category-grid">
+        <div className="category-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
           {categories.map(category => (
             <Link href={`/search?q=${encodeURIComponent(category.name)}`} key={category.id}>
-              <div className="card category-card">
-                <div className="card-emoji">{getCategoryEmoji(category.name)}</div>
-                <div className="card-info">
-                  <h3 className="card-title">{category.name}</h3>
-                  <p className="card-count">{category._count.articles} guides available</p>
+              <div className="card category-card" style={{ height: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div className="card-emoji" style={{ width: '44px', height: '44px', fontSize: '1.4rem' }}>{getCategoryEmoji(category.name)}</div>
+                  <h3 className="card-title" style={{ margin: 0 }}>{category.name}</h3>
                 </div>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem', lineHeight: '1.5' }}>
+                  {categoryDescriptions[category.name] || "Find solutions, error guides, and setup steps for this topic."}
+                </p>
               </div>
             </Link>
           ))}
