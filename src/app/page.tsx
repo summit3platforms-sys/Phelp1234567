@@ -125,7 +125,7 @@ export default async function Home() {
             <h2 className="section-title">Browse by Brand</h2>
             <p className="section-desc">Select your printer manufacturer to find specific solutions.</p>
           </div>
-          <div style={{ background: 'rgba(79, 70, 229, 0.08)', color: 'var(--primary-color)', padding: '0.4rem 1rem', borderRadius: '9999px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+          <div style={{ background: 'rgba(0, 45, 98, 0.08)', color: 'var(--primary-color)', padding: '0.4rem 1rem', borderRadius: '9999px', fontSize: '0.85rem', fontWeight: 'bold' }}>
             {totalBrandsCount} Brands Supported
           </div>
         </div>

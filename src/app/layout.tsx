@@ -17,9 +17,8 @@ export default function RootLayout({
       <body>
         <header className="header">
           <div className="container">
-            <Link href="/" className="logo">
-              <span className="logo-emoji">🖨️</span>
-              <span>Liberty<span style={{ color: 'var(--accent-color)' }}>PrinterFix</span></span>
+            <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
+              <img src="/logo.png" alt="LibertyPrinterFix" style={{ height: '40px', width: 'auto', display: 'block' }} />
             </Link>
             <nav className="nav-links">
               <Link href="/" className="nav-link">Home</Link>
@@ -38,9 +37,8 @@ export default function RootLayout({
           <div className="container">
             <div className="footer-grid">
               <div className="footer-col footer-info">
-                <Link href="/" className="logo" style={{ marginBottom: '1rem' }}>
-                  <span className="logo-emoji">🖨️</span>
-                  <span>Liberty<span style={{ color: 'var(--accent-color)' }}>PrinterFix</span></span>
+                <Link href="/" style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
+                  <img src="/logo.png" alt="LibertyPrinterFix" style={{ height: '35px', width: 'auto', display: 'block' }} />
                 </Link>
                 <p className="footer-desc">
                   The ultimate independent database for printer troubleshooting, setup guides, ink/toner fixes, and diagnostic error codes.
