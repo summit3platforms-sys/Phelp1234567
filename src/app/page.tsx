@@ -57,12 +57,17 @@ export default async function Home() {
 
   const getCategoryEmoji = (name: string): string => {
     const key = name.toLowerCase();
-    if (key.includes('error')) return '⚠️';
+    if (key.includes('error') || key.includes('alert')) return '⚠️';
     if (key.includes('wifi') || key.includes('wireless') || key.includes('connect')) return '📶';
     if (key.includes('paper') || key.includes('jam')) return '📄';
-    if (key.includes('driver') || key.includes('setup') || key.includes('install')) return '⚙️';
+    if (key.includes('driver') || key.includes('software') || key.includes('firmware')) return '⚙️';
     if (key.includes('ink') || key.includes('toner') || key.includes('cartridge')) return '💧';
-    if (key.includes('quality') || key.includes('print')) return '🎨';
+    if (key.includes('quality')) return '🎨';
+    if (key.includes('setup') || key.includes('install')) return '🔌';
+    if (key.includes('scan')) return '🔍';
+    if (key.includes('mobile') || key.includes('cloud')) return '☁️';
+    if (key.includes('hardware') || key.includes('maintenance')) return '🔧';
+    if (key.includes('print')) return '🖨️';
     return '🛠️';
   };
 
