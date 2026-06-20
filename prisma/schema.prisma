@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Brand {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  articles    Article[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  articles    Article[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Article {
+  id              String   @id @default(uuid())
+  title           String
+  slug            String   @unique
+  content         String
+  featuredImage   String?
+  errorCode       String?
+  printerModel    String?
+  tags            String?
+  seoTitle        String?
+  metaDescription String?
+  status          String   @default("draft") // draft, published
+  
+  brandId         String
+  brand           Brand    @relation(fields: [brandId], references: [id])
+  
+  categoryId      String
+  category        Category @relation(fields: [categoryId], references: [id])
+
+  publishedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
