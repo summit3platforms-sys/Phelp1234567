@@ -716,7 +716,7 @@ a:hover {
 
 @media (min-width: 769px) {
   .header-logo-img {
-    height: 50px;
+    height: 60px;
   }
   .footer-logo-img {
     height: 45px;
@@ -725,10 +725,19 @@ a:hover {
 
 @media (min-width: 1200px) {
   .header-logo-img {
-    height: 58px;
+    height: 75px;
   }
   .footer-logo-img {
-    height: 50px;
+    height: 55px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .header-logo-img {
+    height: 85px;
+  }
+  .footer-logo-img {
+    height: 60px;
   }
 }
 
