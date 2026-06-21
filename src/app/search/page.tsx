@@ -34,7 +34,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   }
 
   return (
-    <div>
+    <div className="page-top">
       <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Search Knowledge Base</h1>
       
       <form action="/search" method="GET" className="search-form" style={{ marginBottom: '2rem' }}>

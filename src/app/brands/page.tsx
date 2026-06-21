@@ -34,7 +34,7 @@ export default async function BrandsPage() {
   };
 
   return (
-    <div>
+    <div className="page-top">
       <div style={{ marginBottom: '3rem', textAlign: 'center' }}>
         <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '-0.03em' }}>
           All Printer Brands

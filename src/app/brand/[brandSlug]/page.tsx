@@ -40,7 +40,7 @@ export default async function BrandPage({ params }: { params: Promise<{ brandSlu
   }, {} as Record<string, typeof brand.articles>);
 
   return (
-    <div>
+    <div className="page-top">
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2.5rem' }}>{brand.name} Printers</h1>
         <p style={{ fontSize: '1.2rem', color: '#666' }}>{brand.description || `Troubleshooting guides and error codes for ${brand.name} printers.`}</p>
