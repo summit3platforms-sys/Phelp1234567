@@ -132,7 +132,7 @@ export default async function Home() {
         <div className="brand-grid">
           {brands.map(brand => (
             <Link href={`/brand/${brand.slug}`} key={brand.id}>
-              <div className="card" style={{ padding: '1.25rem 1.5rem' }}>
+              <div className="card brand-card">
                 <div className="card-emoji" style={{ width: '40px', height: '40px', fontSize: '1.35rem', borderRadius: 'var(--radius-sm)' }}>
                   {getBrandEmoji(brand.name)}
                 </div>
@@ -161,7 +161,7 @@ export default async function Home() {
             <p className="section-desc">Explore help guides grouped by typical printer issues.</p>
           </div>
         </div>
-        <div className="category-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
+        <div className="category-grid">
           {categories.map(category => (
             <Link href={`/search?q=${encodeURIComponent(category.name)}`} key={category.id}>
               <div className="card category-card" style={{ height: '100%' }}>
