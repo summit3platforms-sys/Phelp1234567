@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import LeadCaptureForm from "@/components/LeadCaptureForm";
 
 export default async function Home() {
   // Get total count of brands
@@ -84,38 +85,46 @@ export default async function Home() {
       {/* Hero Section — full width, no container */}
       <section className="hero">
         <div className="hero-inner">
-          <div className="hero-badge">
-            <span>✨</span> Smart Troubleshooting Database
+          {/* Left Column: Hero Content */}
+          <div style={{ textAlign: 'left' }}>
+            <div className="hero-badge">
+              <span>✨</span> Smart Troubleshooting Database
+            </div>
+            <h1 className="hero-title">
+              Solve Your <span>Printer Errors</span> in Seconds
+            </h1>
+            <p className="hero-subtitle" style={{ margin: '0 0 2rem 0', maxWidth: '100%' }}>
+              Access step-by-step troubleshooting guides, fix error codes, and get your printer back online.
+            </p>
+
+            {/* Hero Search Bar */}
+            <form action="/search" method="GET" className="search-form" style={{ margin: '0' }}>
+              <div className="search-icon">🔍</div>
+              <input 
+                type="text" 
+                name="q" 
+                placeholder="Enter printer error code (e.g. 0x6100004a) or search keywords..." 
+                className="search-input"
+                required
+              />
+              <button type="submit" className="search-button">
+                Search
+              </button>
+            </form>
+
+            {/* Quick Tags */}
+            <div className="quick-tags" style={{ justifyContent: 'flex-start' }}>
+              <span className="quick-tag-label">Popular Searches:</span>
+              <Link href="/search?q=0x6100004a" className="quick-tag">HP 0x6100004a</Link>
+              <Link href="/search?q=offline" className="quick-tag">Printer Offline</Link>
+              <Link href="/search?q=jam" className="quick-tag">Paper Jam</Link>
+              <Link href="/search?q=setup" className="quick-tag">Wi-Fi Setup</Link>
+            </div>
           </div>
-          <h1 className="hero-title">
-            Solve Your <span>Printer Errors</span> in Seconds
-          </h1>
-          <p className="hero-subtitle">
-            Access step-by-step troubleshooting guides, fix error codes, and get your printer back online.
-          </p>
 
-          {/* Hero Search Bar */}
-          <form action="/search" method="GET" className="search-form">
-            <div className="search-icon">🔍</div>
-            <input 
-              type="text" 
-              name="q" 
-              placeholder="Enter printer error code (e.g. 0x6100004a) or search keywords..." 
-              className="search-input"
-              required
-            />
-            <button type="submit" className="search-button">
-              Search
-            </button>
-          </form>
-
-          {/* Quick Tags */}
-          <div className="quick-tags">
-            <span className="quick-tag-label">Popular Searches:</span>
-            <Link href="/search?q=0x6100004a" className="quick-tag">HP 0x6100004a</Link>
-            <Link href="/search?q=offline" className="quick-tag">Printer Offline</Link>
-            <Link href="/search?q=jam" className="quick-tag">Paper Jam</Link>
-            <Link href="/search?q=setup" className="quick-tag">Wi-Fi Setup</Link>
+          {/* Right Column: Lead Capture Form */}
+          <div>
+            <LeadCaptureForm />
           </div>
         </div>
       </section>
