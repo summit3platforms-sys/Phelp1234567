@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
+import LeadCaptureForm from "@/components/LeadCaptureForm";
 
 type PageParams = { params: Promise<{ brandSlug: string; categorySlug: string; articleSlug: string }> };
 
@@ -48,20 +49,6 @@ export default async function ArticlePage({ params }: PageParams) {
     take: 5,
     include: { category: true }
   });
-
-  // Fetch categories with active guides for this brand
-  const brandCategories = await prisma.category.findMany({
-    include: {
-      articles: {
-        where: {
-          brandId: article.brandId,
-          status: 'published'
-        },
-        select: { id: true }
-      }
-    }
-  });
-  const activeBrandCategories = brandCategories.filter(cat => cat.articles.length > 0);
 
   // Schema.org JSON-LD
   const jsonLd = {
@@ -143,7 +130,7 @@ export default async function ArticlePage({ params }: PageParams) {
             />
           </article>
 
-          {/* Author Biography Card below Article */}
+          {/* Author Biography Box below Article */}
           {article.author && (
             <div className="author-bio-card">
               <div className="author-bio-header">
@@ -166,44 +153,9 @@ export default async function ArticlePage({ params }: PageParams) {
 
         {/* Sidebar Column */}
         <aside className="article-sidebar-col">
-          {/* Sidebar Author Box (optional short bio) */}
-          {article.author && (
-            <div className="sidebar-widget" style={{ textAlign: 'center' }}>
-              <h3 className="widget-title">About The Author</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-                {article.author.image ? (
-                  <img src={article.author.image} alt={article.author.name} style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--border-color)' }} />
-                ) : (
-                  <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '2rem', color: '#fff', border: '3px solid var(--border-color)' }}>
-                    {article.author.name.charAt(0)}
-                  </div>
-                )}
-                <div>
-                  <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{article.author.name}</div>
-                  <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.2rem' }}>{article.author.role}</div>
-                </div>
-                {article.author.bio && (
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.5', margin: 0 }}>
-                    {article.author.bio.length > 90 ? `${article.author.bio.substring(0, 90)}...` : article.author.bio}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Categories Widget */}
-          <div className="sidebar-widget">
-            <h3 className="widget-title">{article.brand.name} Categories</h3>
-            <ul className="widget-list">
-              {activeBrandCategories.map(cat => (
-                <li key={cat.id} className="widget-list-item">
-                  <Link href={`/${article.brand.slug}/${cat.slug}`} style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                    <span>{cat.name}</span>
-                    <span className="widget-count-badge">{cat.articles.length}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          {/* Lead Capture Form Widget */}
+          <div style={{ width: '100%' }}>
+            <LeadCaptureForm />
           </div>
 
           {/* Related Guides Widget */}
@@ -224,18 +176,6 @@ export default async function ArticlePage({ params }: PageParams) {
                 <li style={{ color: 'var(--text-muted)', fontSize: '0.9rem', padding: '0.5rem 0' }}>No other guides for {article.brand.name}.</li>
               )}
             </ul>
-          </div>
-
-          {/* Quick Help CTA Widget */}
-          <div className="sidebar-widget" style={{ background: 'linear-gradient(135deg, #002d62 0%, #001a3a 100%)', color: '#fff', border: 'none', textAlign: 'center', padding: '2rem 1.5rem' }}>
-            <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>🛠️</span>
-            <h4 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Need Expert Help?</h4>
-            <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', lineHeight: '1.5', marginBottom: '1.5rem' }}>
-              If you can't resolve your printer error, submit details and our technicians will assist you.
-            </p>
-            <Link href="/" style={{ display: 'inline-block', background: '#fff', color: 'var(--primary-color)', width: 'auto', padding: '0.6rem 1.25rem', borderRadius: '4px', fontSize: '0.9rem', fontWeight: 'bold', textDecoration: 'none' }}>
-              Get Support Now
-            </Link>
           </div>
         </aside>
       </div>
