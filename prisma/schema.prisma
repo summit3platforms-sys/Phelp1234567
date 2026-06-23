@@ -47,6 +47,9 @@ model Article {
   categoryId      String
   category        Category @relation(fields: [categoryId], references: [id])
 
+  authorId        String?
+  author          Author?  @relation(fields: [authorId], references: [id])
+
   publishedAt     DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -68,4 +71,16 @@ model Lead {
   printerBrand String
   status       String   @default("new")
   createdAt    DateTime @default(now())
+}
+
+model Author {
+  id        String    @id @default(uuid())
+  name      String
+  slug      String    @unique
+  bio       String?
+  image     String?
+  role      String?   @default("Technical Expert")
+  articles  Article[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }

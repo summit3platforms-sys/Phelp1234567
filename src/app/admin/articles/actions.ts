@@ -16,6 +16,7 @@ export async function updateArticle(id: string, formData: FormData) {
   const seoTitle = formData.get("seoTitle") as string;
   const metaDescription = formData.get("metaDescription") as string;
   const status = formData.get("status") as string;
+  const authorId = formData.get("authorId") as string;
 
   await prisma.article.update({
     where: { id },
@@ -25,6 +26,7 @@ export async function updateArticle(id: string, formData: FormData) {
       seoTitle,
       metaDescription,
       status,
+      authorId: authorId || null,
     },
   });
   revalidatePath("/admin/articles");

@@ -25,6 +25,7 @@ async function main() {
 
   const {
     title,
+    slug,
     brand,
     category,
     errorCode,
@@ -62,7 +63,7 @@ async function main() {
   }
 
   // 3. Create article entry
-  const articleSlug = generateSlug(title);
+  const articleSlug = slug || generateSlug(title);
 
   // Generate SEO data if missing
   const finalSeoTitle = seoTitle || title;

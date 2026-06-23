@@ -23,6 +23,7 @@ export default function AdminLayout({
           <li><Link href="/admin/brands" style={{ display: 'block', padding: '0.5rem', background: '#fff', borderRadius: '4px', border: '1px solid var(--border-color)' }}>Brands</Link></li>
           <li><Link href="/admin/categories" style={{ display: 'block', padding: '0.5rem', background: '#fff', borderRadius: '4px', border: '1px solid var(--border-color)' }}>Categories</Link></li>
           <li><Link href="/admin/leads" style={{ display: 'block', padding: '0.5rem', background: '#fff', borderRadius: '4px', border: '1px solid var(--border-color)', fontWeight: 'bold' }}>Leads</Link></li>
+          <li><Link href="/admin/authors" style={{ display: 'block', padding: '0.5rem', background: '#fff', borderRadius: '4px', border: '1px solid var(--border-color)', fontWeight: 'bold' }}>Authors</Link></li>
         </ul>
       </aside>
       <main style={{ flex: 1, padding: '2rem' }}>

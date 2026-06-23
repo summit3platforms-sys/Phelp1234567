@@ -62,10 +62,10 @@ export default function RootLayout({
               <div className="footer-col">
                 <h4 className="footer-col-title">Popular Brands</h4>
                 <div className="footer-col-links">
-                  <Link href="/brand/hp">HP Printers</Link>
-                  <Link href="/brand/canon">Canon Printers</Link>
-                  <Link href="/brand/epson">Epson Printers</Link>
-                  <Link href="/brand/brother">Brother Printers</Link>
+                  <Link href="/hp">HP Printers</Link>
+                  <Link href="/canon">Canon Printers</Link>
+                  <Link href="/epson">Epson Printers</Link>
+                  <Link href="/brother">Brother Printers</Link>
                   <Link href="/brands" style={{ fontWeight: '600', color: 'var(--primary-color)' }}>View All Brands ➔</Link>
                 </div>
               </div>

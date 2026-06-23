@@ -11,7 +11,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   })
 
   const brandUrls = brands.map((brand) => ({
-    url: `${baseUrl}/brand/${brand.slug}`,
+    url: `${baseUrl}/${brand.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }))
+
+  const activeBrandCategories = await prisma.article.findMany({
+    where: { status: 'published' },
+    select: {
+      brand: { select: { slug: true } },
+      category: { select: { slug: true } }
+    },
+    distinct: ['brandId', 'categoryId']
+  })
+
+  const categoryUrls = activeBrandCategories.map((bc) => ({
+    url: `${baseUrl}/${bc.brand.slug}/${bc.category.slug}`,
     lastModified: new Date(),
     changeFrequency: 'weekly' as const,
     priority: 0.8,
@@ -32,6 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     ...brandUrls,
+    ...categoryUrls,
     ...articleUrls,
   ]
 }

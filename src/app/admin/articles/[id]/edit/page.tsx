@@ -12,6 +12,10 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
     notFound();
   }
 
+  const authors = await prisma.author.findMany({
+    orderBy: { name: 'asc' },
+  });
+
   async function handleSubmit(formData: FormData) {
     "use server";
     await updateArticle(resolvedParams.id, formData);
@@ -36,6 +40,16 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
           <select name="status" defaultValue={article.status} style={inputStyle}>
             <option value="draft">Draft</option>
             <option value="published">Published</option>
+          </select>
+        </div>
+
+        <div>
+          <label style={labelStyle}>Author</label>
+          <select name="authorId" defaultValue={article.authorId || ''} style={inputStyle}>
+            <option value="">No Author</option>
+            {authors.map(author => (
+              <option key={author.id} value={author.id}>{author.name} ({author.role})</option>
+            ))}
           </select>
         </div>
 

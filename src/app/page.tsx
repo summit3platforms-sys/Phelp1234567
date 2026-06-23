@@ -145,7 +145,7 @@ export default async function Home() {
           </div>
           <div className="brand-grid">
             {brands.map(brand => (
-              <Link href={`/brand/${brand.slug}`} key={brand.id}>
+              <Link href={`/${brand.slug}`} key={brand.id}>
                 <div className="card brand-card">
                   <div className="card-emoji" style={{ width: '40px', height: '40px', fontSize: '1.35rem', borderRadius: 'var(--radius-sm)' }}>
                     {getBrandEmoji(brand.name)}

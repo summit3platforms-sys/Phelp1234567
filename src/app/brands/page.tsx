@@ -46,7 +46,7 @@ export default async function BrandsPage() {
 
       <div className="brand-grid">
         {brands.map(brand => (
-          <Link href={`/brand/${brand.slug}`} key={brand.id}>
+          <Link href={`/${brand.slug}`} key={brand.id}>
             <div className="card">
               <div className="card-emoji">{getBrandEmoji(brand.name)}</div>
               <div className="card-info">
