@@ -1217,8 +1217,6 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  position: sticky;
-  top: 96px; /* Keep sidebar visible when scrolling */
 }
 
 /* Sidebar Widgets */
