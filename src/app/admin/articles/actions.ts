@@ -2,6 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import fs from "fs";
+import path from "path";
 
 export async function deleteArticle(id: string) {
   await prisma.article.delete({
@@ -18,6 +20,8 @@ export async function updateArticle(id: string, formData: FormData) {
   const status = formData.get("status") as string;
   const authorId = formData.get("authorId") as string;
   const rawSlug = formData.get("slug") as string;
+  const featuredImageText = formData.get("featuredImage") as string;
+  const file = formData.get("featuredImageFile") as File | null;
 
   if (!rawSlug) {
     throw new Error("URL Slug is required");
@@ -37,6 +41,26 @@ export async function updateArticle(id: string, formData: FormData) {
     throw new Error(`The slug '${slug}' is already in use by another article.`);
   }
 
+  let featuredImage = featuredImageText || null;
+
+  if (file && file.size > 0 && file.name) {
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    // Create a unique filename
+    const fileExt = path.extname(file.name) || ".jpg";
+    const filename = `${slug}-${Date.now()}${fileExt}`;
+    const uploadDir = path.join(process.cwd(), "public", "uploads");
+
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const filePath = path.join(uploadDir, filename);
+    await fs.promises.writeFile(filePath, buffer);
+    featuredImage = `/uploads/${filename}`;
+  }
+
   await prisma.article.update({
     where: { id },
     data: {
@@ -46,6 +70,7 @@ export async function updateArticle(id: string, formData: FormData) {
       seoTitle,
       metaDescription,
       status,
+      featuredImage,
       authorId: authorId || null,
     },
   });

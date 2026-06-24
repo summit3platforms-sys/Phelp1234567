@@ -29,7 +29,7 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
     <div>
       <h1 style={{ fontSize: '2rem', marginBottom: '2rem' }}>Edit Article</h1>
       
-      <form action={handleSubmit} style={{ background: '#fff', padding: '2rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+      <form action={handleSubmit} encType="multipart/form-data" style={{ background: '#fff', padding: '2rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
         <div>
           <label style={labelStyle}>Title</label>
           <input type="text" name="title" defaultValue={article.title} required style={inputStyle} />
@@ -56,6 +56,30 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
               <option key={author.id} value={author.id}>{author.name} ({author.role})</option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <label style={labelStyle}>Featured Image (Thumbnail)</label>
+          {article.featuredImage && (
+            <div style={{ marginBottom: '1rem' }}>
+              <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '0.3rem' }}>Current Image Preview:</p>
+              <img src={article.featuredImage} alt="Current Featured Image" style={{ maxWidth: '200px', maxHeight: '150px', objectFit: 'contain', border: '1px solid var(--border-color)', borderRadius: '4px' }} />
+            </div>
+          )}
+          <input 
+            type="text" 
+            name="featuredImage" 
+            defaultValue={article.featuredImage || ''} 
+            placeholder="Image URL or Path (e.g. /uploads/image.jpg)" 
+            style={inputStyle} 
+          />
+          <label style={{ ...labelStyle, fontSize: '0.85rem', color: '#555', marginTop: '0.3rem' }}>Or Upload New Image:</label>
+          <input 
+            type="file" 
+            name="featuredImageFile" 
+            accept="image/*" 
+            style={{ ...inputStyle, padding: '0.5rem' }} 
+          />
         </div>
 
         <div>
