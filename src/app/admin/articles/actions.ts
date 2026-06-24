@@ -41,24 +41,32 @@ export async function updateArticle(id: string, formData: FormData) {
     throw new Error(`The slug '${slug}' is already in use by another article.`);
   }
 
-  let featuredImage = featuredImageText || null;
+  const removeFeaturedImage = formData.get("removeFeaturedImage") === "true";
 
-  if (file && file.size > 0 && file.name) {
+  // Get current article to preserve the base64 image if no new file is uploaded
+  const article = await prisma.article.findUnique({ where: { id } });
+  let featuredImage = article?.featuredImage || null;
+
+  if (removeFeaturedImage) {
+    featuredImage = null;
+  } else if (file && file.size > 0 && file.name) {
+    // New file uploaded - convert to base64 Data URL
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-
-    // Create a unique filename
-    const fileExt = path.extname(file.name) || ".jpg";
-    const filename = `${slug}-${Date.now()}${fileExt}`;
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    const base64String = buffer.toString("base64");
+    const mimeType = file.type || "image/jpeg";
+    featuredImage = `data:${mimeType};base64,${base64String}`;
+  } else {
+    // No new file uploaded, check the text input
+    if (featuredImageText.trim() !== "") {
+      featuredImage = featuredImageText.trim();
+    } else {
+      // If the text input is cleared, and the old image was NOT base64, they wanted to remove it.
+      // (If it was base64, the text input was blank by default, so they didn't touch it).
+      if (article?.featuredImage && !article.featuredImage.startsWith("data:")) {
+        featuredImage = null;
+      }
     }
-
-    const filePath = path.join(uploadDir, filename);
-    await fs.promises.writeFile(filePath, buffer);
-    featuredImage = `/uploads/${filename}`;
   }
 
   await prisma.article.update({
