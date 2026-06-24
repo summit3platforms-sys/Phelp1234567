@@ -36,6 +36,11 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
         </div>
 
         <div>
+          <label style={labelStyle}>URL Slug</label>
+          <input type="text" name="slug" defaultValue={article.slug} required style={inputStyle} placeholder="e.g. bixolon-printer-error-codes" />
+        </div>
+
+        <div>
           <label style={labelStyle}>Status</label>
           <select name="status" defaultValue={article.status} style={inputStyle}>
             <option value="draft">Draft</option>
