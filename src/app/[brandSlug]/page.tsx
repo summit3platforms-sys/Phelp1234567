@@ -73,7 +73,7 @@ export default async function BrandPage({ params }: PageParams) {
             <section key={category.slug} style={{ background: '#fff', padding: '2rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '1.25rem' }}>
                 <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>
-                  <Link href={`/${brand.slug}/${category.slug}`} style={{ color: 'var(--text-color)', textDecoration: 'none', transition: 'color var(--transition-fast)' }} onMouseOver={(e) => (e.currentTarget.style.color = 'var(--primary-color)')} onMouseOut={(e) => (e.currentTarget.style.color = 'var(--text-color)')}>
+                  <Link href={`/${brand.slug}/${category.slug}`} className="brand-category-heading-link">
                     {category.name}
                   </Link>
                 </h2>
@@ -83,7 +83,7 @@ export default async function BrandPage({ params }: PageParams) {
               </div>
               <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
                 {category.articles.slice(0, 6).map(article => (
-                  <li key={article.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', padding: '0.75rem', borderRadius: 'var(--radius-sm)', transition: 'background-color var(--transition-fast)' }} onMouseOver={(e) => (e.currentTarget.style.backgroundColor = 'rgba(0, 45, 98, 0.02)')} onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}>
+                  <li key={article.id} className="brand-article-list-item">
                     <Link href={`/${brand.slug}/${category.slug}/${article.slug}`} style={{ fontWeight: '700', color: 'var(--text-color)', fontSize: '1.05rem', lineHeight: '1.4' }}>
                       {article.title}
                     </Link>
