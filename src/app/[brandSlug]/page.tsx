@@ -81,13 +81,22 @@ export default async function BrandPage({ params }: PageParams) {
                   View All ({category.articles.length}) ➔
                 </Link>
               </div>
-              <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+              <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
                 {category.articles.slice(0, 6).map(article => (
-                  <li key={article.id} className="brand-article-list-item">
-                    <Link href={`/${brand.slug}/${category.slug}/${article.slug}`} style={{ fontWeight: '700', color: 'var(--text-color)', fontSize: '1.05rem', lineHeight: '1.4' }}>
+                  <li key={article.id} className="brand-article-list-item" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', background: '#fff', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                    {article.featuredImage && (
+                      <Link href={`/${brand.slug}/${category.slug}/${article.slug}`} style={{ display: 'block', overflow: 'hidden', borderRadius: '6px', aspectRatio: '16/9', background: '#f1f5f9', marginBottom: '0.5rem' }}>
+                        <img 
+                          src={article.featuredImage} 
+                          alt={article.title} 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      </Link>
+                    )}
+                    <Link href={`/${brand.slug}/${category.slug}/${article.slug}`} style={{ fontWeight: '700', color: 'var(--text-color)', fontSize: '1.05rem', lineHeight: '1.4', display: 'block' }}>
                       {article.title}
                     </Link>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.25rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: 'auto', paddingTop: '0.25rem' }}>
                       {article.errorCode && (
                         <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: '4px', background: '#fee2e2', color: '#ef4444' }}>
                           Code: {article.errorCode}

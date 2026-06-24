@@ -208,6 +208,15 @@ export default async function Home() {
             {recentArticles.map(article => (
               <div key={article.id} className="article-item">
                 <div>
+                  {article.featuredImage && (
+                    <Link href={`/${article.brand.slug}/${article.category.slug}/${article.slug}`} style={{ display: 'block', overflow: 'hidden', borderRadius: '6px', aspectRatio: '16/9', background: '#f1f5f9', marginBottom: '1rem' }}>
+                      <img 
+                        src={article.featuredImage} 
+                        alt={article.title} 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </Link>
+                  )}
                   <div className="article-meta">
                     <span className="meta-badge badge-brand">{article.brand.name}</span>
                     <span className="meta-badge badge-category">{article.category.name}</span>

@@ -74,6 +74,15 @@ export default async function BrandCategoryPage({ params }: PageParams) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
             {articles.map(article => (
               <div key={article.id} className="article-item" style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                {article.featuredImage && (
+                  <Link href={`/${brand.slug}/${category.slug}/${article.slug}`} style={{ display: 'block', overflow: 'hidden', borderRadius: '6px', aspectRatio: '16/9', background: '#f1f5f9', marginBottom: '1rem' }}>
+                    <img 
+                      src={article.featuredImage} 
+                      alt={article.title} 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </Link>
+                )}
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
                   {article.errorCode && (
                     <span className="meta-badge badge-error" style={{ fontSize: '0.75rem' }}>
