@@ -35,6 +35,7 @@ async function main() {
     tags,
     seoTitle,
     metaDescription,
+    authorId,
   } = data;
 
   if (!title || !brand || !category || !content) {
@@ -88,6 +89,7 @@ async function main() {
         metaDescription: finalMetaDesc,
         status: 'published',
         publishedAt: new Date(),
+        authorId: authorId || null,
       },
     });
     console.log(`Updated article: ${title}`);
@@ -107,6 +109,7 @@ async function main() {
         metaDescription: finalMetaDesc,
         status: 'published',
         publishedAt: new Date(),
+        authorId: authorId || null,
       },
     });
     console.log(`Published new article: ${title}`);
