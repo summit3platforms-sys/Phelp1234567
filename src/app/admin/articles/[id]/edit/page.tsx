@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { updateArticle } from "../../actions";
 
+import ImageUploadSection from "@/components/ImageUploadSection";
+
 export default async function EditArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
   const article = await prisma.article.findUnique({
@@ -58,33 +60,7 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
           </select>
         </div>
 
-        <div>
-          <label style={labelStyle}>Featured Image (Thumbnail)</label>
-          {article.featuredImage && (
-            <div style={{ marginBottom: '1rem' }}>
-              <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '0.3rem' }}>Current Image Preview:</p>
-              <img src={article.featuredImage} alt="Current Featured Image" style={{ maxWidth: '200px', maxHeight: '150px', objectFit: 'contain', border: '1px solid var(--border-color)', borderRadius: '4px' }} />
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem', fontWeight: 'normal', fontSize: '0.9rem', color: '#dc2626', cursor: 'pointer' }}>
-                <input type="checkbox" name="removeFeaturedImage" value="true" />
-                Remove current image
-              </label>
-            </div>
-          )}
-          <input 
-            type="text" 
-            name="featuredImage" 
-            defaultValue={article.featuredImage && article.featuredImage.startsWith('data:') ? '' : (article.featuredImage || '')} 
-            placeholder="Or enter Image URL/Path (e.g. /bixolon-error-codes.jpg)" 
-            style={inputStyle} 
-          />
-          <label style={{ ...labelStyle, fontSize: '0.85rem', color: '#555', marginTop: '0.3rem' }}>Upload New Image:</label>
-          <input 
-            type="file" 
-            name="featuredImageFile" 
-            accept="image/*" 
-            style={{ ...inputStyle, padding: '0.5rem' }} 
-          />
-        </div>
+        <ImageUploadSection initialValue={article.featuredImage} />
 
         <div>
           <label style={labelStyle}>SEO Title</label>
