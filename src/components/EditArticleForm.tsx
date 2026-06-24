@@ -32,6 +32,7 @@ export default function EditArticleForm({ article, authors, updateAction }: Edit
   const [embeddedImages, setEmbeddedImages] = useState<string[]>([]);
   const [isInserting, setIsInserting] = useState<boolean>(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [selectedFilePreview, setSelectedFilePreview] = useState<string | null>(null);
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const bodyFileInputRef = useRef<HTMLInputElement>(null);
@@ -49,6 +50,19 @@ export default function EditArticleForm({ article, authors, updateAction }: Edit
     // De-duplicate matches
     setEmbeddedImages(Array.from(new Set(matches)));
   }, [content]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setSelectedFilePreview(null);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setSelectedFilePreview(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleInsertImage = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -115,6 +129,7 @@ export default function EditArticleForm({ article, authors, updateAction }: Edit
           }
 
           setIsInserting(false);
+          setSelectedFilePreview(null); // Clear preview
           if (bodyFileInputRef.current) {
             bodyFileInputRef.current.value = ''; // Clear file input
           }
@@ -144,6 +159,25 @@ export default function EditArticleForm({ article, authors, updateAction }: Edit
     });
   };
 
+  const handleDeleteEmbeddedImage = (e: React.MouseEvent, imgSrc: string) => {
+    e.preventDefault();
+    if (!window.confirm("Are you sure you want to remove this image from the article content?")) {
+      return;
+    }
+
+    // Escape regex characters (base64 string contains +, /, etc.)
+    const escapedSrc = imgSrc.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    
+    // Pattern to match img tag, optionally wrapped in a div
+    const pattern = new RegExp(
+      `(?:<div[^>]*>\\s*)?<img[^>]+src=["']${escapedSrc}["'][^>]*>(?:\\s*<\\/div>)?`,
+      'g'
+    );
+
+    const newContent = content.replace(pattern, '');
+    setContent(newContent);
+  };
+
   const inputStyle = { width: '100%', padding: '0.8rem', marginBottom: '1rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '1rem' };
   const labelStyle = { display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' };
 
@@ -152,7 +186,6 @@ export default function EditArticleForm({ article, authors, updateAction }: Edit
       
       {/* Left Column: Form inputs */}
       <form action={async (formData) => {
-        // Form submits to Server Action
         await updateAction(article.id, formData);
       }} style={{ background: '#fff', padding: '2rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
         
@@ -228,9 +261,17 @@ export default function EditArticleForm({ article, authors, updateAction }: Edit
             Choose an image to compress and insert directly into the text editor at your cursor position.
           </p>
 
+          {selectedFilePreview && (
+            <div style={{ marginBottom: '0.75rem', padding: '0.25rem', border: '1px dashed #cbd5e1', borderRadius: '4px', background: '#f8fafc' }}>
+              <p style={{ fontSize: '0.7rem', color: '#666', margin: '0 0 0.25rem 0', fontWeight: 'bold' }}>Selected File Preview:</p>
+              <img src={selectedFilePreview} alt="Selected Preview" style={{ width: '100%', maxHeight: '120px', objectFit: 'contain' }} />
+            </div>
+          )}
+
           <input 
             type="file" 
             ref={bodyFileInputRef}
+            onChange={handleFileChange}
             accept="image/*" 
             style={{ width: '100%', padding: '0.25rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.8rem', marginBottom: '0.75rem', background: '#fff' }} 
           />
@@ -271,14 +312,22 @@ export default function EditArticleForm({ article, authors, updateAction }: Edit
                   />
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.7rem', color: '#475569', fontWeight: 500 }}>
-                      {isBase64 ? 'Compressed Base64' : 'URL Link'}
+                      {isBase64 ? 'Base64 Data' : 'URL Link'}
                     </span>
-                    <button
-                      onClick={(e) => handleCopyTag(e, imgSrc)}
-                      style={{ padding: '0.25rem 0.5rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 600 }}
-                    >
-                      Copy Tag
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.35rem' }}>
+                      <button
+                        onClick={(e) => handleCopyTag(e, imgSrc)}
+                        style={{ padding: '0.25rem 0.5rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 600 }}
+                      >
+                        Copy
+                      </button>
+                      <button
+                        onClick={(e) => handleDeleteEmbeddedImage(e, imgSrc)}
+                        style={{ padding: '0.25rem 0.5rem', background: '#fee2e2', color: '#ef4444', border: '1px solid #fca5a5', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 600 }}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
               );

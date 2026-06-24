@@ -117,12 +117,6 @@ export default async function ArticlePage({ params }: PageParams) {
               </div>
             </header>
 
-            {article.featuredImage && (
-              <div style={{ marginBottom: '2rem' }}>
-                <img src={article.featuredImage} alt={article.title} style={{ maxWidth: '100%', height: 'auto', borderRadius: '4px' }} />
-              </div>
-            )}
-
             <div 
               className="article-content"
               dangerouslySetInnerHTML={{ __html: article.content }} 
