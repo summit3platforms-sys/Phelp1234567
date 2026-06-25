@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
 
@@ -10,7 +10,12 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
   const brand = await prisma.brand.findUnique({ where: { slug: resolvedParams.brandSlug } });
   const category = await prisma.category.findUnique({ where: { slug: resolvedParams.categorySlug } });
   
-  if (!brand || !category) return { title: 'Not Found' };
+  if (!brand || !category) {
+    const currentPath = `/${resolvedParams.brandSlug}/${resolvedParams.categorySlug}`;
+    const redir = await prisma.redirect.findUnique({ where: { oldUrl: currentPath } });
+    if (redir) return { title: 'Redirecting...' };
+    return { title: 'Not Found' };
+  }
   
   return {
     title: `${brand.name} Printer ${category.name} - Troubleshooting Guides`,
@@ -29,6 +34,11 @@ export default async function BrandCategoryPage({ params }: PageParams) {
   });
 
   if (!brand || !category) {
+    const currentPath = `/${resolvedParams.brandSlug}/${resolvedParams.categorySlug}`;
+    const redir = await prisma.redirect.findUnique({ where: { oldUrl: currentPath } });
+    if (redir) {
+      permanentRedirect(redir.newUrl);
+    }
     notFound();
   }
 

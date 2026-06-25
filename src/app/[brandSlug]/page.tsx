@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
 
@@ -8,7 +8,12 @@ type PageParams = { params: Promise<{ brandSlug: string }> };
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
   const resolvedParams = await params;
   const brand = await prisma.brand.findUnique({ where: { slug: resolvedParams.brandSlug } });
-  if (!brand) return { title: 'Not Found' };
+  if (!brand) {
+    const currentPath = `/${resolvedParams.brandSlug}`;
+    const redir = await prisma.redirect.findUnique({ where: { oldUrl: currentPath } });
+    if (redir) return { title: 'Redirecting...' };
+    return { title: 'Not Found' };
+  }
   
   return {
     title: `${brand.name} Printer Troubleshooting & Error Codes`,
@@ -30,13 +35,18 @@ export default async function BrandPage({ params }: PageParams) {
   });
 
   if (!brand) {
+    const currentPath = `/${resolvedParams.brandSlug}`;
+    const redir = await prisma.redirect.findUnique({ where: { oldUrl: currentPath } });
+    if (redir) {
+      permanentRedirect(redir.newUrl);
+    }
     notFound();
   }
 
   // Group articles by category slug/object
   const categoriesMap = new Map<string, { name: string; slug: string; articles: typeof brand.articles }>();
   brand.articles.forEach(article => {
-    const cat = article.category;
+    const cat = article.category || { name: "Uncategorized", slug: "uncategorized" };
     if (!categoriesMap.has(cat.slug)) {
       categoriesMap.set(cat.slug, { name: cat.name, slug: cat.slug, articles: [] });
     }

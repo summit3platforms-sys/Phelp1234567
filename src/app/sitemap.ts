@@ -18,7 +18,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   const activeBrandCategories = await prisma.article.findMany({
-    where: { status: 'published' },
+    where: { 
+      status: 'published',
+      NOT: [
+        { brandId: null },
+        { categoryId: null }
+      ]
+    },
     select: {
       brand: { select: { slug: true } },
       category: { select: { slug: true } }
@@ -26,19 +32,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     distinct: ['brandId', 'categoryId']
   })
 
-  const categoryUrls = activeBrandCategories.map((bc) => ({
-    url: `${baseUrl}/${bc.brand.slug}/${bc.category.slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
-    priority: 0.8,
-  }))
+  const categoryUrls = activeBrandCategories
+    .filter((bc) => bc.brand && bc.category)
+    .map((bc) => ({
+      url: `${baseUrl}/${bc.brand!.slug}/${bc.category!.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    }))
 
-  const articleUrls = articles.map((article) => ({
-    url: `${baseUrl}/${article.brand.slug}/${article.category.slug}/${article.slug}`,
-    lastModified: article.updatedAt,
-    changeFrequency: 'monthly' as const,
-    priority: 0.7,
-  }))
+  const articleUrls = articles.map((article) => {
+    const brandSlug = article.brand?.slug || 'uncategorized';
+    const categorySlug = article.category?.slug || 'uncategorized';
+    return {
+      url: `${baseUrl}/${brandSlug}/${categorySlug}/${article.slug}`,
+      lastModified: article.updatedAt,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    }
+  })
 
   return [
     {

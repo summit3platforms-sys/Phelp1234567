@@ -205,42 +205,49 @@ export default async function Home() {
           </div>
 
           <div className="articles-grid">
-            {recentArticles.map(article => (
-              <div key={article.id} className="article-item">
-                <div>
-                  {article.featuredImage && (
-                    <Link href={`/${article.brand.slug}/${article.category.slug}/${article.slug}`} style={{ display: 'block', overflow: 'hidden', borderRadius: '6px', aspectRatio: '16/9', background: '#f1f5f9', marginBottom: '1rem' }}>
-                      <img 
-                        src={article.featuredImage} 
-                        alt={article.title} 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    </Link>
-                  )}
-                  <div className="article-meta">
-                    <span className="meta-badge badge-brand">{article.brand.name}</span>
-                    <span className="meta-badge badge-category">{article.category.name}</span>
-                    {article.errorCode && (
-                      <span className="meta-badge badge-error">Code: {article.errorCode}</span>
+            {recentArticles.map(article => {
+              const brandSlug = article.brand?.slug || 'uncategorized';
+              const categorySlug = article.category?.slug || 'uncategorized';
+              const brandName = article.brand?.name || 'Uncategorized';
+              const categoryName = article.category?.name || 'Uncategorized';
+              
+              return (
+                <div key={article.id} className="article-item">
+                  <div>
+                    {article.featuredImage && (
+                      <Link href={`/${brandSlug}/${categorySlug}/${article.slug}`} style={{ display: 'block', overflow: 'hidden', borderRadius: '6px', aspectRatio: '16/9', background: '#f1f5f9', marginBottom: '1rem' }}>
+                        <img 
+                          src={article.featuredImage} 
+                          alt={article.title} 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      </Link>
                     )}
+                    <div className="article-meta">
+                      <span className="meta-badge badge-brand">{brandName}</span>
+                      <span className="meta-badge badge-category">{categoryName}</span>
+                      {article.errorCode && (
+                        <span className="meta-badge badge-error">Code: {article.errorCode}</span>
+                      )}
+                    </div>
+                    <Link href={`/${brandSlug}/${categorySlug}/${article.slug}`} className="article-link">
+                      {article.title}
+                    </Link>
+                    <p className="article-desc">
+                      {article.metaDescription || article.content.substring(0, 120).replace(/<[^>]+>/g, '') + '...'}
+                    </p>
                   </div>
-                  <Link href={`/${article.brand.slug}/${article.category.slug}/${article.slug}`} className="article-link">
-                    {article.title}
-                  </Link>
-                  <p className="article-desc">
-                    {article.metaDescription || article.content.substring(0, 120).replace(/<[^>]+>/g, '') + '...'}
-                  </p>
+                  <div className="article-footer">
+                    <span className="article-date">
+                      {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'}
+                    </span>
+                    <Link href={`/${brandSlug}/${categorySlug}/${article.slug}`} className="read-more">
+                      Read Guide ➔
+                    </Link>
+                  </div>
                 </div>
-                <div className="article-footer">
-                  <span className="article-date">
-                    {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'}
-                  </span>
-                  <Link href={`/${article.brand.slug}/${article.category.slug}/${article.slug}`} className="read-more">
-                    Read Guide ➔
-                  </Link>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 

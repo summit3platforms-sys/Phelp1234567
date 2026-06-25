@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import ImageUploadSection from './ImageUploadSection';
+import React, { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import ImageUploadSection from "./ImageUploadSection";
+import { getRevisions, rollbackRevision, updateArticle } from "@/app/admin/articles/actions";
 
 type ArticleData = {
   id: string;
@@ -9,9 +11,19 @@ type ArticleData = {
   slug: string;
   content: string;
   featuredImage: string | null;
+  featuredImageAlt: string | null;
+  featuredImageTitle: string | null;
+  featuredImageCaption: string | null;
   seoTitle: string | null;
   metaDescription: string | null;
+  canonicalUrl: string | null;
+  wordCount: number | null;
+  excerpt: string | null;
+  featuredSnippet: string | null;
+  faqs: string | null;
   status: string;
+  brandId: string | null;
+  categoryId: string | null;
   authorId: string | null;
 };
 
@@ -21,19 +33,44 @@ type Author = {
   role: string | null;
 };
 
+type Brand = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+type RelatedArticle = {
+  id: string;
+  title: string;
+  slug: string;
+  brandId: string | null;
+  categoryId: string | null;
+  brand: { slug: string; name: string } | null;
+  category: { slug: string; name: string } | null;
+};
+
 type EditArticleFormProps = {
   article: ArticleData;
   authors: Author[];
+  brands: Brand[];
+  categories: Category[];
+  allArticles: RelatedArticle[];
   updateAction: (id: string, formData: FormData) => Promise<void>;
 };
 
-type BlockType = 'paragraph' | 'heading' | 'image' | 'raw';
+type BlockType = "paragraph" | "heading" | "image" | "raw";
 
 type ImageAttrs = {
   src: string;
   alt: string;
   caption: string;
-  align: 'left' | 'center' | 'right';
+  align: "left" | "center" | "right";
   width: string;
 };
 
@@ -44,211 +81,532 @@ type Block = {
   html: string;
   headingLevel?: number;
   imageAttrs?: ImageAttrs;
-  isEditingCode?: boolean; // For raw blocks
+  isEditingCode?: boolean;
 };
 
-export default function EditArticleForm({ article, authors, updateAction }: EditArticleFormProps) {
-  const [content, setContent] = useState<string>(article.content);
-  const [editorMode, setEditorMode] = useState<'visual' | 'code'>('visual');
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+  order?: number;
+}
+
+export default function EditArticleForm({
+  article,
+  authors,
+  brands,
+  categories,
+  allArticles,
+  updateAction,
+}: EditArticleFormProps) {
+  const [activeMainTab, setActiveMainTab] = useState<"edit" | "preview">("edit");
+  const [activeSidebarTab, setActiveSidebarTab] = useState<"seo" | "faqs" | "links" | "history">("seo");
+  
+  const [editorMode, setEditorMode] = useState<"visual" | "code">("visual");
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
-  const [draggedBlockIndex, setDraggedBlockIndex] = useState<number | null>(null);
   
-  const [embeddedImages, setEmbeddedImages] = useState<string[]>([]);
-  const [isInserting, setIsInserting] = useState<boolean>(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [selectedFilePreview, setSelectedFilePreview] = useState<string | null>(null);
+  // Form fields
+  const [title, setTitle] = useState(article.title);
+  const [slug, setSlug] = useState(article.slug);
+  const [content, setContent] = useState(article.content);
+  const [status, setStatus] = useState(article.status);
+  const [authorId, setAuthorId] = useState(article.authorId || "");
+  const [brandId, setBrandId] = useState(article.brandId || "");
+  const [categoryId, setCategoryId] = useState(article.categoryId || "");
   
-  const bodyFileInputRef = useRef<HTMLInputElement>(null);
+  // SEO fields
+  const [seoTitle, setSeoTitle] = useState(article.seoTitle || "");
+  const [metaDescription, setMetaDescription] = useState(article.metaDescription || "");
+  const [canonicalUrl, setCanonicalUrl] = useState(article.canonicalUrl || "");
+  const [excerpt, setExcerpt] = useState(article.excerpt || "");
+  const [featuredSnippet, setFeaturedSnippet] = useState(article.featuredSnippet || "");
+  
+  // Featured Image fields
+  const [featuredImage, setFeaturedImage] = useState(article.featuredImage);
+  const [featuredImageAlt, setFeaturedImageAlt] = useState(article.featuredImageAlt || "");
+  const [featuredImageTitle, setFeaturedImageTitle] = useState(article.featuredImageTitle || "");
+  const [featuredImageCaption, setFeaturedImageCaption] = useState(article.featuredImageCaption || "");
 
-  // Helper: Parse HTML into blocks
+  // FAQs
+  const [faqsList, setFaqsList] = useState<FAQItem[]>([]);
+  const [newFaqQuestion, setNewFaqQuestion] = useState("");
+  const [newFaqAnswer, setNewFaqAnswer] = useState("");
+  const [editingFaqId, setEditingFaqId] = useState<string | null>(null);
+  const [editingFaqQuestion, setEditingFaqQuestion] = useState("");
+  const [editingFaqAnswer, setEditingFaqAnswer] = useState("");
+
+  // Revisions & Autosave Status
+  const [revisions, setRevisions] = useState<any[]>([]);
+  const [isDirty, setIsDirty] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<string>("Saved");
+  const [lastSavedTime, setLastSavedTime] = useState<string>("");
+
+  // Link Assistant Search
+  const [linkSearch, setLinkSearch] = useState("");
+
+  // Selection tracking for link insertions
+  const [focusedTextareaId, setFocusedTextareaId] = useState<string | null>(null);
+  const [selectionStart, setSelectionStart] = useState<number>(0);
+  const [selectionEnd, setSelectionEnd] = useState<number>(0);
+  
+  const [mainSelectionStart, setMainSelectionStart] = useState<number>(0);
+  const [mainSelectionEnd, setMainSelectionEnd] = useState<number>(0);
+
+  const textareaRefs = useRef<{ [key: string]: HTMLTextAreaElement | null }>({});
+  const mainTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // Parse HTML content string into block arrays for the visual editor
   const parseHtmlToBlocks = (htmlString: string): Block[] => {
-    if (typeof window === 'undefined') return [];
-    
+    if (typeof window === "undefined") return [];
     const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlString || '', 'text/html');
+    const doc = parser.parseFromString(htmlString || "", "text/html");
     const parsedBlocks: Block[] = [];
-    
     const children = Array.from(doc.body.childNodes);
-    
-    children.forEach((node) => {
-      // Skip empty text nodes
-      if (node.nodeType === Node.TEXT_NODE && !node.textContent?.trim()) {
-        return;
-      }
 
-      // Check if node is an image container or img
+    children.forEach((node) => {
+      // Ignore empty text nodes
+      if (node.nodeType === Node.TEXT_NODE && !node.textContent?.trim()) return;
+
+      // Detect Image (either direct img or img wrapped in div/figure)
       let imgEl: HTMLImageElement | null = null;
-      let captionText = '';
-      let align: 'left' | 'center' | 'right' = 'center';
-      let width = '100%';
+      let divWrapper: HTMLElement | null = null;
 
       if (node.nodeType === Node.ELEMENT_NODE) {
         const el = node as HTMLElement;
-        if (el.tagName === 'IMG') {
+        if (el.tagName === "IMG") {
           imgEl = el as HTMLImageElement;
         } else {
-          // Check for wrapped image
-          imgEl = el.querySelector('img');
+          imgEl = el.querySelector("img");
           if (imgEl) {
-            const textAlign = el.style.textAlign || el.getAttribute('align');
-            if (textAlign === 'left' || textAlign === 'right' || textAlign === 'center') {
-              align = textAlign as any;
-            }
-            
-            // Look for caption divs or text
-            const captionEl = el.querySelector('div, p, figcaption');
-            if (captionEl) {
-              captionText = captionEl.textContent?.trim() || '';
-            }
+            divWrapper = el;
           }
         }
       }
 
       if (imgEl) {
-        const src = imgEl.getAttribute('src') || '';
-        const alt = imgEl.getAttribute('alt') || '';
-        const imgStyleWidth = imgEl.style.maxWidth || imgEl.style.width || imgEl.getAttribute('width') || '100%';
-        
+        let align: "left" | "center" | "right" = "center";
+        let width = "100%";
+        let caption = "";
+
+        if (divWrapper) {
+          const styleAlign = divWrapper.style.textAlign;
+          if (styleAlign === "left" || styleAlign === "right" || styleAlign === "center") {
+            align = styleAlign;
+          }
+        }
+        const styleWidth = imgEl.style.maxWidth || imgEl.style.width;
+        if (styleWidth) {
+          width = styleWidth;
+        }
+
+        // Try to get caption from next sibling if it looks like a caption, or placeholder
         parsedBlocks.push({
-          id: 'block_' + Math.random().toString(36).substring(2, 9),
-          type: 'image',
-          text: '',
-          html: '',
+          id: "block_" + Math.random().toString(36).substring(2, 9),
+          type: "image",
+          text: "",
+          html: "",
           imageAttrs: {
-            src,
-            alt,
-            caption: captionText,
+            src: imgEl.getAttribute("src") || "",
+            alt: imgEl.getAttribute("alt") || "",
+            caption: imgEl.getAttribute("title") || caption,
             align,
-            width: imgStyleWidth
+            width
           }
         });
         return;
       }
 
-      // Handle Headings
       if (node.nodeType === Node.ELEMENT_NODE) {
         const el = node as HTMLElement;
+        
+        // Headings H1-H6
         if (/^H[1-6]$/.test(el.tagName)) {
           parsedBlocks.push({
-            id: 'block_' + Math.random().toString(36).substring(2, 9),
-            type: 'heading',
-            text: el.textContent || '',
-            html: '',
+            id: "block_" + Math.random().toString(36).substring(2, 9),
+            type: "heading",
+            text: el.textContent || "",
+            html: "",
             headingLevel: parseInt(el.tagName.substring(1))
           });
           return;
         }
-        
-        // Handle normal paragraphs
-        if (el.tagName === 'P') {
+
+        // Paragraphs
+        if (el.tagName === "P") {
           parsedBlocks.push({
-            id: 'block_' + Math.random().toString(36).substring(2, 9),
-            type: 'paragraph',
-            text: el.textContent || '',
-            html: ''
+            id: "block_" + Math.random().toString(36).substring(2, 9),
+            type: "paragraph",
+            text: el.innerHTML || el.textContent || "",
+            html: ""
           });
           return;
         }
       }
 
-      // Default: parse as raw HTML block
-      const tempDiv = document.createElement('div');
+      // Default fallback is raw html block
+      const tempDiv = document.createElement("div");
       tempDiv.appendChild(node.cloneNode(true));
       parsedBlocks.push({
-        id: 'block_' + Math.random().toString(36).substring(2, 9),
-        type: 'raw',
-        text: '',
+        id: "block_" + Math.random().toString(36).substring(2, 9),
+        type: "raw",
+        text: "",
         html: tempDiv.innerHTML,
         isEditingCode: false
       });
     });
 
-    if (parsedBlocks.length === 0) {
-      parsedBlocks.push({
-        id: 'block_default',
-        type: 'paragraph',
-        text: '',
-        html: ''
-      });
-    }
-
-    return parsedBlocks;
+    return parsedBlocks.length > 0 ? parsedBlocks : [{ id: "block_default", type: "paragraph", text: "", html: "" }];
   };
 
-  // Helper: Serialize blocks to HTML
+  // Convert blocks back into a clean HTML content string
   const serializeBlocksToHtml = (blocksList: Block[]): string => {
-    return blocksList.map((block) => {
-      if (block.type === 'paragraph') {
-        return `<p>${block.text}</p>`;
-      }
-      if (block.type === 'heading') {
-        const tag = `h${block.headingLevel || 2}`;
-        return `<${tag}>${block.text}</${tag}>`;
-      }
-      if (block.type === 'image' && block.imageAttrs) {
-        const { src, alt, caption, align, width } = block.imageAttrs;
-        const containerStyle = `margin: 2rem 0; text-align: ${align || 'center'};`;
-        const imgStyle = `max-width: ${width || '100%'}; height: auto; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); display: inline-block;`;
-        const captionHtml = caption
-          ? `\n  <div style="font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; text-align: center;">${caption}</div>`
-          : '';
-        return `<div style="${containerStyle}">\n  <img src="${src}" alt="${alt || 'Article Illustration'}" style="${imgStyle}" />${captionHtml}\n</div>`;
-      }
-      if (block.type === 'raw') {
-        return block.html;
-      }
-      return '';
-    }).join('\n\n');
+    return blocksList
+      .map((block) => {
+        if (block.type === "paragraph") {
+          return `<p>${block.text}</p>`;
+        }
+        if (block.type === "heading") {
+          const level = block.headingLevel || 2;
+          return `<h${level}>${block.text}</h${level}>`;
+        }
+        if (block.type === "image" && block.imageAttrs) {
+          const { src, alt, caption, align, width } = block.imageAttrs;
+          const styleStr = `max-width: ${width}; width: 100%; height: auto; display: inline-block;`;
+          const wrapperStyleStr = `text-align: ${align}; margin: 1.5rem 0;`;
+          const imgHtml = `<img src="${src}" alt="${alt}"${caption ? ` title="${caption}"` : ""} style="${styleStr}" />`;
+          const captionHtml = caption ? `<figcaption style="font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; text-align: center;">${caption}</figcaption>` : "";
+          
+          return `<div style="${wrapperStyleStr}">\n  ${imgHtml}${captionHtml ? `\n  ${captionHtml}` : ""}\n</div>`;
+        }
+        if (block.type === "raw") {
+          return block.html;
+        }
+        return "";
+      })
+      .join("\n\n");
   };
 
-  // Initialize blocks on mount
+  // Initialize blocks and faqs
   useEffect(() => {
     const parsed = parseHtmlToBlocks(article.content);
     setBlocks(parsed);
-  }, []);
-
-  // Sync content whenever blocks change in visual mode
-  useEffect(() => {
-    if (editorMode === 'visual' && blocks.length > 0) {
-      const html = serializeBlocksToHtml(blocks);
-      setContent(html);
-    }
-  }, [blocks, editorMode]);
-
-  // Extract all embedded images from content html to update list
-  useEffect(() => {
-    const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/g;
-    const matches: string[] = [];
-    let match;
-    while ((match = imgRegex.exec(content)) !== null) {
-      if (match[1]) {
-        matches.push(match[1]);
+    
+    if (article.faqs) {
+      try {
+        setFaqsList(JSON.parse(article.faqs));
+      } catch (e) {
+        setFaqsList([]);
       }
     }
-    setEmbeddedImages(Array.from(new Set(matches)));
-  }, [content]);
+    
+    loadRevisionsList();
+    setLastSavedTime(new Date().toLocaleTimeString());
+  }, []);
 
-  // Helper file loaders
-  const readFileAsDataURL = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target?.result as string);
-      reader.onerror = () => reject(new Error("Failed to read file"));
-      reader.readAsDataURL(file);
-    });
+  const loadRevisionsList = async () => {
+    try {
+      const list = await getRevisions(article.id);
+      setRevisions(list);
+    } catch (e) {
+      console.error("Failed to load revisions", e);
+    }
   };
 
-  const compressImage = (dataUrl: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
+  // Calculate dynamic Word Count
+  const getWordCount = () => {
+    const rawText = editorMode === "visual" ? serializeBlocksToHtml(blocks) : content;
+    const cleanText = rawText.replace(/<[^>]*>/g, " ");
+    const words = cleanText.trim().split(/\s+/).filter(w => w.length > 0);
+    return words.length;
+  };
+
+  const wordCount = getWordCount();
+
+  // Track changes to make page dirty
+  useEffect(() => {
+    setIsDirty(true);
+  }, [
+    title, slug, content, status, authorId, brandId, categoryId,
+    seoTitle, metaDescription, canonicalUrl, excerpt, featuredSnippet,
+    featuredImage, featuredImageAlt, featuredImageTitle, featuredImageCaption,
+    faqsList
+  ]);
+
+  // Background Autosave trigger (Runs every 30 seconds if dirty)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (isDirty) {
+        handleSaveInPlace();
+      }
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [isDirty, title, slug, blocks, content, status, authorId, brandId, categoryId, seoTitle, metaDescription, canonicalUrl, excerpt, featuredSnippet, featuredImage, featuredImageAlt, featuredImageTitle, featuredImageCaption, faqsList, editorMode]);
+
+  // Compile data into FormData structure
+  const compileFormData = (currentContent: string, currentStatus?: string): FormData => {
+    const fd = new FormData();
+    fd.append("title", title);
+    fd.append("slug", slug);
+    fd.append("content", currentContent);
+    fd.append("status", currentStatus || status);
+    fd.append("authorId", authorId);
+    fd.append("brandId", brandId);
+    fd.append("categoryId", categoryId);
+    fd.append("seoTitle", seoTitle);
+    fd.append("metaDescription", metaDescription);
+    fd.append("canonicalUrl", canonicalUrl);
+    fd.append("excerpt", excerpt);
+    fd.append("featuredSnippet", featuredSnippet);
+    fd.append("faqs", JSON.stringify(faqsList));
+    fd.append("featuredImage", featuredImage || "");
+    fd.append("featuredImageAlt", featuredImageAlt);
+    fd.append("featuredImageTitle", featuredImageTitle);
+    fd.append("featuredImageCaption", featuredImageCaption);
+    return fd;
+  };
+
+  // Perform in-place save without redirecting
+  const handleSaveInPlace = async (newStatus?: string) => {
+    setSaveStatus("Saving...");
+    try {
+      const finalContent = editorMode === "visual" ? serializeBlocksToHtml(blocks) : content;
+      const fd = compileFormData(finalContent, newStatus);
+      await updateArticle(article.id, fd);
+      
+      setIsDirty(false);
+      setSaveStatus("Saved");
+      setLastSavedTime(new Date().toLocaleTimeString());
+      loadRevisionsList();
+    } catch (err: any) {
+      setSaveStatus("Save failed");
+      console.error("Save error:", err);
+    }
+  };
+
+  // Manual save and exit (submits form and redirects)
+  const handleSaveAndExit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaveStatus("Saving & exiting...");
+    try {
+      const finalContent = editorMode === "visual" ? serializeBlocksToHtml(blocks) : content;
+      const fd = compileFormData(finalContent);
+      await updateAction(article.id, fd);
+    } catch (err: any) {
+      setSaveStatus("Save failed");
+      alert(`Save error: ${err.message}`);
+    }
+  };
+
+  // FAQ CRUD handlers
+  const handleAddFaq = () => {
+    if (!newFaqQuestion.trim() || !newFaqAnswer.trim()) return;
+    const newItem: FAQItem = {
+      id: "faq_" + Date.now(),
+      question: newFaqQuestion.trim(),
+      answer: newFaqAnswer.trim()
+    };
+    setFaqsList([...faqsList, newItem]);
+    setNewFaqQuestion("");
+    setNewFaqAnswer("");
+  };
+
+  const handleDeleteFaq = (id: string) => {
+    setFaqsList(faqsList.filter((f) => f.id !== id));
+  };
+
+  const startEditFaq = (faq: FAQItem) => {
+    setEditingFaqId(faq.id);
+    setEditingFaqQuestion(faq.question);
+    setEditingFaqAnswer(faq.answer);
+  };
+
+  const handleSaveEditFaq = () => {
+    if (!editingFaqQuestion.trim() || !editingFaqAnswer.trim()) return;
+    setFaqsList(
+      faqsList.map((f) =>
+        f.id === editingFaqId
+          ? { ...f, question: editingFaqQuestion.trim(), answer: editingFaqAnswer.trim() }
+          : f
+      )
+    );
+    setEditingFaqId(null);
+  };
+
+  const moveFaq = (index: number, direction: "up" | "down") => {
+    const updated = [...faqsList];
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= updated.length) return;
+    const temp = updated[index];
+    updated[index] = updated[targetIndex];
+    updated[targetIndex] = temp;
+    setFaqsList(updated);
+  };
+
+  // Block creation/deletion and alignment controls
+  const addBlock = (type: BlockType, headingLevel?: number, afterBlockId?: string | null) => {
+    const newBlock: Block = {
+      id: "b_" + Date.now() + Math.random().toString(36).substring(2, 5),
+      type,
+      text: "",
+      html: "",
+      headingLevel,
+      imageAttrs: type === "image" ? { src: "", alt: "", caption: "", align: "center", width: "100%" } : undefined,
+      isEditingCode: type === "raw"
+    };
+
+    if (afterBlockId) {
+      const idx = blocks.findIndex((b) => b.id === afterBlockId);
+      if (idx !== -1) {
+        const updated = [...blocks];
+        updated.splice(idx + 1, 0, newBlock);
+        setBlocks(updated);
+        setActiveBlockId(newBlock.id);
+        return;
+      }
+    }
+
+    setBlocks([...blocks, newBlock]);
+    setActiveBlockId(newBlock.id);
+  };
+
+  const deleteBlock = (id: string) => {
+    setBlocks(blocks.filter((b) => b.id !== id));
+  };
+
+  const moveBlock = (index: number, direction: "up" | "down") => {
+    const updated = [...blocks];
+    const targetIdx = direction === "up" ? index - 1 : index + 1;
+    if (targetIdx < 0 || targetIdx >= updated.length) return;
+    const temp = updated[index];
+    updated[index] = updated[targetIdx];
+    updated[targetIdx] = temp;
+    setBlocks(updated);
+  };
+
+  const handleModeChange = (mode: "visual" | "code") => {
+    if (mode === "visual") {
+      setBlocks(parseHtmlToBlocks(content));
+    } else {
+      setContent(serializeBlocksToHtml(blocks));
+    }
+    setEditorMode(mode);
+  };
+
+  // Track text cursor positions for insertions
+  const handleTextareaBlur = (blockId: string, e: React.FocusEvent<HTMLTextAreaElement>) => {
+    setFocusedTextareaId(blockId);
+    setSelectionStart(e.target.selectionStart);
+    setSelectionEnd(e.target.selectionEnd);
+  };
+
+  const handleMainTextareaBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+    setMainSelectionStart(e.target.selectionStart);
+    setMainSelectionEnd(e.target.selectionEnd);
+  };
+
+  // Insert internal links at cursor caret position
+  const handleInsertLink = (articleToLink: RelatedArticle) => {
+    const brandSlug = articleToLink.brand?.slug || "uncategorized";
+    const categorySlug = articleToLink.category?.slug || "uncategorized";
+    const relativeUrl = `/${brandSlug}/${categorySlug}/${articleToLink.slug}`;
+    const linkHtml = `<a href="${relativeUrl}">${articleToLink.title}</a>`;
+
+    if (editorMode === "visual" && focusedTextareaId) {
+      const updated = blocks.map((b) => {
+        if (b.id === focusedTextareaId) {
+          const textBefore = b.text.substring(0, selectionStart);
+          const textAfter = b.text.substring(selectionEnd);
+          const newText = textBefore + linkHtml + textAfter;
+          
+          // Re-adjust cursor offsets
+          setTimeout(() => {
+            const el = textareaRefs.current[b.id];
+            if (el) {
+              el.focus();
+              const newPos = selectionStart + linkHtml.length;
+              el.setSelectionRange(newPos, newPos);
+            }
+          }, 50);
+
+          return { ...b, text: newText };
+        }
+        return b;
+      });
+      setBlocks(updated);
+    } else if (editorMode === "code") {
+      const textBefore = content.substring(0, mainSelectionStart);
+      const textAfter = content.substring(mainSelectionEnd);
+      const newContent = textBefore + linkHtml + textAfter;
+      setContent(newContent);
+
+      setTimeout(() => {
+        if (mainTextareaRef.current) {
+          mainTextareaRef.current.focus();
+          const newPos = mainSelectionStart + linkHtml.length;
+          mainTextareaRef.current.setSelectionRange(newPos, newPos);
+        }
+      }, 50);
+    } else {
+      alert("Please click inside a paragraph text field to position the cursor before inserting a link.");
+    }
+  };
+
+  // Revision rollback action
+  const handleRollback = async (rev: any) => {
+    if (confirm(`Are you sure you want to rollback to revision #${rev.version}?`)) {
+      try {
+        setSaveStatus("Rolling back...");
+        await rollbackRevision(article.id, rev.id);
+        
+        setTitle(rev.title);
+        setContent(rev.content);
+        const parsedBlocks = parseHtmlToBlocks(rev.content);
+        setBlocks(parsedBlocks);
+        
+        setSeoTitle(rev.seoTitle || "");
+        setMetaDescription(rev.metaDescription || "");
+        setExcerpt(rev.excerpt || "");
+        setFeaturedSnippet(rev.featuredSnippet || "");
+        
+        setFeaturedImage(rev.featuredImage);
+        setFeaturedImageAlt(rev.featuredImageAlt || "");
+        setFeaturedImageTitle(rev.featuredImageTitle || "");
+        setFeaturedImageCaption(rev.featuredImageCaption || "");
+        
+        if (rev.faqs) {
+          try {
+            setFaqsList(JSON.parse(rev.faqs));
+          } catch (e) {
+            setFaqsList([]);
+          }
+        } else {
+          setFaqsList([]);
+        }
+        
+        await loadRevisionsList();
+        setIsDirty(false);
+        setSaveStatus("Saved");
+        setLastSavedTime(new Date().toLocaleTimeString());
+        alert(`Rolled back to revision #${rev.version} successfully!`);
+      } catch (err: any) {
+        alert(`Rollback failed: ${err.message}`);
+        setSaveStatus("Rollback failed");
+      }
+    }
+  };
+
+  // Local client side image file upload & compression for blocks
+  const handleBlockImageUpload = (blockId: string, file: File) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement('canvas');
+        const canvas = document.createElement("canvas");
         let width = img.width;
         let height = img.height;
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 600;
+        const MAX_WIDTH = 1000;
+        const MAX_HEIGHT = 750;
 
         if (width > height) {
           if (width > MAX_WIDTH) {
@@ -264,963 +622,1571 @@ export default function EditArticleForm({ article, authors, updateAction }: Edit
 
         canvas.width = width;
         canvas.height = height;
-        const ctx = canvas.getContext('2d');
+
+        const ctx = canvas.getContext("2d");
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', 0.75));
-        } else {
-          reject(new Error("Failed to get 2d context for compression"));
+          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
+          
+          setBlocks((prev) =>
+            prev.map((b) => {
+              if (b.id === blockId) {
+                return {
+                  ...b,
+                  imageAttrs: {
+                    src: compressedDataUrl,
+                    alt: "",
+                    caption: "",
+                    align: "center",
+                    width: "100%"
+                  }
+                };
+              }
+              return b;
+            })
+          );
         }
       };
-      img.onerror = () => reject(new Error("Invalid image format"));
-      img.src = dataUrl;
-    });
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) {
-      setSelectedFilePreview(null);
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setSelectedFilePreview(event.target?.result as string);
+      img.src = event.target?.result as string;
     };
-    reader.readAsDataURL(files[0]);
+    reader.readAsDataURL(file);
   };
 
-  const handleInsertImage = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    const files = bodyFileInputRef.current?.files;
-    if (!files || files.length === 0) {
-      setUploadError("Please select an image file to insert.");
-      return;
-    }
-
-    setIsInserting(true);
-    setUploadError(null);
-
-    try {
-      const newBlocks: Block[] = [];
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const dataUrl = await readFileAsDataURL(file);
-        const compressed = await compressImage(dataUrl);
-        
-        newBlocks.push({
-          id: `img_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-          type: 'image',
-          text: '',
-          html: '',
-          imageAttrs: {
-            src: compressed,
-            alt: file.name.split('.')[0] || 'Article Image',
-            caption: '',
-            align: 'center',
-            width: '100%'
-          }
-        });
+  // SEO Health calculation logic
+  const calculateSeoHealth = () => {
+    const checks = [
+      {
+        id: "meta-title",
+        label: "Meta Title defined and ideal length (40 - 60 chars)",
+        passed: seoTitle.length >= 40 && seoTitle.length <= 60,
+        score: 10,
+        current: `${seoTitle.length} chars`
+      },
+      {
+        id: "meta-desc",
+        label: "Meta Description defined and ideal length (120 - 160 chars)",
+        passed: metaDescription.length >= 120 && metaDescription.length <= 160,
+        score: 15,
+        current: `${metaDescription.length} chars`
+      },
+      {
+        id: "word-count",
+        label: "Comprehensive Article Word Count (300+ target)",
+        passed: wordCount >= 300,
+        score: 15,
+        current: `${wordCount} words`
+      },
+      {
+        id: "canonical",
+        label: "Canonical URL defined",
+        passed: canonicalUrl.trim().length > 0,
+        score: 10,
+        current: canonicalUrl.trim() ? "defined" : "missing"
+      },
+      {
+        id: "headings",
+        label: "Heading Structure contains H2s",
+        passed: editorMode === "visual" 
+          ? blocks.some((b) => b.type === "heading" && b.headingLevel === 2)
+          : content.includes("<h2>") || content.includes("<h2 "),
+        score: 10,
+        current: editorMode === "visual"
+          ? `${blocks.filter(b => b.type === "heading" && b.headingLevel === 2).length} H2s`
+          : "Checked"
+      },
+      {
+        id: "faqs",
+        label: "FAQ Accordion schema sections populated",
+        passed: faqsList.length >= 1,
+        score: 10,
+        current: `${faqsList.length} FAQs`
+      },
+      {
+        id: "internal-links",
+        label: "Includes contextual internal hyperlinking",
+        passed: editorMode === "visual"
+          ? blocks.some(b => b.text.includes("<a href="))
+          : content.includes("<a href="),
+        score: 10,
+        current: "Checked"
+      },
+      {
+        id: "excerpt",
+        label: "Snippet excerpt populated (50 - 150 chars)",
+        passed: excerpt.length >= 50 && excerpt.length <= 150,
+        score: 10,
+        current: `${excerpt.length} chars`
+      },
+      {
+        id: "featured-snippet",
+        label: "Featured SEO Snippet Box",
+        passed: featuredSnippet.trim().length > 0,
+        score: 10,
+        current: featuredSnippet.trim() ? "defined" : "missing"
       }
+    ];
 
-      // Determine insertion index based on active block cursor tracking
-      let insertIndex = blocks.length;
-      if (activeBlockId) {
-        const idx = blocks.findIndex(b => b.id === activeBlockId);
-        if (idx !== -1) {
-          insertIndex = idx + 1;
-        }
-      }
+    const totalPossibleScore = checks.reduce((sum, item) => sum + item.score, 0);
+    const earnedScore = checks.reduce((sum, item) => sum + (item.passed ? item.score : 0), 0);
+    const scorePercentage = Math.round((earnedScore / totalPossibleScore) * 100);
 
-      const updatedBlocks = [...blocks];
-      updatedBlocks.splice(insertIndex, 0, ...newBlocks);
-      setBlocks(updatedBlocks);
-
-      // Set the first new image block as active
-      if (newBlocks.length > 0) {
-        setActiveBlockId(newBlocks[0].id);
-      }
-
-      setSelectedFilePreview(null);
-      if (bodyFileInputRef.current) {
-        bodyFileInputRef.current.value = '';
-      }
-      setSuccessMessage(`Successfully inserted ${newBlocks.length} image(s)`);
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err: any) {
-      setUploadError(err.message || "Failed to upload image.");
-    } finally {
-      setIsInserting(false);
-    }
-  };
-
-  const handleReplaceImageFile = async (e: React.ChangeEvent<HTMLInputElement>, blockId: string) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setIsInserting(true);
-      const dataUrl = await readFileAsDataURL(file);
-      const compressed = await compressImage(dataUrl);
-
-      setBlocks(prev => prev.map(b => {
-        if (b.id === blockId && b.imageAttrs) {
-          return {
-            ...b,
-            imageAttrs: {
-              ...b.imageAttrs,
-              src: compressed
-            }
-          };
-        }
-        return b;
-      }));
-      setSuccessMessage("Image replaced successfully.");
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err: any) {
-      setUploadError(err.message || "Failed to replace image.");
-    } finally {
-      setIsInserting(false);
-    }
-  };
-
-  const updateImageAttr = (blockId: string, attrName: keyof ImageAttrs, value: string) => {
-    setBlocks(prev => prev.map(b => {
-      if (b.id === blockId && b.imageAttrs) {
-        return {
-          ...b,
-          imageAttrs: {
-            ...b.imageAttrs,
-            [attrName]: value
-          }
-        };
-      }
-      return b;
-    }));
-  };
-
-  const deleteBlock = (blockId: string) => {
-    if (!window.confirm("Are you sure you want to delete this block?")) {
-      return;
-    }
-    setBlocks(prev => prev.filter(b => b.id !== blockId));
-    if (activeBlockId === blockId) {
-      setActiveBlockId(null);
-    }
-  };
-
-  // Keyboard controls for paragraph splitting/backspacing
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>, index: number) => {
-    const block = blocks[index];
-    if (e.key === 'Enter' && !e.shiftKey && block.type !== 'raw') {
-      e.preventDefault();
-      const textarea = e.currentTarget;
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const text = textarea.value;
-
-      const currentText = text.substring(0, start);
-      const nextText = text.substring(end);
-
-      const updated = [...blocks];
-      updated[index] = { ...block, text: currentText };
-      
-      const newBlock: Block = {
-        id: 'block_' + Math.random().toString(36).substring(2, 9),
-        type: 'paragraph',
-        text: nextText,
-        html: ''
-      };
-      
-      updated.splice(index + 1, 0, newBlock);
-      setBlocks(updated);
-      setActiveBlockId(newBlock.id);
-
-      setTimeout(() => {
-        const el = document.getElementById(`textarea-${newBlock.id}`) as HTMLTextAreaElement | null;
-        if (el) {
-          el.focus();
-          el.selectionStart = el.selectionEnd = 0;
-        }
-      }, 20);
-
-    } else if (e.key === 'Backspace' && e.currentTarget.selectionStart === 0 && e.currentTarget.selectionEnd === 0 && index > 0) {
-      const prevBlock = blocks[index - 1];
-      if (prevBlock.type === 'paragraph' || prevBlock.type === 'heading') {
-        e.preventDefault();
-        const prevTextLength = prevBlock.text.length;
-
-        const updated = [...blocks];
-        updated[index - 1] = {
-          ...prevBlock,
-          text: prevBlock.text + block.text
-        };
-        updated.splice(index, 1);
-        setBlocks(updated);
-        setActiveBlockId(prevBlock.id);
-
-        setTimeout(() => {
-          const el = document.getElementById(`textarea-${prevBlock.id}`) as HTMLTextAreaElement | null;
-          if (el) {
-            el.focus();
-            el.selectionStart = el.selectionEnd = prevTextLength;
-          }
-        }, 20);
-      }
-    }
-  };
-
-  // Drag and drop handlers
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    e.dataTransfer.setData('text/plain', index.toString());
-    setDraggedBlockIndex(index);
-  };
-
-  const handleDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
-    e.preventDefault();
-    const sourceStr = e.dataTransfer.getData('text/plain');
-    if (sourceStr === '') return;
-    const sourceIndex = parseInt(sourceStr);
-    if (isNaN(sourceIndex) || sourceIndex === targetIndex) return;
-
-    const updated = [...blocks];
-    const [removed] = updated.splice(sourceIndex, 1);
-    updated.splice(targetIndex, 0, removed);
-    setBlocks(updated);
-    setDraggedBlockIndex(null);
-  };
-
-  // Reorder buttons fallback
-  const moveBlock = (index: number, direction: 'up' | 'down') => {
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= blocks.length) return;
-
-    const updated = [...blocks];
-    const temp = updated[index];
-    updated[index] = updated[targetIndex];
-    updated[targetIndex] = temp;
-    setBlocks(updated);
-  };
-
-  const addBlock = (type: BlockType, headingLevel?: number) => {
-    const newBlock: Block = {
-      id: 'block_' + Math.random().toString(36).substring(2, 9),
-      type,
-      text: '',
-      html: type === 'raw' ? '<div>Raw HTML Element</div>' : '',
-      headingLevel,
-      isEditingCode: type === 'raw' ? true : false
+    return {
+      score: scorePercentage,
+      checks
     };
-
-    let insertIndex = blocks.length;
-    if (activeBlockId) {
-      const idx = blocks.findIndex(b => b.id === activeBlockId);
-      if (idx !== -1) {
-        insertIndex = idx + 1;
-      }
-    }
-
-    const updated = [...blocks];
-    updated.splice(insertIndex, 0, newBlock);
-    setBlocks(updated);
-    setActiveBlockId(newBlock.id);
-
-    setTimeout(() => {
-      const el = document.getElementById(`textarea-${newBlock.id}`) as HTMLElement | null;
-      el?.focus();
-    }, 50);
   };
 
-  const handleModeChange = (mode: 'visual' | 'code') => {
-    if (mode === 'visual') {
-      const parsed = parseHtmlToBlocks(content);
-      setBlocks(parsed);
+  const seoHealth = calculateSeoHealth();
+
+  // Related internal link list search filter
+  const filteredArticles = allArticles.filter((art) => {
+    if (!linkSearch.trim()) return true;
+    return art.title.toLowerCase().includes(linkSearch.toLowerCase()) || 
+           art.slug.toLowerCase().includes(linkSearch.toLowerCase());
+  });
+
+  // Table of Contents rendering parser
+  const getTableOfContents = () => {
+    if (editorMode === "visual") {
+      return blocks
+        .filter((b) => b.type === "heading" && b.headingLevel === 2)
+        .map((b) => b.text);
     }
-    setEditorMode(mode);
+    // Simple regex parser for markdown/HTML in code mode
+    const h2s = [];
+    const regex = /<h2[^>]*>(.*?)<\/h2>/gi;
+    let match;
+    while ((match = regex.exec(content)) !== null) {
+      h2s.push(match[1].replace(/<[^>]*>/g, ""));
+    }
+    return h2s;
   };
 
-  const handleDeleteEmbeddedImage = (e: React.MouseEvent, imgSrc: string) => {
-    e.preventDefault();
-    if (!window.confirm("Are you sure you want to remove this image from the article content?")) {
-      return;
-    }
-
-    // In visual editor, filter out any image block matching this src
-    if (editorMode === 'visual') {
-      setBlocks(prev => prev.filter(b => !(b.type === 'image' && b.imageAttrs?.src === imgSrc)));
-    } else {
-      const escapedSrc = imgSrc.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-      const pattern = new RegExp(
-        `(?:<div[^>]*>\\s*)?<img[^>]+src=["']${escapedSrc}["'][^>]*>(?:\\s*<\\/div>)?`,
-        'g'
-      );
-      setContent(prev => prev.replace(pattern, ''));
-    }
-  };
-
-  const handleCopyTag = (e: React.MouseEvent, imgSrc: string) => {
-    e.preventDefault();
-    const tag = `<img src="${imgSrc}" alt="Article Image" style="max-width: 100%; height: auto; border-radius: var(--radius-md);" />`;
-    navigator.clipboard.writeText(tag).then(() => {
-      alert("HTML Image Tag copied to clipboard!");
-    });
-  };
-
-  const adjustTextAreaHeight = (el: HTMLTextAreaElement | null) => {
-    if (el) {
-      el.style.height = 'auto';
-      el.style.height = el.scrollHeight + 'px';
-    }
-  };
-
-  const inputStyle = { width: '100%', padding: '0.8rem', marginBottom: '1rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '1rem' };
-  const labelStyle = { display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' };
+  const tocHeadings = getTableOfContents();
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem', alignItems: 'start' }}>
-      
-      {/* Styles for visual blocks drag handle and overlays */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        .editor-block-container {
-          position: relative;
-          padding: 0.5rem 0.5rem 0.5rem 2rem;
-          border: 1px dashed transparent;
-          border-radius: 6px;
-          margin-bottom: 0.25rem;
-          transition: all 0.25s ease;
-          background: #fff;
-        }
-        .editor-block-container:hover {
-          border-color: #cbd5e1;
+    <div className="edit-form-container">
+      {/* Dynamic Style injection */}
+      <style>{`
+        .edit-form-container {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 1.5rem;
           background-color: #f8fafc;
+          color: #0f172a;
         }
-        .editor-block-container.active {
-          border-color: #3b82f6;
-          background-color: #f0f7ff;
+        .header-bar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background: white;
+          padding: 1rem 1.5rem;
+          border-radius: 8px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+          margin-bottom: 1.5rem;
+          border: 1px solid #e2e8f0;
         }
-        .editor-block-controls {
-          opacity: 0;
-          position: absolute;
-          left: 4px;
-          top: 8px;
+        .title-area {
           display: flex;
           align-items: center;
-          gap: 2px;
-          transition: opacity 0.2s ease;
-          z-index: 10;
+          gap: 1rem;
         }
-        .editor-block-container:hover .editor-block-controls {
-          opacity: 1;
-        }
-        .editor-block-container.active .editor-block-controls {
-          opacity: 1;
-        }
-        .drag-handle {
-          cursor: grab;
-          font-size: 0.8rem;
-          padding: 2px;
-          border-radius: 3px;
-          background: #f1f5f9;
-          border: 1px solid #cbd5e1;
+        .back-link {
           color: #64748b;
-          display: inline-flex;
+          text-decoration: none;
+          font-weight: 500;
+          font-size: 0.9rem;
+          display: flex;
           align-items: center;
-          justify-content: center;
-          width: 18px;
-          height: 18px;
+          gap: 0.25rem;
         }
-        .drag-handle:active {
-          cursor: grabbing;
+        .back-link:hover {
+          color: #0f172a;
         }
-        .arrow-btn {
+        .save-indicator {
+          font-size: 0.85rem;
+          color: #64748b;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        .indicator-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          display: inline-block;
+        }
+        .dot-saved { background-color: #10b981; }
+        .dot-saving { background-color: #f59e0b; animation: pulse 1s infinite alternate; }
+        .dot-failed { background-color: #ef4444; }
+
+        @keyframes pulse {
+          0% { opacity: 0.4; }
+          100% { opacity: 1; }
+        }
+
+        .actions-row {
+          display: flex;
+          gap: 0.75rem;
+          align-items: center;
+        }
+        .btn {
+          padding: 0.5rem 1rem;
+          border-radius: 6px;
+          font-weight: 600;
+          font-size: 0.9rem;
           cursor: pointer;
-          font-size: 0.6rem;
-          padding: 2px;
-          border-radius: 3px;
-          background: #f1f5f9;
-          border: 1px solid #cbd5e1;
-          color: #64748b;
-          width: 18px;
-          height: 18px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
+          transition: all 0.15s ease;
+          border: 1px solid transparent;
         }
-        .arrow-btn:hover {
+        .btn-outline {
+          background: white;
+          border-color: #cbd5e1;
+          color: #475569;
+        }
+        .btn-outline:hover {
+          background: #f1f5f9;
+          border-color: #94a3b8;
+          color: #0f172a;
+        }
+        .btn-primary {
+          background: #3b82f6;
+          color: white;
+        }
+        .btn-primary:hover {
+          background: #2563eb;
+        }
+        .btn-success {
+          background: #10b981;
+          color: white;
+        }
+        .btn-success:hover {
+          background: #059669;
+        }
+
+        .main-layout {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+        }
+        @media(min-width: 1024px) {
+          .main-layout {
+            grid-template-columns: 1fr 380px;
+          }
+        }
+
+        .editor-section {
+          background: white;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 1.5rem;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-section {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .sidebar-tabs {
+          display: flex;
+          background: #e2e8f0;
+          padding: 0.25rem;
+          border-radius: 6px;
+          gap: 0.25rem;
+        }
+        .sidebar-tab-btn {
+          flex: 1;
+          background: none;
+          border: none;
+          padding: 0.4rem 0.5rem;
+          font-size: 0.8rem;
+          font-weight: 600;
+          border-radius: 4px;
+          cursor: pointer;
+          color: #475569;
+          transition: background 0.15s;
+        }
+        .sidebar-tab-btn.active {
+          background: white;
+          color: #0f172a;
+          box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-panel {
+          background: white;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 1.25rem;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+          min-height: 400px;
+        }
+
+        .input-group {
+          margin-bottom: 1rem;
+        }
+        .input-group label {
+          display: block;
+          font-weight: 600;
+          font-size: 0.85rem;
+          margin-bottom: 0.35rem;
+          color: #475569;
+        }
+        .text-input {
+          width: 100%;
+          padding: 0.5rem 0.75rem;
+          border: 1px solid #cbd5e1;
+          border-radius: 6px;
+          font-size: 0.95rem;
+          box-sizing: border-box;
+          outline: none;
+        }
+        .text-input:focus {
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .tabs-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1.5rem;
+          border-bottom: 1px solid #e2e8f0;
+          padding-bottom: 0.5rem;
+        }
+        .tabs-toggle {
+          display: flex;
+          gap: 0.5rem;
+        }
+        .tab-btn {
+          background: none;
+          border: none;
+          padding: 0.4rem 0.8rem;
+          font-size: 0.9rem;
+          font-weight: 600;
+          cursor: pointer;
+          color: #64748b;
+          border-bottom: 2px solid transparent;
+        }
+        .tab-btn.active {
+          color: #3b82f6;
+          border-bottom-color: #3b82f6;
+        }
+
+        .block-card {
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          margin-bottom: 1rem;
+          background: #fff;
+          transition: all 0.2s ease;
+          overflow: hidden;
+        }
+        .block-card.active {
+          border-color: #3b82f6;
+          box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+        }
+        .block-card-header {
+          background: #f8fafc;
+          padding: 0.5rem 0.75rem;
+          border-bottom: 1px solid #e2e8f0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .block-type-badge {
+          font-size: 0.75rem;
+          font-weight: bold;
+          text-transform: uppercase;
+          color: #64748b;
+          background: #e2e8f0;
+          padding: 0.15rem 0.4rem;
+          border-radius: 4px;
+        }
+        .block-controls {
+          display: flex;
+          gap: 0.25rem;
+        }
+        .block-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: #64748b;
+          padding: 0.25rem;
+          border-radius: 4px;
+          font-size: 0.8rem;
+        }
+        .block-btn:hover {
           background: #e2e8f0;
           color: #0f172a;
         }
-        .delete-block-btn {
-          cursor: pointer;
-          font-size: 0.65rem;
+        .block-btn-danger:hover {
           background: #fee2e2;
           color: #ef4444;
-          border: 1px solid #fca5a5;
-          border-radius: 3px;
-          width: 18px;
-          height: 18px;
-          display: inline-flex;
+        }
+        .block-content {
+          padding: 0.75rem;
+        }
+        .block-textarea {
+          width: 100%;
+          border: none;
+          outline: none;
+          resize: vertical;
+          font-size: 0.95rem;
+          line-height: 1.5;
+          font-family: inherit;
+          padding: 0;
+          color: #0f172a;
+          box-sizing: border-box;
+          min-height: 60px;
+        }
+
+        .heading-select {
+          padding: 0.25rem 0.5rem;
+          font-size: 0.8rem;
+          border: 1px solid #cbd5e1;
+          border-radius: 4px;
+          outline: none;
+        }
+
+        .image-block-uploader {
+          padding: 1rem;
+          border: 2px dashed #cbd5e1;
+          border-radius: 6px;
+          text-align: center;
+          background: #f8fafc;
+        }
+        .image-block-preview-card {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+        .image-block-preview-img {
+          max-height: 180px;
+          object-fit: contain;
+          border-radius: 4px;
+          align-self: center;
+          border: 1px solid #cbd5e1;
+          background: #f1f5f9;
+        }
+
+        .block-insert-divider {
+          height: 16px;
+          margin: -0.5rem 0 0.5rem;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          opacity: 0;
+          transition: opacity 0.2s;
+        }
+        .block-insert-divider:hover {
+          opacity: 1;
+        }
+        .block-insert-line {
+          height: 1px;
+          background: #e2e8f0;
+          flex: 1;
+        }
+        .block-insert-btn-group {
+          background: white;
+          border: 1px solid #cbd5e1;
+          border-radius: 12px;
+          padding: 0.15rem 0.5rem;
+          display: flex;
+          gap: 0.25rem;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .block-insert-mini-btn {
+          background: none;
+          border: none;
+          font-size: 0.7rem;
+          font-weight: bold;
+          color: #64748b;
+          cursor: pointer;
+          padding: 0.15rem 0.35rem;
+          border-radius: 4px;
+        }
+        .block-insert-mini-btn:hover {
+          background: #f1f5f9;
+          color: #3b82f6;
+        }
+
+        .seo-score-widget {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          margin-bottom: 1.25rem;
+          padding-bottom: 1rem;
+          border-bottom: 1px solid #e2e8f0;
+        }
+        .seo-score-circle {
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+          display: flex;
           align-items: center;
           justify-content: center;
-        }
-        .delete-block-btn:hover {
-          background: #ef4444;
+          font-size: 1.2rem;
+          font-weight: 800;
           color: white;
         }
-        .block-type-tag {
-          font-size: 0.6rem;
-          padding: 1px 4px;
-          background: #e2e8f0;
-          border-radius: 3px;
-          color: #475569;
-          font-weight: bold;
-          text-transform: uppercase;
+        .score-good { background: #10b981; }
+        .score-warn { background: #f59e0b; }
+        .score-poor { background: #ef4444; }
+
+        .checklist-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.5rem;
+          font-size: 0.8rem;
+          margin-bottom: 0.65rem;
+          line-height: 1.4;
         }
-      ` }} />
+        .checklist-status {
+          font-size: 1rem;
+          line-height: 1;
+          margin-top: -1px;
+        }
+        .checklist-status.passed { color: #10b981; }
+        .checklist-status.failed { color: #cbd5e1; }
 
-      {/* Left Column: Form inputs */}
-      <form action={async (formData) => {
-        await updateAction(article.id, formData);
-      }} style={{ background: '#fff', padding: '2rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-        
-        <div>
-          <label style={labelStyle}>Title</label>
-          <input type="text" name="title" defaultValue={article.title} required style={inputStyle} />
-        </div>
+        .faq-item-card {
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          padding: 0.75rem;
+          margin-bottom: 0.75rem;
+          background: #f8fafc;
+        }
+        .faq-item-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 0.5rem;
+          margin-bottom: 0.4rem;
+        }
+        .faq-item-title {
+          font-weight: 600;
+          font-size: 0.85rem;
+        }
+        .faq-item-ans {
+          font-size: 0.8rem;
+          color: #475569;
+        }
 
-        <div>
-          <label style={labelStyle}>URL Slug</label>
-          <input type="text" name="slug" defaultValue={article.slug} required style={inputStyle} placeholder="e.g. bixolon-printer-error-codes" />
-        </div>
+        .link-list-item {
+          padding: 0.5rem;
+          border-radius: 4px;
+          border: 1px solid #f1f5f9;
+          font-size: 0.8rem;
+          cursor: pointer;
+          background: #fff;
+          transition: background 0.15s;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .link-list-item:hover {
+          background: #f1f5f9;
+          border-color: #cbd5e1;
+        }
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div>
-            <label style={labelStyle}>Status</label>
-            <select name="status" defaultValue={article.status} style={inputStyle}>
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-            </select>
-          </div>
+        .revision-row {
+          padding: 0.6rem 0.5rem;
+          border-bottom: 1px solid #f1f5f9;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 0.8rem;
+        }
+        .revision-meta {
+          display: flex;
+          flex-direction: column;
+          gap: 0.15rem;
+        }
 
-          <div>
-            <label style={labelStyle}>Author</label>
-            <select name="authorId" defaultValue={article.authorId || ''} style={inputStyle}>
-              <option value="">No Author</option>
-              {authors.map(author => (
-                <option key={author.id} value={author.id}>{author.name} ({author.role})</option>
-              ))}
-            </select>
-          </div>
-        </div>
+        /* Live Preview Styles */
+        .preview-pane {
+          background: white;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 2.5rem;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          line-height: 1.7;
+          color: #334155;
+        }
+        .preview-breadcrumbs {
+          font-size: 0.85rem;
+          color: #64748b;
+          margin-bottom: 1rem;
+        }
+        .preview-title {
+          font-size: 2.25rem;
+          line-height: 1.2;
+          font-weight: 800;
+          color: #0f172a;
+          margin-bottom: 1rem;
+        }
+        .preview-meta-row {
+          font-size: 0.85rem;
+          color: #64748b;
+          border-bottom: 1px solid #e2e8f0;
+          padding-bottom: 1rem;
+          margin-bottom: 1.5rem;
+          display: flex;
+          gap: 1.5rem;
+        }
+        .preview-toc {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 1.25rem;
+          margin-bottom: 1.75rem;
+        }
+        .preview-toc-title {
+          font-weight: 700;
+          font-size: 1rem;
+          color: #0f172a;
+          margin-bottom: 0.75rem;
+        }
+        .preview-toc-list {
+          padding-left: 1.25rem;
+          margin: 0;
+          font-size: 0.9rem;
+          color: #2563eb;
+        }
+        .preview-toc-list li {
+          margin-bottom: 0.35rem;
+        }
+        .preview-snippet {
+          background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+          border-left: 4px solid #3b82f6;
+          border-radius: 0 8px 8px 0;
+          padding: 1.25rem;
+          margin-bottom: 1.75rem;
+        }
+        .preview-snippet-title {
+          font-weight: 700;
+          font-size: 0.95rem;
+          color: #1d4ed8;
+          margin-bottom: 0.35rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        .preview-body h2 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #0f172a;
+          margin: 2rem 0 1rem;
+        }
+        .preview-body h3 {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: #1e293b;
+          margin: 1.5rem 0 0.75rem;
+        }
+        .preview-body p {
+          margin-bottom: 1.25rem;
+        }
+        .preview-body img {
+          border-radius: 6px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .preview-faqs {
+          margin-top: 3rem;
+          border-top: 1px solid #e2e8f0;
+          padding-top: 2rem;
+        }
+        .preview-faqs-title {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #0f172a;
+          margin-bottom: 1.5rem;
+        }
+        .preview-faq-item {
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          margin-bottom: 0.75rem;
+          overflow: hidden;
+        }
+        .preview-faq-q {
+          background: #f8fafc;
+          padding: 0.85rem 1.25rem;
+          font-weight: 600;
+          font-size: 0.95rem;
+          color: #0f172a;
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .preview-faq-a {
+          padding: 1rem 1.25rem;
+          background: white;
+          border-top: 1px solid #e2e8f0;
+          font-size: 0.9rem;
+          color: #475569;
+        }
+      `}</style>
 
-        {/* Featured Thumbnail component */}
-        <ImageUploadSection initialValue={article.featuredImage} />
-
-        <div>
-          <label style={labelStyle}>SEO Title</label>
-          <input type="text" name="seoTitle" defaultValue={article.seoTitle || ''} style={inputStyle} />
-        </div>
-
-        <div>
-          <label style={labelStyle}>Meta Description</label>
-          <textarea name="metaDescription" defaultValue={article.metaDescription || ''} rows={3} style={inputStyle} />
-        </div>
-
-        <div style={{ marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <label style={{ ...labelStyle, marginBottom: 0 }}>Content Body</label>
-            
-            {/* Editor mode toggler */}
-            <div style={{ display: 'flex', background: '#f1f5f9', padding: '0.2rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
-              <button
-                type="button"
-                onClick={() => handleModeChange('visual')}
-                style={{
-                  padding: '0.35rem 0.75rem',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  border: 'none',
-                  borderRadius: '4px',
-                  background: editorMode === 'visual' ? '#fff' : 'transparent',
-                  color: editorMode === 'visual' ? '#0f172a' : '#64748b',
-                  boxShadow: editorMode === 'visual' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.1s ease'
-                }}
-              >
-                ✏ Visual Editor
-              </button>
-              <button
-                type="button"
-                onClick={() => handleModeChange('code')}
-                style={{
-                  padding: '0.35rem 0.75rem',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  border: 'none',
-                  borderRadius: '4px',
-                  background: editorMode === 'code' ? '#fff' : 'transparent',
-                  color: editorMode === 'code' ? '#0f172a' : '#64748b',
-                  boxShadow: editorMode === 'code' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.1s ease'
-                }}
-              >
-                💻 HTML Code
-              </button>
+      {/* Header bar */}
+      <div className="header-bar">
+        <div className="title-area">
+          <Link href="/admin/articles" className="back-link">
+            ← Back
+          </Link>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+            <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: 700 }}>
+              Edit: {title || "Untitled Article"}
+            </h2>
+            <div className="save-indicator">
+              <span className={`indicator-dot ${
+                saveStatus === "Saving..." ? "dot-saving" : 
+                saveStatus.startsWith("Saved") ? "dot-saved" : "dot-failed"
+              }`} />
+              <span>{saveStatus === "Saving..." ? "Saving changes..." : `${saveStatus} (Last save: ${lastSavedTime})`}</span>
             </div>
           </div>
+        </div>
+        
+        <div className="actions-row">
+          <button 
+            type="button" 
+            className="btn btn-outline" 
+            onClick={() => handleSaveInPlace()}
+            disabled={saveStatus === "Saving..."}
+          >
+            Save Draft
+          </button>
+          
+          <button
+            type="button"
+            className={`btn ${status === "published" ? "btn-success" : "btn-primary"}`}
+            onClick={async () => {
+              const targetStatus = status === "published" ? "draft" : "published";
+              if (targetStatus === "published") {
+                const missing = seoHealth.checks.filter(c => !c.passed && c.score >= 10);
+                if (missing.length > 0) {
+                  const confirmPub = confirm(`Warning: This article is missing some recommended SEO features:\n\n` + 
+                    missing.map(m => `• ${m.label}`).join("\n") + 
+                    `\n\nDo you want to publish anyway?`);
+                  if (!confirmPub) return;
+                }
+              }
+              setStatus(targetStatus);
+              await handleSaveInPlace(targetStatus);
+            }}
+          >
+            {status === "published" ? "✓ Published" : "Publish Article"}
+          </button>
 
-          {/* Hidden input keeping original content field in sync */}
-          <input type="hidden" name="content" value={content} />
+          <button
+            type="button"
+            className="btn btn-outline"
+            style={{ background: "#0f172a", color: "white", borderColor: "#0f172a" }}
+            onClick={handleSaveAndExit}
+          >
+            Save & Exit
+          </button>
+        </div>
+      </div>
 
-          {/* Mode 1: Visual Block Editor */}
-          {editorMode === 'visual' && (
-            <div style={{ border: '1px solid #cbd5e1', borderRadius: '6px', padding: '1rem', background: '#f8fafc', minHeight: '500px' }}>
-              
-              {/* Insert Block Floating Toolbar */}
-              <div style={{ display: 'flex', gap: '0.5rem', background: '#fff', padding: '0.5rem', borderRadius: '6px', border: '1px solid #e2e8f0', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.8rem', color: '#64748b', alignSelf: 'center', fontWeight: 'bold', marginRight: '0.25rem' }}>+ Add Block:</span>
-                <button type="button" onClick={() => addBlock('paragraph')} style={{ fontSize: '0.75rem', padding: '0.3rem 0.6rem', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer', background: '#f8fafc' }}>
-                  ¶ Paragraph
+      {/* Main editor area */}
+      <div className="main-layout">
+        
+        {/* Left Side: Blocks / Code editor / Live Preview */}
+        <div>
+          <div className="tabs-header">
+            <div className="tabs-toggle">
+              <button 
+                type="button" 
+                className={`tab-btn ${activeMainTab === "edit" ? "active" : ""}`}
+                onClick={() => setActiveMainTab("edit")}
+              >
+                Editor
+              </button>
+              <button 
+                type="button" 
+                className={`tab-btn ${activeMainTab === "preview" ? "active" : ""}`}
+                onClick={() => setActiveMainTab("preview")}
+              >
+                Live Preview Tab
+              </button>
+            </div>
+            
+            {activeMainTab === "edit" && (
+              <div style={{ display: "flex", gap: "0.25rem", background: "#f1f5f9", padding: "0.2rem", borderRadius: "6px" }}>
+                <button
+                  type="button"
+                  style={{
+                    border: "none", background: editorMode === "visual" ? "white" : "none",
+                    padding: "0.25rem 0.5rem", borderRadius: "4px", fontSize: "0.8rem", fontWeight: "bold", cursor: "pointer"
+                  }}
+                  onClick={() => handleModeChange("visual")}
+                >
+                  Visual Blocks
                 </button>
-                <button type="button" onClick={() => addBlock('heading', 2)} style={{ fontSize: '0.75rem', padding: '0.3rem 0.6rem', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer', background: '#f8fafc', fontWeight: 'bold' }}>
-                  H2 Heading
-                </button>
-                <button type="button" onClick={() => addBlock('heading', 3)} style={{ fontSize: '0.75rem', padding: '0.3rem 0.6rem', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer', background: '#f8fafc', fontWeight: 'bold' }}>
-                  H3 Heading
-                </button>
-                <button type="button" onClick={() => addBlock('raw')} style={{ fontSize: '0.75rem', padding: '0.3rem 0.6rem', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer', background: '#f8fafc' }}>
-                  💡 Custom HTML
+                <button
+                  type="button"
+                  style={{
+                    border: "none", background: editorMode === "code" ? "white" : "none",
+                    padding: "0.25rem 0.5rem", borderRadius: "4px", fontSize: "0.8rem", fontWeight: "bold", cursor: "pointer"
+                  }}
+                  onClick={() => handleModeChange("code")}
+                >
+                  HTML Code
                 </button>
               </div>
+            )}
+          </div>
 
-              {/* Blocks list */}
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {blocks.map((block, idx) => {
-                  const isActive = activeBlockId === block.id;
-                  
-                  return (
+          {activeMainTab === "edit" ? (
+            <div className="editor-section">
+              {/* Common Metadata Fields */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
+                <div className="input-group">
+                  <label>Article Title *</label>
+                  <input 
+                    type="text" 
+                    className="text-input" 
+                    value={title} 
+                    onChange={(e) => setTitle(e.target.value)} 
+                    placeholder="Enter article title..."
+                  />
+                </div>
+                <div className="input-group">
+                  <label>URL Slug *</label>
+                  <input 
+                    type="text" 
+                    className="text-input" 
+                    value={slug} 
+                    onChange={(e) => setSlug(e.target.value)} 
+                    placeholder="article-url-slug"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
+                <div className="input-group">
+                  <label>Brand Selection</label>
+                  <select 
+                    className="text-input" 
+                    value={brandId} 
+                    onChange={(e) => setBrandId(e.target.value)}
+                  >
+                    <option value="">-- Uncategorized Brand --</option>
+                    {brands.map((b) => (
+                      <option key={b.id} value={b.id}>{b.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="input-group">
+                  <label>Category Selection</label>
+                  <select 
+                    className="text-input" 
+                    value={categoryId} 
+                    onChange={(e) => setCategoryId(e.target.value)}
+                  >
+                    <option value="">-- Uncategorized Category --</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="input-group">
+                  <label>Author</label>
+                  <select 
+                    className="text-input" 
+                    value={authorId} 
+                    onChange={(e) => setAuthorId(e.target.value)}
+                  >
+                    <option value="">-- No Author Assigned --</option>
+                    {authors.map((a) => (
+                      <option key={a.id} value={a.id}>{a.name} ({a.role || "Expert"})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Editor Modes */}
+              {editorMode === "visual" ? (
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                    <p style={{ margin: 0, fontSize: "0.85rem", color: "#64748b", fontWeight: "600" }}>
+                      Click on a text field to insert images/links at the caret position.
+                    </p>
+                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                      <button type="button" className="btn btn-outline" style={{ padding: "0.3rem 0.6rem", fontSize: "0.8rem" }} onClick={() => addBlock("paragraph")}>+ Add Text Block</button>
+                      <button type="button" className="btn btn-outline" style={{ padding: "0.3rem 0.6rem", fontSize: "0.8rem" }} onClick={() => addBlock("heading", 2)}>+ Add Heading H2</button>
+                      <button type="button" className="btn btn-outline" style={{ padding: "0.3rem 0.6rem", fontSize: "0.8rem" }} onClick={() => addBlock("image")}>+ Add Image Block</button>
+                    </div>
+                  </div>
+
+                  {blocks.map((block, idx) => (
                     <div key={block.id}>
-                      <div
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, idx)}
-                        onDragOver={(e) => handleDragOver(e, idx)}
-                        onDrop={(e) => handleDrop(e, idx)}
-                        className={`editor-block-container ${isActive ? 'active' : ''}`}
-                        onClick={() => setActiveBlockId(block.id)}
-                      >
-                        {/* Hover controls on left */}
-                        <div className="editor-block-controls">
-                          <div className="drag-handle" title="Drag to reorder block">☰</div>
-                          <button type="button" className="arrow-btn" onClick={() => moveBlock(idx, 'up')} title="Move Up" disabled={idx === 0}>▲</button>
-                          <button type="button" className="arrow-btn" onClick={() => moveBlock(idx, 'down')} title="Move Down" disabled={idx === blocks.length - 1}>▼</button>
-                          <button type="button" className="delete-block-btn" onClick={() => deleteBlock(block.id)} title="Delete Block">✕</button>
-                          <span className="block-type-tag">{block.type}</span>
-                        </div>
-
-                        {/* Rendering blocks by type */}
-                        {block.type === 'paragraph' && (
-                          <textarea
-                            id={`textarea-${block.id}`}
-                            value={block.text}
-                            onChange={(e) => {
-                              const updated = [...blocks];
-                              updated[idx] = { ...block, text: e.target.value };
-                              setBlocks(updated);
-                              adjustTextAreaHeight(e.target);
-                            }}
-                            ref={(el) => adjustTextAreaHeight(el)}
-                            onKeyDown={(e) => handleKeyDown(e, idx)}
-                            onFocus={() => setActiveBlockId(block.id)}
-                            rows={1}
-                            placeholder="Type a paragraph... (Press Enter for a new line, Backspace to merge)"
-                            style={{
-                              width: '100%',
-                              background: 'transparent',
-                              border: 'none',
-                              outline: 'none',
-                              resize: 'none',
-                              fontSize: '1.1rem',
-                              lineHeight: '1.6',
-                              color: '#0f172a',
-                              fontFamily: 'inherit',
-                              overflow: 'hidden',
-                              padding: '4px 0'
-                            }}
-                          />
-                        )}
-
-                        {block.type === 'heading' && (
-                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <select
-                              value={block.headingLevel || 2}
-                              onChange={(e) => {
-                                const updated = [...blocks];
-                                updated[idx] = { ...block, headingLevel: parseInt(e.target.value) };
-                                setBlocks(updated);
-                              }}
-                              style={{ border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.7rem', padding: '0.1rem' }}
-                            >
-                              <option value={1}>H1</option>
-                              <option value={2}>H2</option>
-                              <option value={3}>H3</option>
-                              <option value={4}>H4</option>
-                            </select>
-                            <textarea
-                              id={`textarea-${block.id}`}
-                              value={block.text}
-                              onChange={(e) => {
-                                const updated = [...blocks];
-                                updated[idx] = { ...block, text: e.target.value };
-                                setBlocks(updated);
-                                adjustTextAreaHeight(e.target);
-                              }}
-                              ref={(el) => adjustTextAreaHeight(el)}
-                              onKeyDown={(e) => handleKeyDown(e, idx)}
-                              onFocus={() => setActiveBlockId(block.id)}
-                              rows={1}
-                              placeholder="Heading..."
-                              style={{
-                                width: '100%',
-                                background: 'transparent',
-                                border: 'none',
-                                outline: 'none',
-                                resize: 'none',
-                                fontSize: block.headingLevel === 1 ? '1.8rem' : block.headingLevel === 2 ? '1.4rem' : '1.15rem',
-                                fontWeight: 'bold',
-                                lineHeight: '1.4',
-                                color: '#0f172a',
-                                fontFamily: 'inherit',
-                                overflow: 'hidden',
-                                padding: '4px 0'
-                              }}
-                            />
+                      {/* Inter-block insert divider */}
+                      {idx > 0 && (
+                        <div className="block-insert-divider">
+                          <div className="block-insert-line" />
+                          <div className="block-insert-btn-group">
+                            <button type="button" className="block-insert-mini-btn" onClick={() => addBlock("paragraph", undefined, blocks[idx-1].id)}>+ Paragraph</button>
+                            <button type="button" className="block-insert-mini-btn" onClick={() => addBlock("heading", 2, blocks[idx-1].id)}>+ H2</button>
+                            <button type="button" className="block-insert-mini-btn" onClick={() => addBlock("image", undefined, blocks[idx-1].id)}>+ Image</button>
                           </div>
-                        )}
-
-                        {block.type === 'image' && block.imageAttrs && (
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0.5rem 0' }}>
-                            {/* Visual Image container wrapper with alignment styling */}
-                            <div style={{
-                              display: 'flex',
-                              justifyContent: block.imageAttrs.align === 'left' ? 'flex-start' : block.imageAttrs.align === 'right' ? 'flex-end' : 'center',
-                              width: '100%'
-                            }}>
-                              <div style={{ width: block.imageAttrs.width || '100%', position: 'relative' }}>
-                                <img
-                                  src={block.imageAttrs.src}
-                                  alt={block.imageAttrs.alt || "Article image"}
-                                  style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
-                                />
-                                
-                                {/* Overlay Alignment indicator */}
-                                <span style={{ position: 'absolute', top: '8px', right: '8px', padding: '0.2rem 0.4rem', background: 'rgba(15, 23, 42, 0.75)', color: 'white', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 'bold' }}>
-                                  Scale: {block.imageAttrs.width} | Align: {block.imageAttrs.align}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Caption Input Field */}
-                            <input
-                              type="text"
-                              value={block.imageAttrs.caption || ''}
-                              onChange={(e) => updateImageAttr(block.id, 'caption', e.target.value)}
-                              placeholder="Write a caption under this image..."
-                              style={{ width: '100%', border: 'none', borderBottom: '1px dashed #cbd5e1', outline: 'none', fontSize: '0.85rem', color: '#64748b', textAlign: 'center', marginTop: '0.5rem', background: 'transparent', padding: '4px 0' }}
-                            />
-
-                            {/* Image Controls toolbar panel */}
-                            <div style={{ display: 'flex', gap: '0.4rem', background: '#0f172a', color: 'white', padding: '0.4rem', borderRadius: '6px', marginTop: '0.75rem', width: '100%', flexWrap: 'wrap', alignItems: 'center' }}>
-                              
-                              {/* Width Selector */}
-                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Size:</span>
-                                <select
-                                  value={block.imageAttrs.width}
-                                  onChange={(e) => updateImageAttr(block.id, 'width', e.target.value)}
-                                  style={{ background: '#334155', color: '#fff', border: '1px solid #475569', borderRadius: '4px', fontSize: '0.75rem', padding: '0.15rem 0.3rem', cursor: 'pointer' }}
-                                >
-                                  <option value="25%">25% (Small)</option>
-                                  <option value="50%">50% (Medium)</option>
-                                  <option value="75%">75% (Large)</option>
-                                  <option value="100%">100% (Full)</option>
-                                </select>
-                              </div>
-
-                              {/* Alignment Buttons */}
-                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', borderLeft: '1px solid #475569', paddingLeft: '4px' }}>
-                                <span style={{ fontSize: '0.7rem', color: '#94a3b8', marginRight: '2px' }}>Align:</span>
-                                <button
-                                  type="button"
-                                  onClick={() => updateImageAttr(block.id, 'align', 'left')}
-                                  style={{ padding: '0.15rem 0.35rem', background: block.imageAttrs.align === 'left' ? '#3b82f6' : '#334155', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '0.75rem' }}
-                                >
-                                  L
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => updateImageAttr(block.id, 'align', 'center')}
-                                  style={{ padding: '0.15rem 0.35rem', background: block.imageAttrs.align === 'center' ? '#3b82f6' : '#334155', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '0.75rem' }}
-                                >
-                                  C
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => updateImageAttr(block.id, 'align', 'right')}
-                                  style={{ padding: '0.15rem 0.35rem', background: block.imageAttrs.align === 'right' ? '#3b82f6' : '#334155', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '0.75rem' }}
-                                >
-                                  R
-                                </button>
-                              </div>
-
-                              {/* Alt Text Input */}
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, minWidth: '120px', borderLeft: '1px solid #475569', paddingLeft: '4px' }}>
-                                <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Alt:</span>
-                                <input
-                                  type="text"
-                                  value={block.imageAttrs.alt}
-                                  onChange={(e) => updateImageAttr(block.id, 'alt', e.target.value)}
-                                  placeholder="SEO Description..."
-                                  style={{ background: '#334155', color: '#fff', border: '1px solid #475569', borderRadius: '4px', fontSize: '0.75rem', padding: '0.15rem 0.3rem', flex: 1, minWidth: '80px' }}
-                                />
-                              </div>
-
-                              {/* Replace File Button */}
-                              <label style={{ padding: '0.2rem 0.4rem', background: '#475569', border: '1px solid #64748b', color: 'white', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>
-                                ↻ Replace
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={(e) => handleReplaceImageFile(e, block.id)}
-                                  style={{ display: 'none' }}
-                                />
-                              </label>
-
-                              {/* Block Delete */}
-                              <button
-                                type="button"
-                                onClick={() => deleteBlock(block.id)}
-                                style={{ padding: '0.2rem 0.4rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 'bold' }}
-                              >
-                                Delete
-                              </button>
-
-                            </div>
-                          </div>
-                        )}
-
-                        {block.type === 'raw' && (
-                          <div style={{ border: '1px solid #e2e8f0', borderRadius: '4px', background: '#fff', padding: '0.5rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.25rem' }}>
-                              <span style={{ fontSize: '0.75rem', color: '#0f766e', fontWeight: 'bold' }}>💡 Custom HTML Element Preview:</span>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const updated = [...blocks];
-                                  updated[idx] = { ...block, isEditingCode: !block.isEditingCode };
-                                  setBlocks(updated);
-                                }}
-                                style={{ padding: '0.15rem 0.35rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '3px', fontSize: '0.7rem', cursor: 'pointer' }}
-                              >
-                                {block.isEditingCode ? '✔ View Preview' : '✏ Edit Code'}
-                              </button>
-                            </div>
-                            
-                            {block.isEditingCode ? (
-                              <textarea
-                                id={`textarea-${block.id}`}
-                                value={block.html}
-                                onChange={(e) => {
-                                  const updated = [...blocks];
-                                  updated[idx] = { ...block, html: e.target.value };
-                                  setBlocks(updated);
-                                }}
-                                rows={4}
-                                style={{ width: '100%', fontFamily: 'monospace', fontSize: '0.8rem', padding: '0.25rem', border: '1px solid #cbd5e1', borderRadius: '4px' }}
-                              />
-                            ) : (
-                              <div 
-                                dangerouslySetInnerHTML={{ __html: block.html }} 
-                                style={{ padding: '0.5rem', background: '#fafafa', border: '1px dashed #e2e8f0', overflowX: 'auto' }}
-                              />
-                            )}
-                          </div>
-                        )}
-
-                      </div>
-
-                      {/* Visual caret marker: next inserted image indicator line */}
-                      {isActive && (
-                        <div style={{
-                          margin: '0.5rem 0',
-                          padding: '0.35rem 0',
-                          borderTop: '2px dashed #3b82f6',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.5rem',
-                          color: '#3b82f6',
-                          fontSize: '0.75rem',
-                          fontWeight: 'bold',
-                          background: '#eff6ff',
-                          borderRadius: '4px',
-                          animation: 'pulse 2.5s infinite'
-                        }}>
-                          <span>✔</span> Image will be inserted exactly here (after this block)
+                          <div className="block-insert-line" />
                         </div>
                       )}
-                    </div>
-                  );
-                })}
 
-                {/* If cursor selection is at the end of the document */}
-                {activeBlockId === null && (
-                  <div style={{
-                    margin: '1rem 0',
-                    padding: '0.5rem',
-                    border: '2px dashed #94a3b8',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    color: '#475569',
-                    fontSize: '0.8rem',
-                    fontWeight: 500,
-                    background: '#f1f5f9',
-                    borderRadius: '6px'
-                  }}>
-                    <span>ℹ</span> Cursor is at the end. Next uploaded image will be placed at the bottom.
+                      <div className={`block-card ${activeBlockId === block.id ? "active" : ""}`} onClick={() => setActiveBlockId(block.id)}>
+                        <div className="block-card-header">
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                            <span className="block-type-badge">{block.type}</span>
+                            {block.type === "heading" && (
+                              <select
+                                className="heading-select"
+                                value={block.headingLevel || 2}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value);
+                                  setBlocks(blocks.map(b => b.id === block.id ? { ...b, headingLevel: val } : b));
+                                }}
+                              >
+                                <option value={2}>Heading H2</option>
+                                <option value={3}>Heading H3</option>
+                                <option value={4}>Heading H4</option>
+                              </select>
+                            )}
+                          </div>
+                          
+                          <div className="block-controls">
+                            <button type="button" className="block-btn" disabled={idx === 0} onClick={(e) => { e.stopPropagation(); moveBlock(idx, "up"); }}>▲</button>
+                            <button type="button" className="block-btn" disabled={idx === blocks.length - 1} onClick={(e) => { e.stopPropagation(); moveBlock(idx, "down"); }}>▼</button>
+                            <button type="button" className="block-btn block-btn-danger" onClick={(e) => { e.stopPropagation(); deleteBlock(block.id); }}>Delete</button>
+                          </div>
+                        </div>
+
+                        <div className="block-content">
+                          {block.type === "paragraph" || block.type === "heading" ? (
+                            <textarea
+                              ref={(el) => { textareaRefs.current[block.id] = el; }}
+                              className="block-textarea"
+                              value={block.text}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setBlocks(blocks.map(b => b.id === block.id ? { ...b, text: val } : b));
+                              }}
+                              onBlur={(e) => handleTextareaBlur(block.id, e)}
+                              placeholder={block.type === "heading" ? "Heading text..." : "Start writing content here..."}
+                              onInput={(e) => {
+                                const target = e.target as HTMLTextAreaElement;
+                                target.style.height = "auto";
+                                target.style.height = target.scrollHeight + "px";
+                              }}
+                              style={{ height: "auto" }}
+                            />
+                          ) : block.type === "image" && block.imageAttrs ? (
+                            <div className="image-block-preview-card">
+                              {block.imageAttrs.src ? (
+                                <div style={{ display: "flex", gap: "1rem" }}>
+                                  <img 
+                                    src={block.imageAttrs.src} 
+                                    alt={block.imageAttrs.alt || "Block Preview"} 
+                                    className="image-block-preview-img"
+                                  />
+                                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                                    <div className="input-group" style={{ marginBottom: "0.4rem" }}>
+                                      <label style={{ fontSize: "0.75rem" }}>Alt Text (required for SEO)</label>
+                                      <input 
+                                        type="text" 
+                                        className="text-input" 
+                                        style={{ padding: "0.3rem", fontSize: "0.85rem" }}
+                                        value={block.imageAttrs.alt}
+                                        onChange={(e) => {
+                                          const val = e.target.value;
+                                          setBlocks(blocks.map(b => b.id === block.id ? {
+                                            ...b,
+                                            imageAttrs: { ...(b.imageAttrs || { src: "", alt: "", caption: "", align: "center", width: "100%" }), alt: val }
+                                          } : b));
+                                        }}
+                                        placeholder="SEO description..."
+                                      />
+                                    </div>
+                                    <div className="input-group" style={{ marginBottom: "0.4rem" }}>
+                                      <label style={{ fontSize: "0.75rem" }}>Caption Text</label>
+                                      <input 
+                                        type="text" 
+                                        className="text-input" 
+                                        style={{ padding: "0.3rem", fontSize: "0.85rem" }}
+                                        value={block.imageAttrs.caption}
+                                        onChange={(e) => {
+                                          const val = e.target.value;
+                                          setBlocks(blocks.map(b => b.id === block.id ? {
+                                            ...b,
+                                            imageAttrs: { ...(b.imageAttrs || { src: "", alt: "", caption: "", align: "center", width: "100%" }), caption: val }
+                                          } : b));
+                                        }}
+                                        placeholder="Caption displayed below image..."
+                                      />
+                                    </div>
+                                    
+                                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                                      <div style={{ flex: 1 }}>
+                                        <label style={{ fontSize: "0.7rem", fontWeight: "bold", color: "#64748b" }}>Align</label>
+                                        <select
+                                          className="text-input"
+                                          style={{ padding: "0.2rem", fontSize: "0.8rem", height: "auto" }}
+                                          value={block.imageAttrs.align}
+                                          onChange={(e) => {
+                                            const val = e.target.value as any;
+                                            setBlocks(blocks.map(b => b.id === block.id ? {
+                                              ...b,
+                                              imageAttrs: { ...(b.imageAttrs || { src: "", alt: "", caption: "", align: "center", width: "100%" }), align: val }
+                                            } : b));
+                                          }}
+                                        >
+                                          <option value="left">Left</option>
+                                          <option value="center">Center</option>
+                                          <option value="right">Right</option>
+                                        </select>
+                                      </div>
+                                      
+                                      <div style={{ flex: 1 }}>
+                                        <label style={{ fontSize: "0.7rem", fontWeight: "bold", color: "#64748b" }}>Width</label>
+                                        <select
+                                          className="text-input"
+                                          style={{ padding: "0.2rem", fontSize: "0.8rem", height: "auto" }}
+                                          value={block.imageAttrs.width}
+                                          onChange={(e) => {
+                                            const val = e.target.value;
+                                            setBlocks(blocks.map(b => b.id === block.id ? {
+                                              ...b,
+                                              imageAttrs: { ...(b.imageAttrs || { src: "", alt: "", caption: "", align: "center", width: "100%" }), width: val }
+                                            } : b));
+                                          }}
+                                        >
+                                          <option value="50%">50%</option>
+                                          <option value="75%">75%</option>
+                                          <option value="100%">100%</option>
+                                        </select>
+                                      </div>
+                                    </div>
+
+                                    <button
+                                      type="button"
+                                      className="btn btn-outline"
+                                      style={{ padding: "0.25rem 0.5rem", fontSize: "0.75rem", alignSelf: "flex-start", marginTop: "0.5rem" }}
+                                      onClick={() => {
+                                        setBlocks(blocks.map(b => b.id === block.id ? {
+                                          ...b,
+                                          imageAttrs: { src: "", alt: "", caption: "", align: "center", width: "100%" }
+                                        } : b));
+                                      }}
+                                    >
+                                      Remove Photo
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="image-block-uploader">
+                                  <p style={{ margin: "0 0 0.5rem", fontSize: "0.85rem", color: "#64748b" }}>Upload image block content:</p>
+                                  <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", alignItems: "center" }}>
+                                    <input 
+                                      type="file" 
+                                      accept="image/*" 
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) handleBlockImageUpload(block.id, file);
+                                      }}
+                                    />
+                                    <span style={{ fontSize: "0.8rem", color: "#64748b" }}>or URL:</span>
+                                    <input 
+                                      type="text" 
+                                      placeholder="https://image-url..." 
+                                      className="text-input" 
+                                      style={{ width: "200px", padding: "0.25rem" }}
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                          const val = (e.target as HTMLInputElement).value;
+                                          setBlocks(blocks.map(b => b.id === block.id ? {
+                                            ...b,
+                                            imageAttrs: { src: val, alt: "", caption: "", align: "center", width: "100%" }
+                                          } : b));
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div>
+                              <label style={{ fontSize: "0.75rem", fontWeight: "bold" }}>Raw HTML Code</label>
+                              <textarea
+                                className="block-textarea"
+                                style={{ fontFamily: "monospace", fontSize: "0.85rem" }}
+                                value={block.html}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setBlocks(blocks.map(b => b.id === block.id ? { ...b, html: val } : b));
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <button 
+                    type="button" 
+                    className="btn btn-outline" 
+                    style={{ width: "100%", borderStyle: "dashed", marginTop: "1rem" }}
+                    onClick={() => addBlock("paragraph")}
+                  >
+                    + Add New Block
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <div className="input-group">
+                    <label>Article Content HTML Body</label>
+                    <textarea
+                      ref={mainTextareaRef}
+                      className="text-input"
+                      style={{ fontFamily: "monospace", fontSize: "0.9rem", minHeight: "500px" }}
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                      onBlur={handleMainTextareaBlur}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Live Preview Layout Rendering Pane */
+            <div className="preview-pane">
+              <div className="preview-breadcrumbs">
+                Home &gt; {brands.find(b => b.id === brandId)?.name || "Uncategorized"} &gt; {categories.find(c => c.id === categoryId)?.name || "Uncategorized"}
+              </div>
+              
+              <h1 className="preview-title">{title || "Untitled Article"}</h1>
+              
+              <div className="preview-meta-row">
+                <span>By <strong>{authors.find(a => a.id === authorId)?.name || "Technical Expert"}</strong></span>
+                <span>Published: {new Date().toLocaleDateString()}</span>
+                <span>Reading Time: <strong>{Math.ceil(wordCount / 200)} min read</strong> ({wordCount} words)</span>
+              </div>
+
+              {featuredImage && (
+                <div style={{ margin: "0 0 2rem", textAlign: "center" }}>
+                  <img 
+                    src={featuredImage} 
+                    alt={featuredImageAlt || "Featured banner"} 
+                    title={featuredImageTitle}
+                    style={{ maxWidth: "100%", maxHeight: "400px", objectFit: "contain", borderRadius: "8px" }}
+                  />
+                  {featuredImageCaption && (
+                    <figcaption style={{ fontSize: "0.85rem", color: "#64748b", marginTop: "0.5rem" }}>
+                      {featuredImageCaption}
+                    </figcaption>
+                  )}
+                </div>
+              )}
+
+              {tocHeadings.length > 0 && (
+                <div className="preview-toc">
+                  <div className="preview-toc-title">Table of Contents</div>
+                  <ol className="preview-toc-list">
+                    {tocHeadings.map((h, i) => (
+                      <li key={i}>{h}</li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {featuredSnippet && (
+                <div className="preview-snippet">
+                  <div className="preview-snippet-title">Featured Snippet Summary</div>
+                  <p style={{ margin: 0, fontSize: "0.95rem", color: "#1e3a8a", fontStyle: "italic" }}>
+                    {featuredSnippet}
+                  </p>
+                </div>
+              )}
+
+              <div 
+                className="preview-body"
+                dangerouslySetInnerHTML={{ 
+                  __html: editorMode === "visual" ? serializeBlocksToHtml(blocks) : content 
+                }} 
+              />
+
+              {faqsList.length > 0 && (
+                <div className="preview-faqs">
+                  <h3 className="preview-faqs-title">Frequently Asked Questions</h3>
+                  {faqsList.map((faq) => (
+                    <div className="preview-faq-item" key={faq.id}>
+                      <div className="preview-faq-q">
+                        <span>{faq.question}</span>
+                        <span>▼</span>
+                      </div>
+                      <div className="preview-faq-a">{faq.answer}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Right Side: Tabbed panel (SEO checklist, Revisions, FAQs, Link Assistant) */}
+        <div className="sidebar-section">
+          
+          <div className="sidebar-tabs">
+            <button 
+              type="button" 
+              className={`sidebar-tab-btn ${activeSidebarTab === "seo" ? "active" : ""}`}
+              onClick={() => setActiveSidebarTab("seo")}
+            >
+              SEO Checker
+            </button>
+            <button 
+              type="button" 
+              className={`sidebar-tab-btn ${activeSidebarTab === "faqs" ? "active" : ""}`}
+              onClick={() => setActiveSidebarTab("faqs")}
+            >
+              FAQs
+            </button>
+            <button 
+              type="button" 
+              className={`sidebar-tab-btn ${activeSidebarTab === "links" ? "active" : ""}`}
+              onClick={() => setActiveSidebarTab("links")}
+            >
+              Links
+            </button>
+            <button 
+              type="button" 
+              className={`sidebar-tab-btn ${activeSidebarTab === "history" ? "active" : ""}`}
+              onClick={() => setActiveSidebarTab("history")}
+            >
+              Revisions
+            </button>
+          </div>
+
+          <div className="sidebar-panel">
+            
+            {/* SEO Health Checker tab */}
+            {activeSidebarTab === "seo" && (
+              <div>
+                <h3 style={{ margin: "0 0 1rem", fontSize: "1rem" }}>SEO Health Checker</h3>
+                
+                <div className="seo-score-widget">
+                  <div className={`seo-score-circle ${
+                    seoHealth.score >= 80 ? "score-good" :
+                    seoHealth.score >= 50 ? "score-warn" : "score-poor"
+                  }`}>
+                    {seoHealth.score}%
+                  </div>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: "0.9rem" }}>SEO Score</h4>
+                    <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b" }}>
+                      Target at least 80% before publishing
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem", marginBottom: "1.5rem" }}>
+                  {seoHealth.checks.map((check) => (
+                    <div className="checklist-item" key={check.id}>
+                      <span className={`checklist-status ${check.passed ? "passed" : "failed"}`}>
+                        {check.passed ? "✓" : "○"}
+                      </span>
+                      <div>
+                        <div style={{ fontWeight: check.passed ? "500" : "normal" }}>{check.label}</div>
+                        <span style={{ fontSize: "0.75rem", color: check.passed ? "#10b981" : "#94a3b8" }}>
+                          Current: {check.current}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Additional SEO Fields */}
+                <h4 style={{ fontSize: "0.85rem", borderTop: "1px solid #e2e8f0", paddingTop: "1rem", margin: "1rem 0 0.5rem" }}>
+                  SEO Metadata Overrides
+                </h4>
+
+                <div className="input-group">
+                  <label>SEO Meta Title (Title Tag)</label>
+                  <input 
+                    type="text" 
+                    className="text-input" 
+                    value={seoTitle} 
+                    onChange={(e) => setSeoTitle(e.target.value)} 
+                    placeholder="Custom SEO Title..."
+                  />
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.7rem", color: "#64748b", marginTop: "0.2rem" }}>
+                    <span>Ideal: 40-60 chars</span>
+                    <span style={{ color: seoTitle.length >= 40 && seoTitle.length <= 60 ? "#10b981" : "#64748b" }}>
+                      {seoTitle.length} chars
+                    </span>
+                  </div>
+                </div>
+
+                <div className="input-group">
+                  <label>Meta Description</label>
+                  <textarea 
+                    className="text-input" 
+                    style={{ fontSize: "0.85rem", minHeight: "60px" }}
+                    value={metaDescription} 
+                    onChange={(e) => setMetaDescription(e.target.value)} 
+                    placeholder="Search results description snippet..."
+                  />
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.7rem", color: "#64748b", marginTop: "0.2rem" }}>
+                    <span>Ideal: 120-160 chars</span>
+                    <span style={{ color: metaDescription.length >= 120 && metaDescription.length <= 160 ? "#10b981" : "#64748b" }}>
+                      {metaDescription.length} chars
+                    </span>
+                  </div>
+                </div>
+
+                <div className="input-group">
+                  <label>Canonical URL</label>
+                  <input 
+                    type="text" 
+                    className="text-input" 
+                    value={canonicalUrl} 
+                    onChange={(e) => setCanonicalUrl(e.target.value)} 
+                    placeholder="https://example.com/canonical-source"
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label>Featured Snippet Box Content</label>
+                  <textarea 
+                    className="text-input" 
+                    style={{ fontSize: "0.85rem", minHeight: "60px" }}
+                    value={featuredSnippet} 
+                    onChange={(e) => setFeaturedSnippet(e.target.value)} 
+                    placeholder="Summary sentence answering query immediately..."
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label>Snippet Excerpt</label>
+                  <textarea 
+                    className="text-input" 
+                    style={{ fontSize: "0.85rem", minHeight: "60px" }}
+                    value={excerpt} 
+                    onChange={(e) => setExcerpt(e.target.value)} 
+                    placeholder="Short description for archive lists..."
+                  />
+                </div>
+
+                {/* Featured Image details */}
+                <h4 style={{ fontSize: "0.85rem", borderTop: "1px solid #e2e8f0", paddingTop: "1rem", margin: "1.5rem 0 0.5rem" }}>
+                  Featured Thumbnail Image
+                </h4>
+                <ImageUploadSection initialValue={featuredImage} />
+                {/* Alt details for featured image */}
+                {featuredImage && (
+                  <div>
+                    <div className="input-group">
+                      <label style={{ fontSize: "0.75rem" }}>Alt Text</label>
+                      <input 
+                        type="text" 
+                        className="text-input" 
+                        value={featuredImageAlt} 
+                        onChange={(e) => setFeaturedImageAlt(e.target.value)}
+                        placeholder="Image description..."
+                      />
+                    </div>
+                    <div className="input-group">
+                      <label style={{ fontSize: "0.75rem" }}>Title Tag</label>
+                      <input 
+                        type="text" 
+                        className="text-input" 
+                        value={featuredImageTitle} 
+                        onChange={(e) => setFeaturedImageTitle(e.target.value)}
+                        placeholder="Mouseover text..."
+                      />
+                    </div>
+                    <div className="input-group">
+                      <label style={{ fontSize: "0.75rem" }}>Caption</label>
+                      <input 
+                        type="text" 
+                        className="text-input" 
+                        value={featuredImageCaption} 
+                        onChange={(e) => setFeaturedImageCaption(e.target.value)}
+                        placeholder="Caption text displayed below..."
+                      />
+                    </div>
                   </div>
                 )}
               </div>
-
-            </div>
-          )}
-
-          {/* Mode 2: Code Editor */}
-          {editorMode === 'code' && (
-            <textarea 
-              name="content" 
-              value={content} 
-              onChange={(e) => setContent(e.target.value)}
-              rows={22} 
-              required 
-              style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.9rem', lineHeight: '1.5' }} 
-            />
-          )}
-        </div>
-
-        <button type="submit" style={{ padding: '0.8rem 2.5rem', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '1rem', fontWeight: 600 }}>
-          Save Article Changes
-        </button>
-      </form>
-
-      {/* Right Column: Inline Images Uploader and Library sidebar */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        
-        {/* Upload Inline Image Card */}
-        <div style={{ background: '#fff', padding: '1.25rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>Insert Body Image</h3>
-          
-          <p style={{ fontSize: '0.8rem', color: '#666', lineHeight: '1.4', margin: '0 0 1rem 0' }}>
-            Choose one or more images to compress and insert directly into the text editor at your active marker position.
-          </p>
-
-          {selectedFilePreview && (
-            <div style={{ marginBottom: '0.75rem', padding: '0.25rem', border: '1px dashed #cbd5e1', borderRadius: '4px', background: '#f8fafc' }}>
-              <p style={{ fontSize: '0.7rem', color: '#666', margin: '0 0 0.25rem 0', fontWeight: 'bold' }}>Selected File Preview:</p>
-              <img src={selectedFilePreview} alt="Selected Preview" style={{ width: '100%', maxHeight: '120px', objectFit: 'contain' }} />
-            </div>
-          )}
-
-          <input 
-            type="file" 
-            ref={bodyFileInputRef}
-            onChange={handleFileChange}
-            accept="image/*" 
-            multiple
-            style={{ width: '100%', padding: '0.25rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.8rem', marginBottom: '0.75rem', background: '#fff' }} 
-          />
-
-          <button 
-            onClick={handleInsertImage}
-            disabled={isInserting}
-            style={{ width: '100%', padding: '0.5rem', background: '#0f172a', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
-          >
-            {isInserting ? 'Compressing & Inserting...' : 'Upload & Insert Image(s)'}
-          </button>
-
-          {uploadError && (
-            <p style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.5rem', marginBottom: 0 }}>
-              {uploadError}
-            </p>
-          )}
-
-          {successMessage && (
-            <p style={{ color: '#10b981', fontSize: '0.75rem', marginTop: '0.5rem', marginBottom: 0, fontWeight: 'bold' }}>
-              {successMessage}
-            </p>
-          )}
-        </div>
-
-        {/* Embedded Images list */}
-        <div style={{ background: '#fff', padding: '1.25rem', borderRadius: '8px', border: '1px solid var(--border-color)', maxHeight: '500px', overflowY: 'auto' }}>
-          <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>
-            Embedded Images ({embeddedImages.length})
-          </h3>
-          <p style={{ fontSize: '0.75rem', color: '#666', margin: '0 0 1rem 0', lineHeight: '1.3' }}>
-            These are the images currently embedded inside the HTML content editor.
-          </p>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {embeddedImages.map((imgSrc, idx) => {
-              const isBase64 = imgSrc.startsWith('data:');
-              return (
-                <div key={idx} style={{ padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '6px', background: '#f8fafc' }}>
-                  <img 
-                    src={imgSrc} 
-                    alt={`Embedded ${idx}`} 
-                    style={{ width: '100%', height: '100px', objectFit: 'contain', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '4px', marginBottom: '0.5rem' }} 
-                  />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.7rem', color: '#475569', fontWeight: 500 }}>
-                      {isBase64 ? 'Base64 Data' : 'URL Link'}
-                    </span>
-                    <div style={{ display: 'flex', gap: '0.35rem' }}>
-                      <button
-                        onClick={(e) => handleCopyTag(e, imgSrc)}
-                        style={{ padding: '0.25rem 0.5rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 600 }}
-                      >
-                        Copy
-                      </button>
-                      <button
-                        onClick={(e) => handleDeleteEmbeddedImage(e, imgSrc)}
-                        style={{ padding: '0.25rem 0.5rem', background: '#fee2e2', color: '#ef4444', border: '1px solid #fca5a5', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 600 }}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
-            {embeddedImages.length === 0 && (
-              <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem', padding: '1rem 0' }}>
-                No embedded images found in the editor text.
-              </p>
             )}
+
+            {/* FAQs Accordion Manager tab */}
+            {activeSidebarTab === "faqs" && (
+              <div>
+                <h3 style={{ margin: "0 0 1rem", fontSize: "1rem" }}>FAQ Accordion Schema Manager</h3>
+                
+                {/* List FAQs */}
+                <div style={{ marginBottom: "1.5rem" }}>
+                  {faqsList.length === 0 ? (
+                    <p style={{ fontStyle: "italic", fontSize: "0.8rem", color: "#64748b" }}>
+                      No FAQs added to this article yet.
+                    </p>
+                  ) : (
+                    faqsList.map((faq, idx) => (
+                      <div className="faq-item-card" key={faq.id}>
+                        {editingFaqId === faq.id ? (
+                          <div>
+                            <input 
+                              type="text" 
+                              className="text-input" 
+                              style={{ marginBottom: "0.5rem", fontSize: "0.85rem", padding: "0.3rem" }} 
+                              value={editingFaqQuestion}
+                              onChange={(e) => setEditingFaqQuestion(e.target.value)}
+                            />
+                            <textarea 
+                              className="text-input" 
+                              style={{ marginBottom: "0.5rem", fontSize: "0.8rem", padding: "0.3rem", minHeight: "50px" }}
+                              value={editingFaqAnswer}
+                              onChange={(e) => setEditingFaqAnswer(e.target.value)}
+                            />
+                            <div style={{ display: "flex", gap: "0.25rem" }}>
+                              <button type="button" className="btn btn-primary" style={{ padding: "0.2rem 0.5rem", fontSize: "0.75rem" }} onClick={handleSaveEditFaq}>Save</button>
+                              <button type="button" className="btn btn-outline" style={{ padding: "0.2rem 0.5rem", fontSize: "0.75rem" }} onClick={() => setEditingFaqId(null)}>Cancel</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <div className="faq-item-header">
+                              <span className="faq-item-title">Q: {faq.question}</span>
+                              <div style={{ display: "flex", gap: "0.2rem" }}>
+                                <button type="button" style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }} disabled={idx === 0} onClick={() => moveFaq(idx, "up")}>▲</button>
+                                <button type="button" style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }} disabled={idx === faqsList.length - 1} onClick={() => moveFaq(idx, "down")}>▼</button>
+                                <button type="button" style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem", color: "#3b82f6" }} onClick={() => startEditFaq(faq)}>Edit</button>
+                                <button type="button" style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem", color: "#ef4444" }} onClick={() => handleDeleteFaq(faq.id)}>✕</button>
+                              </div>
+                            </div>
+                            <div className="faq-item-ans">A: {faq.answer}</div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {/* Add FAQ form */}
+                <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "1rem" }}>
+                  <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.85rem" }}>Add New FAQ Question</h4>
+                  <div className="input-group">
+                    <input 
+                      type="text" 
+                      className="text-input" 
+                      placeholder="e.g. How do I clear red light error?" 
+                      value={newFaqQuestion}
+                      onChange={(e) => setNewFaqQuestion(e.target.value)}
+                    />
+                  </div>
+                  <div className="input-group">
+                    <textarea 
+                      className="text-input" 
+                      placeholder="e.g. Open the cover, remove jammed paper..." 
+                      style={{ minHeight: "60px", fontSize: "0.85rem" }}
+                      value={newFaqAnswer}
+                      onChange={(e) => setNewFaqAnswer(e.target.value)}
+                    />
+                  </div>
+                  <button type="button" className="btn btn-primary" style={{ width: "100%" }} onClick={handleAddFaq}>
+                    + Insert FAQ Section
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Link Assistant tab */}
+            {activeSidebarTab === "links" && (
+              <div>
+                <h3 style={{ margin: "0 0 0.5rem", fontSize: "1rem" }}>Internal Link Assistant</h3>
+                <p style={{ margin: "0 0 1rem", fontSize: "0.75rem", color: "#64748b" }}>
+                  Click an article to insert a hyperlink at your cursor caret position in the block editor.
+                </p>
+
+                <div className="input-group">
+                  <input 
+                    type="text" 
+                    className="text-input" 
+                    placeholder="Search articles title or slug..." 
+                    value={linkSearch}
+                    onChange={(e) => setLinkSearch(e.target.value)}
+                  />
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", maxHeight: "400px", overflowY: "auto" }}>
+                  {filteredArticles.length === 0 ? (
+                    <p style={{ fontStyle: "italic", fontSize: "0.8rem", color: "#64748b" }}>
+                      No matching articles found.
+                    </p>
+                  ) : (
+                    filteredArticles.map((art) => (
+                      <div 
+                        className="link-list-item" 
+                        key={art.id}
+                        onClick={() => handleInsertLink(art)}
+                      >
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.15rem", width: "85%" }}>
+                          <span style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{art.title}</span>
+                          <span style={{ fontSize: "0.7rem", color: "#64748b" }}>/{art.brand?.slug || "uncategorized"}/{art.category?.slug || "uncategorized"}/{art.slug}</span>
+                        </div>
+                        <span style={{ color: "#3b82f6", fontWeight: "bold" }}>+</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Revision History panel tab */}
+            {activeSidebarTab === "history" && (
+              <div>
+                <h3 style={{ margin: "0 0 1rem", fontSize: "1rem" }}>Revision History Rollback</h3>
+                
+                {revisions.length === 0 ? (
+                  <p style={{ fontStyle: "italic", fontSize: "0.8rem", color: "#64748b" }}>
+                    No prior saved revisions found for this article.
+                  </p>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    {revisions.map((rev) => (
+                      <div className="revision-row" key={rev.id}>
+                        <div className="revision-meta">
+                          <span style={{ fontWeight: "bold" }}>Revision #{rev.version}</span>
+                          <span style={{ color: "#64748b", fontSize: "0.7rem" }}>
+                            {new Date(rev.createdAt).toLocaleString()}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          className="btn btn-outline"
+                          style={{ padding: "0.25rem 0.5rem", fontSize: "0.75rem" }}
+                          onClick={() => handleRollback(rev)}
+                        >
+                          Rollback
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
         </div>
 
       </div>
-
     </div>
   );
 }
+
