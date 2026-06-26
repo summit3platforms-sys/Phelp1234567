@@ -236,53 +236,6 @@ export async function updateArticle(id: string, formData: FormData) {
   revalidatePath(`/${newBrandSlug}/${newCategorySlug}/${slug}`);
 }
 
-export async function importBulkArticles(articles: Array<{
-  title: string;
-  content: string;
-  excerpt?: string;
-  wordCount?: number;
-  featuredSnippet?: string;
-  faqs?: string;
-  seoTitle?: string;
-  metaDescription?: string;
-}>) {
-  const created = [];
-  for (const art of articles) {
-    const slugBase = formatSlug(art.title) || `draft-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-    
-    // Ensure uniqueness
-    let slug = slugBase;
-    let counter = 1;
-    while (true) {
-      const existing = await prisma.article.findFirst({ where: { slug } });
-      if (!existing) break;
-      slug = `${slugBase}-${counter++}`;
-    }
-
-    const wordCount = art.wordCount || calculateWordCount(art.content);
-
-    const doc = await prisma.article.create({
-      data: {
-        title: art.title,
-        slug,
-        content: art.content,
-        excerpt: art.excerpt || null,
-        wordCount,
-        featuredSnippet: art.featuredSnippet || null,
-        faqs: art.faqs || null,
-        seoTitle: art.seoTitle || null,
-        metaDescription: art.metaDescription || null,
-        status: "needs_review", // Bulk drafts status is needs_review
-        brandId: null, // Uncategorized
-        categoryId: null,
-      }
-    });
-    created.push(doc);
-  }
-  revalidatePath("/admin/articles");
-  return created;
-}
-
 export async function rollbackRevision(articleId: string, revisionId: string) {
   const revision = await prisma.revision.findUnique({
     where: { id: revisionId }

@@ -50,24 +50,8 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
   });
 
   return (
-    <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
-        <h1 style={{ fontSize: "2rem", margin: 0 }}>Manage Articles</h1>
-        <div style={{ display: "flex", gap: "1rem" }}>
-          <Link href="/admin/articles/import" style={{
-            display: "inline-block",
-            padding: "0.6rem 1.2rem",
-            background: "#0070f3",
-            color: "#fff",
-            borderRadius: "6px",
-            fontSize: "0.95rem",
-            fontWeight: "500",
-            textDecoration: "none"
-          }}>
-            + Import From File
-          </Link>
-        </div>
-      </div>
+    <div>
+      <h1 style={{ fontSize: '2rem', marginBottom: '2rem' }}>Manage Articles</h1>
 
       {/* Search and Filter Form */}
       <form action="/admin/articles" method="GET" style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -86,7 +70,6 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
           <option value="all">All Statuses</option>
           <option value="published">Published</option>
           <option value="draft">Drafts</option>
-          <option value="needs_review">Needs Review</option>
         </select>
         <button type="submit" className="nav-btn" style={{ margin: 0, padding: '0.6rem 1.5rem' }}>
           Search
@@ -122,8 +105,8 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
                 <td style={{ padding: '1rem' }}>{article.category?.name || <span style={{ color: "#aaa", fontStyle: "italic" }}>Uncategorized</span>}</td>
                 <td style={{ padding: '1rem' }}>
                   <span style={{ 
-                    background: article.status === 'published' ? '#e8f5e9' : article.status === 'needs_review' ? '#eef2f6' : '#fff3e0',
-                    color: article.status === 'published' ? '#2e7d32' : article.status === 'needs_review' ? '#475569' : '#e65100',
+                    background: article.status === 'published' ? '#e8f5e9' : '#fff3e0',
+                    color: article.status === 'published' ? '#2e7d32' : '#e65100',
                     padding: '0.2rem 0.5rem',
                     borderRadius: '4px',
                     fontSize: '0.85rem'

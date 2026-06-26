@@ -20,7 +20,6 @@ export default function AdminLayout({
         <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <li><Link href="/admin" style={{ display: 'block', padding: '0.5rem', background: '#fff', borderRadius: '4px', border: '1px solid var(--border-color)' }}>Dashboard</Link></li>
            <li><Link href="/admin/articles" style={{ display: 'block', padding: '0.5rem', background: '#fff', borderRadius: '4px', border: '1px solid var(--border-color)' }}>Articles</Link></li>
-          <li><Link href="/admin/articles/import" style={{ display: 'block', padding: '0.5rem', background: '#fff', borderRadius: '4px', border: '1px solid var(--border-color)', fontWeight: 'bold', color: '#0070f3' }}>Import Articles</Link></li>
           <li><Link href="/admin/brands" style={{ display: 'block', padding: '0.5rem', background: '#fff', borderRadius: '4px', border: '1px solid var(--border-color)' }}>Brands</Link></li>
           <li><Link href="/admin/categories" style={{ display: 'block', padding: '0.5rem', background: '#fff', borderRadius: '4px', border: '1px solid var(--border-color)' }}>Categories</Link></li>
           <li><Link href="/admin/leads" style={{ display: 'block', padding: '0.5rem', background: '#fff', borderRadius: '4px', border: '1px solid var(--border-color)', fontWeight: 'bold' }}>Leads</Link></li>
