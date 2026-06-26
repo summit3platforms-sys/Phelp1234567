@@ -4,9 +4,10 @@ import React, { useState, useRef } from 'react';
 
 type ImageUploadSectionProps = {
   initialValue: string | null;
+  onChange?: (value: string) => void;
 };
 
-export default function ImageUploadSection({ initialValue }: ImageUploadSectionProps) {
+export default function ImageUploadSection({ initialValue, onChange }: ImageUploadSectionProps) {
   const [value, setValue] = useState<string>(initialValue || '');
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +59,7 @@ export default function ImageUploadSection({ initialValue }: ImageUploadSectionP
           // Compress to JPEG with 70% quality
           const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
           setValue(compressedDataUrl);
+          onChange?.(compressedDataUrl);
           setIsUploading(false);
           if (fileInputRef.current) {
             fileInputRef.current.value = ''; // Reset file input
@@ -83,6 +85,7 @@ export default function ImageUploadSection({ initialValue }: ImageUploadSectionP
   const handleRemoveClick = (e: React.MouseEvent) => {
     e.preventDefault();
     setValue('');
+    onChange?.('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -90,6 +93,7 @@ export default function ImageUploadSection({ initialValue }: ImageUploadSectionP
 
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
+    onChange?.(e.target.value);
   };
 
   // Helper to determine if the value is a base64 string

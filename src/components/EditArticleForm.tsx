@@ -100,11 +100,12 @@ export default function EditArticleForm({
   updateAction,
 }: EditArticleFormProps) {
   const [activeMainTab, setActiveMainTab] = useState<"edit" | "preview">("edit");
-  const [activeSidebarTab, setActiveSidebarTab] = useState<"seo" | "faqs" | "links" | "history">("seo");
+  const [activeSidebarTab, setActiveSidebarTab] = useState<"seo" | "faqs" | "links" | "history" | "images">("seo");
   
   const [editorMode, setEditorMode] = useState<"visual" | "code">("visual");
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
+  const [copiedBlockId, setCopiedBlockId] = useState<string | null>(null);
   
   // Form fields
   const [title, setTitle] = useState(article.title);
@@ -650,6 +651,108 @@ export default function EditArticleForm({
       img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleSidebarImageUpload = (files: FileList | null) => {
+    if (!files) return;
+    
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+          const MAX_WIDTH = 1000;
+          const MAX_HEIGHT = 750;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
+            
+            const newBlock: Block = {
+              id: "b_" + Date.now() + Math.random().toString(36).substring(2, 5),
+              type: "image",
+              text: "",
+              html: "",
+              imageAttrs: {
+                src: compressedDataUrl,
+                alt: file.name.split('.')[0] || "Uploaded image",
+                caption: "",
+                align: "center",
+                width: "100%"
+              }
+            };
+
+            setBlocks((currentBlocks) => {
+              if (activeBlockId) {
+                const idx = currentBlocks.findIndex((b) => b.id === activeBlockId);
+                if (idx !== -1) {
+                  const updated = [...currentBlocks];
+                  updated.splice(idx + 1, 0, newBlock);
+                  return updated;
+                }
+              }
+              return [...currentBlocks, newBlock];
+            });
+            setActiveBlockId(newBlock.id);
+          }
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleCopyImgTag = (blockId: string, src: string, alt: string) => {
+    const tag = `<img src="${src}" alt="${alt || ''}" />`;
+    navigator.clipboard.writeText(tag).then(() => {
+      setCopiedBlockId(blockId);
+      setTimeout(() => {
+        setCopiedBlockId(null);
+      }, 2000);
+    });
+  };
+
+  const handleReinsertImageBlock = (originalBlock: Block) => {
+    if (!originalBlock.imageAttrs) return;
+    const newBlock: Block = {
+      id: "b_" + Date.now() + Math.random().toString(36).substring(2, 5),
+      type: "image",
+      text: "",
+      html: "",
+      imageAttrs: { ...originalBlock.imageAttrs }
+    };
+    
+    setBlocks((currentBlocks) => {
+      if (activeBlockId) {
+        const idx = currentBlocks.findIndex((b) => b.id === activeBlockId);
+        if (idx !== -1) {
+          const updated = [...currentBlocks];
+          updated.splice(idx + 1, 0, newBlock);
+          return updated;
+        }
+      }
+      return [...currentBlocks, newBlock];
+    });
+    setActiveBlockId(newBlock.id);
   };
 
   // SEO Health calculation logic
@@ -1328,6 +1431,85 @@ export default function EditArticleForm({
           font-size: 0.9rem;
           color: #475569;
         }
+
+        .image-library-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 0.75rem;
+          margin-top: 1rem;
+        }
+        .image-library-card {
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          padding: 0.5rem;
+          background: #f8fafc;
+          display: flex;
+          gap: 0.75rem;
+          align-items: center;
+          cursor: pointer;
+          transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .image-library-card:hover {
+          border-color: #cbd5e1;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .image-library-card.active {
+          border-color: #3b82f6;
+          background: #f0f7ff;
+        }
+        .image-library-thumb {
+          width: 50px;
+          height: 50px;
+          object-fit: cover;
+          border-radius: 4px;
+          border: 1px solid #cbd5e1;
+          background: #f1f5f9;
+        }
+        .image-library-info {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 0.2rem;
+        }
+        .image-library-name {
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: #0f172a;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .image-library-actions {
+          display: flex;
+          gap: 0.35rem;
+          margin-top: 0.15rem;
+        }
+        .image-library-btn {
+          background: white;
+          border: 1px solid #cbd5e1;
+          padding: 0.15rem 0.35rem;
+          font-size: 0.7rem;
+          border-radius: 4px;
+          cursor: pointer;
+          color: #475569;
+          font-weight: 500;
+          transition: all 0.15s;
+        }
+        .image-library-btn:hover {
+          background: #f1f5f9;
+          border-color: #94a3b8;
+          color: #0f172a;
+        }
+        .image-library-btn-danger {
+          color: #ef4444;
+          border-color: #fecaca;
+        }
+        .image-library-btn-danger:hover {
+          background: #fee2e2;
+          border-color: #fca5a5;
+          color: #dc2626;
+        }
       `}</style>
 
       {/* Header bar */}
@@ -1865,6 +2047,13 @@ export default function EditArticleForm({
             </button>
             <button 
               type="button" 
+              className={`sidebar-tab-btn ${activeSidebarTab === "images" ? "active" : ""}`}
+              onClick={() => setActiveSidebarTab("images")}
+            >
+              Images
+            </button>
+            <button 
+              type="button" 
               className={`sidebar-tab-btn ${activeSidebarTab === "history" ? "active" : ""}`}
               onClick={() => setActiveSidebarTab("history")}
             >
@@ -1986,7 +2175,7 @@ export default function EditArticleForm({
                 <h4 style={{ fontSize: "0.85rem", borderTop: "1px solid #e2e8f0", paddingTop: "1rem", margin: "1.5rem 0 0.5rem" }}>
                   Featured Thumbnail Image
                 </h4>
-                <ImageUploadSection initialValue={featuredImage} />
+                <ImageUploadSection initialValue={featuredImage} onChange={(val) => setFeaturedImage(val)} />
                 {/* Alt details for featured image */}
                 {featuredImage && (
                   <div>
@@ -2143,6 +2332,121 @@ export default function EditArticleForm({
                         <span style={{ color: "#3b82f6", fontWeight: "bold" }}>+</span>
                       </div>
                     ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Images tab */}
+            {activeSidebarTab === "images" && (
+              <div>
+                <h3 style={{ margin: "0 0 0.5rem", fontSize: "1rem" }}>Article Images Library</h3>
+                <p style={{ margin: "0 0 1rem", fontSize: "0.75rem", color: "#64748b" }}>
+                  Manage embedded images and upload new ones.
+                </p>
+
+                {/* Upload Section */}
+                <div className="image-block-uploader" style={{ padding: "1.25rem", borderStyle: "dashed", marginBottom: "1.5rem" }}>
+                  <p style={{ margin: "0 0 0.5rem", fontSize: "0.85rem", color: "#64748b", fontWeight: 600 }}>
+                    Upload Body Image(s)
+                  </p>
+                  <input 
+                    type="file" 
+                    multiple 
+                    accept="image/*" 
+                    onChange={(e) => {
+                      handleSidebarImageUpload(e.target.files);
+                      e.target.value = "";
+                    }}
+                    style={{ fontSize: "0.8rem", width: "100%" }}
+                  />
+                  <p style={{ margin: "0.5rem 0 0", fontSize: "0.7rem", color: "#94a3b8" }}>
+                    Selected files will be compressed and inserted as new blocks.
+                  </p>
+                </div>
+
+                {/* Embedded Images Library */}
+                <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.85rem", borderTop: "1px solid #e2e8f0", paddingTop: "1rem" }}>
+                  Embedded Library ({blocks.filter(b => b.type === "image").length})
+                </h4>
+                
+                <div className="image-library-grid">
+                  {blocks.filter(b => b.type === "image").length === 0 ? (
+                    <p style={{ fontStyle: "italic", fontSize: "0.8rem", color: "#64748b" }}>
+                      No images embedded in the body blocks yet.
+                    </p>
+                  ) : (
+                    blocks.map((block) => {
+                      if (block.type !== "image" || !block.imageAttrs) return null;
+                      const hasSrc = !!block.imageAttrs.src;
+                      const displayTitle = block.imageAttrs.alt || `Image Block (${block.id.substring(2, 6)})`;
+                      
+                      return (
+                        <div 
+                          className={`image-library-card ${activeBlockId === block.id ? "active" : ""}`} 
+                          key={block.id}
+                          onClick={() => setActiveBlockId(block.id)}
+                        >
+                          {hasSrc ? (
+                            <img 
+                              src={block.imageAttrs.src} 
+                              alt={block.imageAttrs.alt || "thumbnail"} 
+                              className="image-library-thumb"
+                            />
+                          ) : (
+                            <div className="image-library-thumb" style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", color: "#94a3b8" }}>
+                              No Pic
+                            </div>
+                          )}
+                          
+                          <div className="image-library-info">
+                            <span className="image-library-name" title={displayTitle}>
+                              {displayTitle}
+                            </span>
+                            <span style={{ fontSize: "0.65rem", color: "#94a3b8" }}>
+                              {hasSrc ? (block.imageAttrs.src.startsWith("data:") ? "Base64 (compressed)" : "External Link") : "Empty"}
+                            </span>
+                            
+                            <div className="image-library-actions">
+                              {hasSrc && (
+                                <button
+                                  type="button"
+                                  className="image-library-btn"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCopyImgTag(block.id, block.imageAttrs!.src, block.imageAttrs!.alt);
+                                  }}
+                                >
+                                  {copiedBlockId === block.id ? "Copied!" : "Copy Tag"}
+                                </button>
+                              )}
+                              
+                              <button
+                                type="button"
+                                className="image-library-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleReinsertImageBlock(block);
+                                }}
+                              >
+                                Clone
+                              </button>
+                              
+                              <button
+                                type="button"
+                                className="image-library-btn image-library-btn-danger"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteBlock(block.id);
+                                }}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
                   )}
                 </div>
               </div>
