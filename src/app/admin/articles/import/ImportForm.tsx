@@ -26,6 +26,10 @@ interface BulkQueueItem {
   fileName: string;
   title: string;
   content: string;
+  seoTitle?: string;
+  metaDescription?: string;
+  excerpt?: string;
+  featuredSnippet?: string;
   status: "pending" | "saving" | "success" | "error";
   error?: string;
 }
@@ -127,6 +131,7 @@ export default function ImportForm({ brands, categories }: ImportFormProps) {
     clean = clean.replace(/[ \t]+/g, " ");
     // Remove empty paragraphs
     clean = clean.replace(/<p>\s*<\/p>/gi, "");
+    // Remove duplicate comments or spaces
     clean = clean.replace(/<p>&nbsp;<\/p>/gi, "");
     // Clean up text bullet markers converted to plain paragraphs
     clean = clean.replace(/<p>\s*[\*\-•]\s*(.*?)<\/p>/gi, "<li>$1</li>");
@@ -137,13 +142,84 @@ export default function ImportForm({ brands, categories }: ImportFormProps) {
     return clean.trim();
   };
 
+  // Helper to render HTML table from PDF text cells
+  const renderHtmlTable = (rows: string[][]): string => {
+    if (rows.length === 0) return "";
+    let html = `<table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0; border: 1px solid #cbd5e1;">\n`;
+    rows.forEach((row, idx) => {
+      const isHeader = idx === 0;
+      html += `  <tr style="border-bottom: 1px solid #cbd5e1;${isHeader ? ' background-color: #f1f5f9; font-weight: bold;' : ''}">\n`;
+      row.forEach(cell => {
+        const tag = isHeader ? "th" : "td";
+        html += `    <${tag} style="padding: 0.75rem; border: 1px solid #cbd5e1; text-align: left;">${cell}</${tag}>\n`;
+      });
+      html += `  </tr>\n`;
+    });
+    html += `</table>\n`;
+    return html;
+  };
+
+  // Helper to extract SEO Meta comment block details
+  const parseAndExtractSeoMeta = (content: string) => {
+    const result: { title?: string; seoTitle?: string; metaDescription?: string; slug?: string; featuredSnippet?: string; cleanContent: string } = { cleanContent: content };
+    
+    const commentRegex = /<!--\s*SEO META[\s\S]*?-->/gi;
+    const match = content.match(commentRegex);
+    
+    if (match) {
+      const block = match[0];
+      const titleMatch = block.match(/Meta Title\s*:\s*(.*?)(?=\r?\n|Meta Description|URL Slug|-->)/i);
+      if (titleMatch) {
+        result.seoTitle = titleMatch[1].trim();
+        result.title = titleMatch[1].trim();
+      }
+      const descMatch = block.match(/Meta Description\s*:\s*(.*?)(?=\r?\n|Meta Title|URL Slug|-->)/i);
+      if (descMatch) {
+        result.metaDescription = descMatch[1].trim();
+      }
+      const slugMatch = block.match(/URL Slug\s*:\s*(.*?)(?=\r?\n|Meta Title|Meta Description|-->)/i);
+      if (slugMatch) {
+        let slugVal = slugMatch[1].trim();
+        if (slugVal.startsWith("/")) {
+          slugVal = slugVal.substring(1);
+        }
+        result.slug = slugVal;
+      }
+      result.cleanContent = content.replace(commentRegex, "").trim();
+    } else {
+      const plainTextSeoRegex = /<\s*!\s*-\s*-\s*SEO META[\s\S]*?-\s*-\s*>/gi;
+      const plainMatch = content.match(plainTextSeoRegex);
+      if (plainMatch) {
+        const block = plainMatch[0];
+        const titleMatch = block.match(/Meta Title\s*:\s*(.*?)(?=\r?\n|Meta Description|URL Slug|-)/i);
+        if (titleMatch) {
+          result.seoTitle = titleMatch[1].replace(/\s+/g, " ").trim();
+          result.title = titleMatch[1].replace(/\s+/g, " ").trim();
+        }
+        const descMatch = block.match(/Meta Description\s*:\s*(.*?)(?=\r?\n|Meta Title|URL Slug|-)/i);
+        if (descMatch) {
+          result.metaDescription = descMatch[1].replace(/\s+/g, " ").trim();
+        }
+        const slugMatch = block.match(/URL Slug\s*:\s*(.*?)(?=\r?\n|Meta Title|Meta Description|-)/i);
+        if (slugMatch) {
+          let slugVal = slugMatch[1].trim().replace(/\s+/g, "");
+          if (slugVal.startsWith("/")) {
+            slugVal = slugVal.substring(1);
+          }
+          result.slug = slugVal;
+        }
+        result.cleanContent = content.replace(plainTextSeoRegex, "").trim();
+      }
+    }
+    return result;
+  };
+
   const parseFileContent = async (file: File): Promise<{ title: string; content: string }> => {
     const ext = file.name.split(".").pop()?.toLowerCase();
     
     if (ext === "txt") {
       const text = await file.text();
       const cleaned = cleanTextFormatting(text);
-      // Format as HTML paragraphs
       const htmlContent = cleaned.split("\n\n").map(p => `<p>${p.replace(/\n/g, "<br />")}</p>`).join("");
       const title = file.name.replace(/\.[^/.]+$/, "");
       return { title, content: htmlContent };
@@ -181,17 +257,156 @@ export default function ImportForm({ brands, categories }: ImportFormProps) {
       
       const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
       const pdf = await loadingTask.promise;
-      let fullText = "";
+      let htmlOutput = "";
       
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
         const textContent = await page.getTextContent();
-        const pageText = textContent.items.map((item: any) => item.str).join(" ");
-        fullText += pageText + "\n\n";
+        
+        const itemsByLine: { [key: number]: any[] } = {};
+        
+        textContent.items.forEach((item: any) => {
+          if (!item.str.trim() && item.str !== " ") return;
+          const y = Math.round(item.transform[5] * 2) / 2;
+          
+          let matchedY = y;
+          const existingYs = Object.keys(itemsByLine).map(Number);
+          const closeY = existingYs.find(ey => Math.abs(ey - y) <= 3.5);
+          if (closeY !== undefined) {
+            matchedY = closeY;
+          }
+          
+          if (!itemsByLine[matchedY]) {
+            itemsByLine[matchedY] = [];
+          }
+          itemsByLine[matchedY].push(item);
+        });
+        
+        const sortedYs = Object.keys(itemsByLine).map(Number).sort((a, b) => b - a);
+        
+        const fontSizes: number[] = [];
+        textContent.items.forEach((item: any) => {
+          const fs = Math.abs(item.transform[0]);
+          if (fs > 0) fontSizes.push(fs);
+        });
+        
+        const fontSizeFreq: { [key: number]: number } = {};
+        let dominantFontSize = 10;
+        let maxFreq = 0;
+        fontSizes.forEach(fs => {
+          const rounded = Math.round(fs);
+          fontSizeFreq[rounded] = (fontSizeFreq[rounded] || 0) + 1;
+          if (fontSizeFreq[rounded] > maxFreq) {
+            maxFreq = fontSizeFreq[rounded];
+            dominantFontSize = rounded;
+          }
+        });
+        
+        const pageLines: { text: string; fontSize: number; isTable: boolean; cells: string[] }[] = [];
+        
+        sortedYs.forEach(y => {
+          const items = itemsByLine[y];
+          items.sort((a, b) => a.transform[4] - b.transform[4]);
+          
+          let lineText = "";
+          let lastX: number | null = null;
+          let lastWidth: number | null = null;
+          let maxFontSize = 0;
+          
+          const cells: { text: string; x: number }[] = [];
+          let currentCell = "";
+          let cellStartX = items[0]?.transform[4] || 0;
+          
+          items.forEach((item, idx) => {
+            const str = item.str;
+            const x = item.transform[4];
+            const fs = Math.abs(item.transform[0]);
+            if (fs > maxFontSize) maxFontSize = fs;
+            
+            if (lastX === null) {
+              currentCell = str;
+              lineText = str;
+            } else {
+              const expectedNextX = lastX + lastWidth!;
+              const distance = x - expectedNextX;
+              
+              if (distance > fs * 1.5) {
+                cells.push({ text: currentCell.trim(), x: cellStartX });
+                currentCell = str;
+                cellStartX = x;
+                lineText += " | " + str;
+              } else {
+                const needsSpace = distance > fs * 0.18 && !currentCell.endsWith(" ") && !str.startsWith(" ");
+                if (needsSpace) {
+                  currentCell += " ";
+                  lineText += " ";
+                }
+                currentCell += str;
+                lineText += str;
+              }
+            }
+            
+            lastX = x;
+            lastWidth = item.width || (str.length * fs * 0.45);
+          });
+          
+          if (currentCell) {
+            cells.push({ text: currentCell.trim(), x: cellStartX });
+          }
+          
+          const isTable = cells.length >= 2;
+          pageLines.push({
+            text: lineText.trim(),
+            fontSize: maxFontSize,
+            isTable,
+            cells: cells.map(c => c.text)
+          });
+        });
+        
+        let inTable = false;
+        let tableRows: string[][] = [];
+        
+        for (let i = 0; i < pageLines.length; i++) {
+          const line = pageLines[i];
+          const text = line.text;
+          
+          if (!text) continue;
+          
+          if (line.isTable) {
+            if (!inTable) {
+              inTable = true;
+              tableRows = [];
+            }
+            tableRows.push(line.cells);
+            continue;
+          } else {
+            if (inTable) {
+              htmlOutput += renderHtmlTable(tableRows);
+              inTable = false;
+            }
+          }
+          
+          const isLargeFont = line.fontSize >= dominantFontSize * 1.25;
+          const isShort = text.length < 100;
+          
+          if (isLargeFont && isShort && !text.startsWith("•") && !text.startsWith("-")) {
+            const tag = line.fontSize >= dominantFontSize * 1.5 ? "h2" : "h3";
+            htmlOutput += `<${tag}>${text}</${tag}>\n`;
+          } else if (text.startsWith("•") || text.startsWith("-") || text.startsWith("*") || text.startsWith("→")) {
+            const cleanText = text.replace(/^[•\-\*\→]\s*/, "");
+            htmlOutput += `<li>${cleanText}</li>\n`;
+          } else {
+            htmlOutput += `<p>${text}</p>\n`;
+          }
+        }
+        
+        if (inTable) {
+          htmlOutput += renderHtmlTable(tableRows);
+          inTable = false;
+        }
       }
 
-      const cleaned = cleanTextFormatting(fullText);
-      const htmlContent = cleaned.split("\n\n").map(p => `<p>${p}</p>`).join("");
+      const htmlContent = cleanHtmlFormatting(htmlOutput);
       const title = file.name.replace(/\.[^/.]+$/, "");
       return { title, content: htmlContent };
     }
@@ -204,32 +419,42 @@ export default function ImportForm({ brands, categories }: ImportFormProps) {
     setParseError(null);
 
     if (files.length === 1) {
-      // Single file mode
       try {
         const { title, content } = await parseFileContent(files[0]);
-        // Strip brand name prefixes from slug if title has it
+        const extracted = parseAndExtractSeoMeta(content);
+        const finalTitle = extracted.title || title;
+        const finalContent = extracted.cleanContent;
+
         const brandNames = brands.map(b => b.name.toLowerCase());
-        let slugBase = title.toLowerCase();
+        let slugBase = extracted.slug || finalTitle.toLowerCase();
         for (const brand of brandNames) {
           if (slugBase.startsWith(brand + "-") || slugBase.startsWith(brand + " ")) {
             slugBase = slugBase.replace(new RegExp(`^${brand}[-\\s]+`), "");
           }
         }
         
-        // Generate excerpt (first 150 characters stripped of HTML)
-        const textOnly = content.replace(/<[^>]*>/g, "");
-        const excerpt = textOnly.substring(0, 150) + (textOnly.length > 150 ? "..." : "");
+        let slugClean = slugBase
+          .replace(/\.(md|pdf|docx|txt)$/i, "")
+          .replace(/-(md|pdf|docx|txt)$/i, "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)+/g, "");
+        
+        const textOnly = finalContent.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+        const excerpt = extracted.metaDescription || (textOnly.substring(0, 150) + (textOnly.length > 150 ? "..." : ""));
+        const metaDescription = extracted.metaDescription || textOnly.substring(0, 150);
+        const featuredSnippet = extracted.featuredSnippet || textOnly.substring(0, 200);
 
         setArticleData({
-          title,
-          slug: slugBase.replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, ""),
-          content,
+          title: finalTitle,
+          slug: slugClean,
+          content: finalContent,
           brandId: "",
           categoryId: "",
           excerpt,
-          featuredSnippet: textOnly.substring(0, 200),
-          seoTitle: title.substring(0, 60),
-          metaDescription: textOnly.substring(0, 150),
+          featuredSnippet,
+          seoTitle: extracted.seoTitle || finalTitle.substring(0, 60),
+          metaDescription,
           canonicalUrl: "",
           status: "draft"
         });
@@ -239,18 +464,25 @@ export default function ImportForm({ brands, categories }: ImportFormProps) {
         setParseError(err.message || "Failed to parse file.");
       }
     } else {
-      // Bulk file mode
       setBulkMode(true);
       setSingleFileMode(false);
       const items: BulkQueueItem[] = [];
       for (const file of files) {
         try {
           const { title, content } = await parseFileContent(file);
+          const extracted = parseAndExtractSeoMeta(content);
+          const finalTitle = extracted.title || title;
+          const textOnly = extracted.cleanContent.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+
           items.push({
             id: Math.random().toString(36).substr(2, 9),
             fileName: file.name,
-            title,
-            content,
+            title: finalTitle,
+            content: extracted.cleanContent,
+            seoTitle: extracted.seoTitle || finalTitle.substring(0, 60),
+            metaDescription: extracted.metaDescription || textOnly.substring(0, 150),
+            excerpt: extracted.metaDescription || textOnly.substring(0, 150) + (textOnly.length > 150 ? "..." : ""),
+            featuredSnippet: textOnly.substring(0, 200),
             status: "pending"
           });
         } catch (err: any) {
@@ -300,7 +532,10 @@ export default function ImportForm({ brands, categories }: ImportFormProps) {
       const docs = validItems.map(item => ({
         title: item.title,
         content: item.content,
-        excerpt: item.content.replace(/<[^>]*>/g, "").substring(0, 150) + "...",
+        seoTitle: item.seoTitle,
+        metaDescription: item.metaDescription,
+        excerpt: item.excerpt,
+        featuredSnippet: item.featuredSnippet
       }));
 
       await importBulkArticles(docs);

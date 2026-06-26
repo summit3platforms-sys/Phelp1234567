@@ -2,6 +2,9 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
+
 export const metadata: Metadata = {
   title: "All Supported Printer Brands - LibertyPrinterFix",
   description: "Browse all supported printer brands for troubleshooting guides and error codes, including HP, Canon, Epson, Brother, and more.",

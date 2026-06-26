@@ -2,6 +2,9 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 
+export const dynamic = "force-dynamic";
+
+
 export default async function Home() {
   // Get total count of brands
   const totalBrandsCount = await prisma.brand.count();
