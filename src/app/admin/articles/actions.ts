@@ -113,6 +113,7 @@ export async function updateArticle(id: string, formData: FormData) {
   const featuredImageCaption = formData.get("featuredImageCaption") as string;
   const brandId = formData.get("brandId") as string;
   const categoryId = formData.get("categoryId") as string;
+  const uploadedImages = formData.get("uploadedImages") as string;
 
   if (!rawSlug) {
     throw new Error("URL Slug is required");
@@ -157,7 +158,8 @@ export async function updateArticle(id: string, formData: FormData) {
     oldArticle.featuredImageTitle !== featuredImageTitle ||
     oldArticle.featuredImageCaption !== featuredImageCaption ||
     oldArticle.excerpt !== excerpt ||
-    oldArticle.featuredSnippet !== featuredSnippet;
+    oldArticle.featuredSnippet !== featuredSnippet ||
+    oldArticle.uploadedImages !== uploadedImages;
 
   if (hasChanges) {
     const lastRevision = await prisma.revision.findFirst({
@@ -181,6 +183,7 @@ export async function updateArticle(id: string, formData: FormData) {
         featuredImageCaption: oldArticle.featuredImageCaption,
         excerpt: oldArticle.excerpt,
         featuredSnippet: oldArticle.featuredSnippet,
+        uploadedImages: oldArticle.uploadedImages,
       }
     });
   }
@@ -224,6 +227,7 @@ export async function updateArticle(id: string, formData: FormData) {
       featuredImageAlt: featuredImageAlt || null,
       featuredImageTitle: featuredImageTitle || null,
       featuredImageCaption: featuredImageCaption || null,
+      uploadedImages: uploadedImages || null,
       brandId: brandId || null,
       categoryId: categoryId || null,
       authorId: authorId || null,
@@ -269,6 +273,7 @@ export async function rollbackRevision(articleId: string, revisionId: string) {
         featuredImageCaption: currentArticle.featuredImageCaption,
         excerpt: currentArticle.excerpt,
         featuredSnippet: currentArticle.featuredSnippet,
+        uploadedImages: currentArticle.uploadedImages,
       }
     });
   }
@@ -289,6 +294,7 @@ export async function rollbackRevision(articleId: string, revisionId: string) {
       featuredImageCaption: revision.featuredImageCaption,
       excerpt: revision.excerpt,
       featuredSnippet: revision.featuredSnippet,
+      uploadedImages: revision.uploadedImages,
       wordCount,
     }
   });

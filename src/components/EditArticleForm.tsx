@@ -25,7 +25,16 @@ type ArticleData = {
   brandId: string | null;
   categoryId: string | null;
   authorId: string | null;
+  uploadedImages: string | null;
 };
+
+interface ImageItem {
+  id: string;
+  src: string;
+  name: string;
+  alt: string;
+  caption: string;
+}
 
 type Author = {
   id: string;
@@ -106,6 +115,15 @@ export default function EditArticleForm({
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
   const [copiedBlockId, setCopiedBlockId] = useState<string | null>(null);
+
+  // Uploaded images list
+  const [uploadedImages, setUploadedImages] = useState<ImageItem[]>(() => {
+    try {
+      return article.uploadedImages ? JSON.parse(article.uploadedImages) : [];
+    } catch {
+      return [];
+    }
+  });
   
   // Form fields
   const [title, setTitle] = useState(article.title);
@@ -331,7 +349,7 @@ export default function EditArticleForm({
     title, slug, content, status, authorId, brandId, categoryId,
     seoTitle, metaDescription, canonicalUrl, excerpt, featuredSnippet,
     featuredImage, featuredImageAlt, featuredImageTitle, featuredImageCaption,
-    faqsList
+    faqsList, uploadedImages
   ]);
 
   // Background Autosave trigger (Runs every 30 seconds if dirty)
@@ -342,7 +360,7 @@ export default function EditArticleForm({
       }
     }, 30000);
     return () => clearInterval(interval);
-  }, [isDirty, title, slug, blocks, content, status, authorId, brandId, categoryId, seoTitle, metaDescription, canonicalUrl, excerpt, featuredSnippet, featuredImage, featuredImageAlt, featuredImageTitle, featuredImageCaption, faqsList, editorMode]);
+  }, [isDirty, title, slug, blocks, content, status, authorId, brandId, categoryId, seoTitle, metaDescription, canonicalUrl, excerpt, featuredSnippet, featuredImage, featuredImageAlt, featuredImageTitle, featuredImageCaption, faqsList, editorMode, uploadedImages]);
 
   // Compile data into FormData structure
   const compileFormData = (currentContent: string, currentStatus?: string): FormData => {
@@ -364,6 +382,7 @@ export default function EditArticleForm({
     fd.append("featuredImageAlt", featuredImageAlt);
     fd.append("featuredImageTitle", featuredImageTitle);
     fd.append("featuredImageCaption", featuredImageCaption);
+    fd.append("uploadedImages", JSON.stringify(uploadedImages));
     return fd;
   };
 
@@ -584,6 +603,16 @@ export default function EditArticleForm({
         } else {
           setFaqsList([]);
         }
+
+        if (rev.uploadedImages) {
+          try {
+            setUploadedImages(JSON.parse(rev.uploadedImages));
+          } catch (e) {
+            setUploadedImages([]);
+          }
+        } else {
+          setUploadedImages([]);
+        }
         
         await loadRevisionsList();
         setIsDirty(false);
@@ -653,7 +682,7 @@ export default function EditArticleForm({
     reader.readAsDataURL(file);
   };
 
-  const handleSidebarImageUpload = (files: FileList | null) => {
+  const handleSidebarImagesUpload = (files: FileList | null) => {
     if (!files) return;
     
     Array.from(files).forEach((file) => {
@@ -687,32 +716,15 @@ export default function EditArticleForm({
             ctx.drawImage(img, 0, 0, width, height);
             const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
             
-            const newBlock: Block = {
-              id: "b_" + Date.now() + Math.random().toString(36).substring(2, 5),
-              type: "image",
-              text: "",
-              html: "",
-              imageAttrs: {
-                src: compressedDataUrl,
-                alt: file.name.split('.')[0] || "Uploaded image",
-                caption: "",
-                align: "center",
-                width: "100%"
-              }
+            const newImage: ImageItem = {
+              id: "img_" + Date.now() + Math.random().toString(36).substring(2, 5),
+              src: compressedDataUrl,
+              name: file.name,
+              alt: file.name.split('.')[0] || "Uploaded image",
+              caption: ""
             };
 
-            setBlocks((currentBlocks) => {
-              if (activeBlockId) {
-                const idx = currentBlocks.findIndex((b) => b.id === activeBlockId);
-                if (idx !== -1) {
-                  const updated = [...currentBlocks];
-                  updated.splice(idx + 1, 0, newBlock);
-                  return updated;
-                }
-              }
-              return [...currentBlocks, newBlock];
-            });
-            setActiveBlockId(newBlock.id);
+            setUploadedImages((prev) => [...prev, newImage]);
           }
         };
         img.src = event.target?.result as string;
@@ -721,26 +733,54 @@ export default function EditArticleForm({
     });
   };
 
-  const handleCopyImgTag = (blockId: string, src: string, alt: string) => {
-    const tag = `<img src="${src}" alt="${alt || ''}" />`;
-    navigator.clipboard.writeText(tag).then(() => {
-      setCopiedBlockId(blockId);
-      setTimeout(() => {
-        setCopiedBlockId(null);
-      }, 2000);
-    });
+  const handleUpdateImageMeta = (id: string, field: "alt" | "caption", value: string) => {
+    setUploadedImages((prev) =>
+      prev.map((img) => {
+        if (img.id === id) {
+          const updated = { ...img, [field]: value };
+          // If this image is currently the featured image, sync the parent featured fields!
+          if (featuredImage === img.src) {
+            if (field === "alt") setFeaturedImageAlt(value);
+            if (field === "caption") setFeaturedImageCaption(value);
+          }
+          return updated;
+        }
+        return img;
+      })
+    );
   };
 
-  const handleReinsertImageBlock = (originalBlock: Block) => {
-    if (!originalBlock.imageAttrs) return;
+  const handleSetAsFeatured = (img: ImageItem) => {
+    setFeaturedImage(img.src);
+    setFeaturedImageAlt(img.alt || "");
+    setFeaturedImageCaption(img.caption || "");
+  };
+
+  const handleDeleteUploadedImage = (id: string) => {
+    const target = uploadedImages.find((img) => img.id === id);
+    if (target && featuredImage === target.src) {
+      setFeaturedImage(null);
+      setFeaturedImageAlt("");
+      setFeaturedImageCaption("");
+    }
+    setUploadedImages((prev) => prev.filter((img) => img.id !== id));
+  };
+
+  const handleInsertImageToArticle = (img: ImageItem) => {
     const newBlock: Block = {
-      id: "b_" + Date.now() + Math.random().toString(36).substring(2, 5),
+      id: "block_" + Math.random().toString(36).substring(2, 9),
       type: "image",
       text: "",
       html: "",
-      imageAttrs: { ...originalBlock.imageAttrs }
+      imageAttrs: {
+        src: img.src,
+        alt: img.alt || "",
+        caption: img.caption || "",
+        align: "center",
+        width: "100%"
+      }
     };
-    
+
     setBlocks((currentBlocks) => {
       if (activeBlockId) {
         const idx = currentBlocks.findIndex((b) => b.id === activeBlockId);
@@ -2170,47 +2210,6 @@ export default function EditArticleForm({
                     placeholder="Short description for archive lists..."
                   />
                 </div>
-
-                {/* Featured Image details */}
-                <h4 style={{ fontSize: "0.85rem", borderTop: "1px solid #e2e8f0", paddingTop: "1rem", margin: "1.5rem 0 0.5rem" }}>
-                  Featured Thumbnail Image
-                </h4>
-                <ImageUploadSection initialValue={featuredImage} onChange={(val) => setFeaturedImage(val)} />
-                {/* Alt details for featured image */}
-                {featuredImage && (
-                  <div>
-                    <div className="input-group">
-                      <label style={{ fontSize: "0.75rem" }}>Alt Text</label>
-                      <input 
-                        type="text" 
-                        className="text-input" 
-                        value={featuredImageAlt} 
-                        onChange={(e) => setFeaturedImageAlt(e.target.value)}
-                        placeholder="Image description..."
-                      />
-                    </div>
-                    <div className="input-group">
-                      <label style={{ fontSize: "0.75rem" }}>Title Tag</label>
-                      <input 
-                        type="text" 
-                        className="text-input" 
-                        value={featuredImageTitle} 
-                        onChange={(e) => setFeaturedImageTitle(e.target.value)}
-                        placeholder="Mouseover text..."
-                      />
-                    </div>
-                    <div className="input-group">
-                      <label style={{ fontSize: "0.75rem" }}>Caption</label>
-                      <input 
-                        type="text" 
-                        className="text-input" 
-                        value={featuredImageCaption} 
-                        onChange={(e) => setFeaturedImageCaption(e.target.value)}
-                        placeholder="Caption text displayed below..."
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
@@ -2340,109 +2339,153 @@ export default function EditArticleForm({
             {/* Images tab */}
             {activeSidebarTab === "images" && (
               <div>
-                <h3 style={{ margin: "0 0 0.5rem", fontSize: "1rem" }}>Article Images Library</h3>
+                <h3 style={{ margin: "0 0 0.5rem", fontSize: "1rem" }}>Article Images</h3>
                 <p style={{ margin: "0 0 1rem", fontSize: "0.75rem", color: "#64748b" }}>
-                  Manage embedded images and upload new ones.
+                  Upload and manage images for this article.
                 </p>
 
                 {/* Upload Section */}
                 <div className="image-block-uploader" style={{ padding: "1.25rem", borderStyle: "dashed", marginBottom: "1.5rem" }}>
                   <p style={{ margin: "0 0 0.5rem", fontSize: "0.85rem", color: "#64748b", fontWeight: 600 }}>
-                    Upload Body Image(s)
+                    Upload Images
                   </p>
                   <input 
                     type="file" 
                     multiple 
                     accept="image/*" 
                     onChange={(e) => {
-                      handleSidebarImageUpload(e.target.files);
+                      handleSidebarImagesUpload(e.target.files);
                       e.target.value = "";
                     }}
                     style={{ fontSize: "0.8rem", width: "100%" }}
                   />
                   <p style={{ margin: "0.5rem 0 0", fontSize: "0.7rem", color: "#94a3b8" }}>
-                    Selected files will be compressed and inserted as new blocks.
+                    Select one or multiple files. Images will be compressed client-side.
                   </p>
                 </div>
 
-                {/* Embedded Images Library */}
+                {/* Uploaded Images List */}
                 <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.85rem", borderTop: "1px solid #e2e8f0", paddingTop: "1rem" }}>
-                  Embedded Library ({blocks.filter(b => b.type === "image").length})
+                  Uploaded Images ({uploadedImages.length})
                 </h4>
                 
-                <div className="image-library-grid">
-                  {blocks.filter(b => b.type === "image").length === 0 ? (
+                <div className="image-library-grid" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  {uploadedImages.length === 0 ? (
                     <p style={{ fontStyle: "italic", fontSize: "0.8rem", color: "#64748b" }}>
-                      No images embedded in the body blocks yet.
+                      No images uploaded for this article yet.
                     </p>
                   ) : (
-                    blocks.map((block) => {
-                      if (block.type !== "image" || !block.imageAttrs) return null;
-                      const hasSrc = !!block.imageAttrs.src;
-                      const displayTitle = block.imageAttrs.alt || `Image Block (${block.id.substring(2, 6)})`;
-                      
+                    uploadedImages.map((img) => {
+                      const isFeatured = featuredImage === img.src;
                       return (
                         <div 
-                          className={`image-library-card ${activeBlockId === block.id ? "active" : ""}`} 
-                          key={block.id}
-                          onClick={() => setActiveBlockId(block.id)}
+                          className="image-library-card" 
+                          key={img.id}
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "0.75rem",
+                            border: isFeatured ? "1.5px solid #3b82f6" : "1px solid #e2e8f0",
+                            borderRadius: "6px",
+                            padding: "0.75rem",
+                            background: isFeatured ? "#f0f7ff" : "#f8fafc"
+                          }}
                         >
-                          {hasSrc ? (
+                          <div style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start" }}>
                             <img 
-                              src={block.imageAttrs.src} 
-                              alt={block.imageAttrs.alt || "thumbnail"} 
-                              className="image-library-thumb"
+                              src={img.src} 
+                              alt={img.alt || "thumbnail"} 
+                              style={{
+                                width: "60px",
+                                height: "60px",
+                                objectFit: "cover",
+                                borderRadius: "4px",
+                                border: "1px solid #cbd5e1"
+                              }}
                             />
-                          ) : (
-                            <div className="image-library-thumb" style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", color: "#94a3b8" }}>
-                              No Pic
-                            </div>
-                          )}
-                          
-                          <div className="image-library-info">
-                            <span className="image-library-name" title={displayTitle}>
-                              {displayTitle}
-                            </span>
-                            <span style={{ fontSize: "0.65rem", color: "#94a3b8" }}>
-                              {hasSrc ? (block.imageAttrs.src.startsWith("data:") ? "Base64 (compressed)" : "External Link") : "Empty"}
-                            </span>
-                            
-                            <div className="image-library-actions">
-                              {hasSrc && (
-                                <button
-                                  type="button"
-                                  className="image-library-btn"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleCopyImgTag(block.id, block.imageAttrs!.src, block.imageAttrs!.alt);
-                                  }}
-                                >
-                                  {copiedBlockId === block.id ? "Copied!" : "Copy Tag"}
-                                </button>
-                              )}
+                            <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                              <span 
+                                style={{ 
+                                  fontSize: "0.8rem", 
+                                  fontWeight: 600, 
+                                  overflow: "hidden", 
+                                  textOverflow: "ellipsis", 
+                                  whiteSpace: "nowrap",
+                                  display: "block" 
+                                }} 
+                                title={img.name}
+                              >
+                                {img.name}
+                              </span>
                               
+                              <input 
+                                type="text"
+                                className="text-input"
+                                placeholder="Alt Text (SEO)..."
+                                style={{ padding: "0.25rem 0.4rem", fontSize: "0.75rem", height: "auto" }}
+                                value={img.alt}
+                                onChange={(e) => handleUpdateImageMeta(img.id, "alt", e.target.value)}
+                              />
+                              
+                              <input 
+                                type="text"
+                                className="text-input"
+                                placeholder="Caption..."
+                                style={{ padding: "0.25rem 0.4rem", fontSize: "0.75rem", height: "auto" }}
+                                value={img.caption}
+                                onChange={(e) => handleUpdateImageMeta(img.id, "caption", e.target.value)}
+                              />
+                            </div>
+                          </div>
+
+                          <div style={{ display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>
+                            <button
+                              type="button"
+                              className="image-library-btn"
+                              style={{ flex: 1, minWidth: "100px" }}
+                              onClick={() => handleInsertImageToArticle(img)}
+                            >
+                              Insert into Article
+                            </button>
+                            
+                            {isFeatured ? (
+                              <span 
+                                style={{ 
+                                  flex: 1, 
+                                  minWidth: "90px", 
+                                  textAlign: "center", 
+                                  fontSize: "0.7rem", 
+                                  fontWeight: "bold",
+                                  color: "#3b82f6", 
+                                  background: "#dbeafe", 
+                                  padding: "0.15rem 0.35rem", 
+                                  borderRadius: "4px",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  justifyContent: "center"
+                                }}
+                              >
+                                ⭐ Featured
+                              </span>
+                            ) : (
                               <button
                                 type="button"
                                 className="image-library-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleReinsertImageBlock(block);
-                                }}
+                                style={{ flex: 1, minWidth: "90px" }}
+                                onClick={() => handleSetAsFeatured(img)}
                               >
-                                Clone
+                                Set as Featured
                               </button>
-                              
-                              <button
-                                type="button"
-                                className="image-library-btn image-library-btn-danger"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  deleteBlock(block.id);
-                                }}
-                              >
-                                Delete
-                              </button>
-                            </div>
+                            )}
+                            
+                            <button
+                              type="button"
+                              className="image-library-btn image-library-btn-danger"
+                              style={{ flex: "0 0 auto" }}
+                              onClick={() => handleDeleteUploadedImage(img.id)}
+                            >
+                              Delete
+                            </button>
                           </div>
                         </div>
                       );

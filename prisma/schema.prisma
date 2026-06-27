@@ -48,6 +48,7 @@ model Article {
   featuredSnippet      String?
   faqs                 String?   // JSON string representing FAQs: [{question, answer, order}]
   status               String    @default("draft")
+  uploadedImages       String?   // JSON string representing uploaded images list: [{id, src, name, alt, caption}]
   brandId              String?
   categoryId           String?
   publishedAt          DateTime?
@@ -76,6 +77,7 @@ model Revision {
   featuredImageCaption String?
   excerpt              String?
   featuredSnippet      String?
+  uploadedImages       String?
   createdAt            DateTime @default(now())
 }
 
