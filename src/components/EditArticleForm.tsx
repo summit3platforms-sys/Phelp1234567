@@ -2002,22 +2002,6 @@ export default function EditArticleForm({
                 <span>Reading Time: <strong>{Math.ceil(wordCount / 200)} min read</strong> ({wordCount} words)</span>
               </div>
 
-              {featuredImage && (
-                <div style={{ margin: "0 0 2rem", textAlign: "center" }}>
-                  <img 
-                    src={featuredImage} 
-                    alt={featuredImageAlt || "Featured banner"} 
-                    title={featuredImageTitle}
-                    style={{ maxWidth: "100%", maxHeight: "400px", objectFit: "contain", borderRadius: "8px" }}
-                  />
-                  {featuredImageCaption && (
-                    <figcaption style={{ fontSize: "0.85rem", color: "#64748b", marginTop: "0.5rem" }}>
-                      {featuredImageCaption}
-                    </figcaption>
-                  )}
-                </div>
-              )}
-
               {tocHeadings.length > 0 && (
                 <div className="preview-toc">
                   <div className="preview-toc-title">Table of Contents</div>

@@ -338,23 +338,6 @@ export default async function ArticlePage({ params }: PageParams) {
               </div>
             </header>
 
-            {/* Featured Image display */}
-            {article.featuredImage && (
-              <div style={{ margin: '0 0 2rem 0', textAlign: 'center' }}>
-                <img 
-                  src={article.featuredImage} 
-                  alt={article.featuredImageAlt || article.title} 
-                  title={article.featuredImageTitle || undefined}
-                  style={{ maxWidth: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                />
-                {article.featuredImageCaption && (
-                  <figcaption style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.5rem', textAlign: 'center' }}>
-                    {article.featuredImageCaption}
-                  </figcaption>
-                )}
-              </div>
-            )}
-
             {/* Table of Contents Container */}
             {toc.length > 0 && (
               <div className="toc-container">
