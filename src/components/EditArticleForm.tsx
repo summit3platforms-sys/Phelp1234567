@@ -413,6 +413,9 @@ export default function EditArticleForm({
       const fd = compileFormData(finalContent);
       await updateAction(article.id, fd);
     } catch (err: any) {
+      if (err.message === "NEXT_REDIRECT" || err.message?.includes("NEXT_REDIRECT")) {
+        throw err;
+      }
       setSaveStatus("Save failed");
       alert(`Save error: ${err.message}`);
     }
