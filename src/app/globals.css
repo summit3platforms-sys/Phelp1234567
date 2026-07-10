@@ -1097,6 +1097,20 @@ a:hover {
   color: #334155;
 }
 
+.article-content a {
+  color: var(--primary-color);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  font-weight: 500;
+  transition: color var(--transition-fast), text-decoration-color var(--transition-fast);
+}
+
+.article-content a:hover {
+  color: var(--primary-hover);
+  text-decoration-color: var(--primary-hover);
+}
+
 .article-content h2 {
   font-size: 1.75rem;
   font-weight: 700;
