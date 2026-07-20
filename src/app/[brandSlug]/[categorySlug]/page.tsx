@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
+import Image from "next/image";
 
 type PageParams = { params: Promise<{ brandSlug: string; categorySlug: string }> };
 
@@ -51,8 +52,28 @@ export default async function BrandCategoryPage({ params }: PageParams) {
     orderBy: { publishedAt: 'desc' }
   });
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": `${brand.name} Printer: ${category.name}`,
+    "description": `Browse all troubleshooting articles and solutions for ${brand.name} printers under the ${category.name.toLowerCase()} category.`,
+    "url": `https://libertyprinterfix.com/${brand.slug}/${category.slug}`,
+    "mainEntity": {
+      "@type": "ItemList",
+      "itemListElement": articles.map((article, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "url": `https://libertyprinterfix.com/${brand.slug}/${category.slug}/${article.slug}`
+      }))
+    }
+  };
+
   return (
     <div className="container page-top">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Automatic Breadcrumbs: Home → Brand → Category */}
       <nav aria-label="Breadcrumb" style={{ marginBottom: '1.5rem', fontSize: '0.9rem' }}>
         <Link href="/">Home</Link> &gt; 
@@ -85,11 +106,13 @@ export default async function BrandCategoryPage({ params }: PageParams) {
             {articles.map(article => (
               <div key={article.id} className="article-item" style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', height: '100%' }}>
                 {article.featuredImage && (
-                  <Link href={`/${brand.slug}/${category.slug}/${article.slug}`} style={{ display: 'block', overflow: 'hidden', borderRadius: '6px', aspectRatio: '16/9', background: '#f1f5f9', marginBottom: '1rem' }}>
-                    <img 
+                  <Link href={`/${brand.slug}/${category.slug}/${article.slug}`} style={{ display: 'block', position: 'relative', overflow: 'hidden', borderRadius: '6px', aspectRatio: '16/9', background: '#f1f5f9', marginBottom: '1rem' }}>
+                    <Image 
                       src={article.featuredImage} 
                       alt={article.title} 
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      style={{ objectFit: 'cover' }}
                     />
                   </Link>
                 )}

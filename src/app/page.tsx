@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import Image from "next/image";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
-
 export const dynamic = "force-dynamic";
 
 
@@ -83,8 +83,38 @@ export default async function Home() {
     "Setup & Installation": "Get assistance with initial printer setup, configuration, device registration, and first-time installation."
   };
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "name": "LibertyPrinterFix",
+        "url": "https://libertyprinterfix.com",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://libertyprinterfix.com/search?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "Organization",
+        "name": "LibertyPrinterFix",
+        "url": "https://libertyprinterfix.com",
+        "logo": "https://libertyprinterfix.com/logo.png",
+        "description": "The ultimate independent database for printer troubleshooting, setup guides, ink/toner fixes, and diagnostic error codes."
+      }
+    ]
+  };
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero Section — full width, no container */}
       <section className="hero">
         <div className="hero-inner">
@@ -218,11 +248,13 @@ export default async function Home() {
                 <div key={article.id} className="article-item">
                   <div>
                     {article.featuredImage && (
-                      <Link href={`/${brandSlug}/${categorySlug}/${article.slug}`} style={{ display: 'block', overflow: 'hidden', borderRadius: '6px', aspectRatio: '16/9', background: '#f1f5f9', marginBottom: '1rem' }}>
-                        <img 
+                      <Link href={`/${brandSlug}/${categorySlug}/${article.slug}`} style={{ display: 'block', position: 'relative', overflow: 'hidden', borderRadius: '6px', aspectRatio: '16/9', background: '#f1f5f9', marginBottom: '1rem' }}>
+                        <Image 
                           src={article.featuredImage} 
                           alt={article.title} 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          style={{ objectFit: 'cover' }}
                         />
                       </Link>
                     )}

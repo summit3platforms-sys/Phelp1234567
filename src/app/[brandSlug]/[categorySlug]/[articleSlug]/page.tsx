@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
+import Image from "next/image";
+import parse, { domToReact, Element } from 'html-react-parser';
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 
 type PageParams = { params: Promise<{ brandSlug: string; categorySlug: string; articleSlug: string }> };
@@ -43,7 +45,7 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
   const resolvedParams = await params;
   const article = await prisma.article.findUnique({
     where: { slug: resolvedParams.articleSlug },
-    include: { brand: true, category: true }
+    include: { brand: true, category: true, author: true }
   });
 
   const currentPath = `/${resolvedParams.brandSlug}/${resolvedParams.categorySlug}/${resolvedParams.articleSlug}`;
@@ -61,6 +63,38 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
     title: article.seoTitle || `${article.title} - ${article.brand?.name || "Support"}`,
     description: article.metaDescription || `Troubleshooting guide for ${article.title}.`,
     alternates: article.canonicalUrl ? { canonical: article.canonicalUrl } : undefined,
+    openGraph: {
+      title: article.seoTitle || `${article.title} - ${article.brand?.name || "Support"}`,
+      description: article.metaDescription || `Troubleshooting guide for ${article.title}.`,
+      url: `https://libertyprinterfix.com${currentPath}`,
+      siteName: 'LibertyPrinterFix',
+      images: article.featuredImage ? [
+        {
+          url: article.featuredImage,
+          width: 1200,
+          height: 630,
+          alt: article.title,
+        },
+      ] : [
+        {
+          url: 'https://libertyprinterfix.com/logo.png',
+          width: 800,
+          height: 600,
+          alt: 'LibertyPrinterFix Logo',
+        }
+      ],
+      locale: 'en_US',
+      type: 'article',
+      publishedTime: article.publishedAt?.toISOString(),
+      modifiedTime: article.updatedAt.toISOString(),
+      authors: article.author?.name ? [article.author.name] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.seoTitle || `${article.title} - ${article.brand?.name || "Support"}`,
+      description: article.metaDescription || `Troubleshooting guide for ${article.title}.`,
+      images: article.featuredImage ? [article.featuredImage] : ['https://libertyprinterfix.com/logo.png'],
+    },
   };
 }
 
@@ -166,6 +200,24 @@ export default async function ArticlePage({ params }: PageParams) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": jsonLdGraph
+  };
+
+  const parseOptions = {
+    replace: (domNode: any) => {
+      if (domNode instanceof Element && domNode.name === 'img') {
+        const { src, alt, width, height } = domNode.attribs;
+        return (
+          <Image 
+            src={src} 
+            alt={alt || "Article image"} 
+            width={width ? parseInt(width, 10) : 800} 
+            height={height ? parseInt(height, 10) : 450} 
+            sizes="(max-width: 768px) 100vw, 800px"
+            style={{ width: '100%', height: 'auto', borderRadius: '8px', marginTop: '1.5rem', marginBottom: '1.5rem' }}
+          />
+        );
+      }
+    }
   };
 
   return (
@@ -322,7 +374,7 @@ export default async function ArticlePage({ params }: PageParams) {
                 {article.author && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     {article.author.image ? (
-                      <img src={article.author.image} alt={article.author.name} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
+                      <Image src={article.author.image} alt={article.author.name} width={28} height={28} style={{ borderRadius: '50%', objectFit: 'cover' }} />
                     ) : (
                       <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.8rem', color: '#fff' }}>
                         {article.author.name.charAt(0)}
@@ -331,7 +383,8 @@ export default async function ArticlePage({ params }: PageParams) {
                     <span>By <strong>{article.author.name}</strong></span>
                   </div>
                 )}
-                <span>Updated: {new Date(article.updatedAt).toLocaleDateString()}</span>
+                <span>Published: <time dateTime={article.publishedAt ? new Date(article.publishedAt).toISOString() : new Date(article.createdAt).toISOString()}>{new Date(article.publishedAt || article.createdAt).toLocaleDateString()}</time></span>
+                <span>Updated: <time dateTime={new Date(article.updatedAt).toISOString()}>{new Date(article.updatedAt).toLocaleDateString()}</time></span>
                 <span>Reading Time: <strong>{readingTime} min read</strong></span>
                 {article.errorCode && <span>Error Code: <strong style={{ color: '#c2185b' }}>{article.errorCode}</strong></span>}
                 {article.printerModel && <span>Model: <strong>{article.printerModel}</strong></span>}
@@ -362,9 +415,10 @@ export default async function ArticlePage({ params }: PageParams) {
 
             <div 
               className="article-content"
-              dangerouslySetInnerHTML={{ __html: processedContent }} 
               style={{ fontSize: '1.1rem', lineHeight: '1.8' }}
-            />
+            >
+              {parse(processedContent, parseOptions)}
+            </div>
 
             {/* FAQ Accordion Section */}
             {faqsArray.length > 0 && (
@@ -389,7 +443,7 @@ export default async function ArticlePage({ params }: PageParams) {
             <div className="author-bio-card">
               <div className="author-bio-header">
                 {article.author.image ? (
-                  <img src={article.author.image} alt={article.author.name} className="author-avatar" />
+                  <Image src={article.author.image} alt={article.author.name} width={64} height={64} className="author-avatar" />
                 ) : (
                   <div className="author-avatar-fallback">
                     {article.author.name.charAt(0)}

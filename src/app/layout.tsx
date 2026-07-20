@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Link from "next/link";
 import Script from "next/script";
+import Image from "next/image";
 
 
 export const viewport: Viewport = {
@@ -13,6 +14,28 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "LibertyPrinterFix - Printer Troubleshooting & Error Codes",
   description: "Find solutions, error codes, and troubleshooting steps for all major printer brands including HP, Canon, Epson, and Brother.",
+  openGraph: {
+    title: "LibertyPrinterFix - Printer Troubleshooting & Error Codes",
+    description: "Find solutions, error codes, and troubleshooting steps for all major printer brands including HP, Canon, Epson, and Brother.",
+    url: 'https://libertyprinterfix.com',
+    siteName: 'LibertyPrinterFix',
+    images: [
+      {
+        url: 'https://libertyprinterfix.com/logo.png',
+        width: 800,
+        height: 600,
+        alt: 'LibertyPrinterFix Logo',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "LibertyPrinterFix - Printer Troubleshooting & Error Codes",
+    description: "Find solutions, error codes, and troubleshooting steps for all major printer brands including HP, Canon, Epson, and Brother.",
+    images: ['https://libertyprinterfix.com/logo.png'],
+  },
 };
 
 export default function RootLayout({
@@ -42,7 +65,7 @@ export default function RootLayout({
         <header className="header">
           <div className="container">
             <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
-              <img src="/logo.png" alt="LibertyPrinterFix" className="header-logo-img" />
+              <Image src="/logo.png" alt="LibertyPrinterFix" className="header-logo-img" width={200} height={50} priority />
             </Link>
             <nav className="nav-links">
               <Link href="/" className="nav-link">Home</Link>
@@ -62,7 +85,7 @@ export default function RootLayout({
             <div className="footer-grid">
               <div className="footer-col footer-info">
                 <Link href="/" style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
-                  <img src="/logo.png" alt="LibertyPrinterFix" className="footer-logo-img" />
+                  <Image src="/logo.png" alt="LibertyPrinterFix" className="footer-logo-img" width={200} height={50} />
                 </Link>
                 <p className="footer-desc">
                   The ultimate independent database for printer troubleshooting, setup guides, ink/toner fixes, and diagnostic error codes.
