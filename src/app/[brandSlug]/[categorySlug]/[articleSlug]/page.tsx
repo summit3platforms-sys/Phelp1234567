@@ -391,6 +391,25 @@ export default async function ArticlePage({ params }: PageParams) {
               </div>
             </header>
 
+            {/* Featured Image */}
+            {article.featuredImage && (
+              <figure style={{ margin: '0 0 2rem', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={article.featuredImage}
+                  alt={article.featuredImageAlt || article.title}
+                  title={article.featuredImageTitle || article.title}
+                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                  loading="eager"
+                />
+                {article.featuredImageCaption && (
+                  <figcaption style={{ padding: '0.6rem 1rem', background: '#f8fafc', fontSize: '0.85rem', color: '#64748b', textAlign: 'center', borderTop: '1px solid #e2e8f0' }}>
+                    {article.featuredImageCaption}
+                  </figcaption>
+                )}
+              </figure>
+            )}
+
             {/* Table of Contents Container */}
             {toc.length > 0 && (
               <div className="toc-container">
