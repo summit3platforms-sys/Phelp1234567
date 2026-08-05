@@ -5,6 +5,7 @@ import { Metadata } from "next";
 import Image from "next/image";
 import parse, { domToReact, Element } from 'html-react-parser';
 import LeadCaptureForm from "@/components/LeadCaptureForm";
+import EeatBox from "@/components/EeatBox";
 
 type PageParams = { params: Promise<{ brandSlug: string; categorySlug: string; articleSlug: string }> };
 
@@ -108,6 +109,7 @@ export default async function ArticlePage({ params }: PageParams) {
       brand: true,
       category: true,
       author: true,
+      reviewer: true,
     }
   });
 
@@ -390,6 +392,17 @@ export default async function ArticlePage({ params }: PageParams) {
                 {article.printerModel && <span>Model: <strong>{article.printerModel}</strong></span>}
               </div>
             </header>
+
+            <EeatBox 
+              author={article.author}
+              reviewer={article.reviewer}
+              reviewedAt={article.reviewedAt}
+              difficultyLevel={article.difficultyLevel}
+              timeToFix={article.timeToFix}
+              brandName={article.brand?.name || null}
+              printerModel={article.printerModel}
+              wordCount={article.wordCount}
+            />
 
             {/* Featured Image */}
             {article.featuredImage && (

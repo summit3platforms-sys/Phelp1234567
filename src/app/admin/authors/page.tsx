@@ -98,6 +98,11 @@ export default async function AdminAuthorsPage() {
               </div>
 
               <div>
+                <label style={labelStyle}>Years of Experience</label>
+                <input type="number" name="experienceYears" defaultValue="10" min="0" style={inputStyle} placeholder="e.g. 10" />
+              </div>
+
+              <div>
                 <label style={labelStyle}>Bio</label>
                 <textarea name="bio" rows={4} style={{ ...inputStyle, fontFamily: 'inherit' }} placeholder="Brief biography about the author..." />
               </div>

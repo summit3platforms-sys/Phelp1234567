@@ -12,6 +12,8 @@ export async function createAuthor(formData: FormData) {
   const role = formData.get("role") as string;
   const bio = formData.get("bio") as string;
   const image = formData.get("image") as string;
+  const experienceYearsStr = formData.get("experienceYears") as string;
+  const experienceYears = experienceYearsStr ? parseInt(experienceYearsStr, 10) : 10;
 
   if (!name) {
     throw new Error("Author name is required");
@@ -35,7 +37,8 @@ export async function createAuthor(formData: FormData) {
       slug,
       role: role || "Technical Expert",
       bio: bio || null,
-      image: image || null
+      image: image || null,
+      experienceYears
     }
   });
 

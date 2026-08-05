@@ -55,7 +55,12 @@ model Article {
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
   authorId             String?
-  author               Author?   @relation(fields: [authorId], references: [id])
+  reviewerId           String?
+  reviewedAt           DateTime?
+  difficultyLevel      String?   @default("Intermediate")
+  timeToFix            String?   @default("15 minutes")
+  author               Author?   @relation("ArticleAuthor", fields: [authorId], references: [id])
+  reviewer             Author?   @relation("ArticleReviewer", fields: [reviewerId], references: [id])
   brand                Brand?    @relation(fields: [brandId], references: [id])
   category             Category? @relation(fields: [categoryId], references: [id])
   revisions            Revision[]
@@ -113,9 +118,11 @@ model Author {
   slug      String    @unique
   bio       String?
   image     String?
-  role      String?   @default("Technical Expert")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  articles  Article[]
+  role            String?   @default("Technical Expert")
+  experienceYears Int?      @default(10)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  articles        Article[] @relation("ArticleAuthor")
+  reviewedArticles Article[] @relation("ArticleReviewer")
 }
 
