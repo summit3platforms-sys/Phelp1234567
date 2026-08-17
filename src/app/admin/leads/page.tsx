@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export const dynamic = 'force-dynamic';
 
@@ -6,6 +7,14 @@ export default async function AdminLeadsPage() {
   const leads = await prisma.lead.findMany({
     orderBy: { createdAt: 'desc' },
   });
+
+  async function deleteLead(id: string) {
+    "use server";
+    await prisma.lead.delete({
+      where: { id },
+    });
+    revalidatePath("/admin/leads");
+  }
 
   return (
     <div>
@@ -20,14 +29,17 @@ export default async function AdminLeadsPage() {
               <th style={{ padding: '1rem', fontWeight: '600' }}>Date</th>
               <th style={{ padding: '1rem', fontWeight: '600' }}>Name</th>
               <th style={{ padding: '1rem', fontWeight: '600' }}>Contact</th>
+              <th style={{ padding: '1rem', fontWeight: '600' }}>Location / IP</th>
               <th style={{ padding: '1rem', fontWeight: '600' }}>Printer Brand</th>
+              <th style={{ padding: '1rem', fontWeight: '600' }}>Issue Description</th>
               <th style={{ padding: '1rem', fontWeight: '600' }}>Status</th>
+              <th style={{ padding: '1rem', fontWeight: '600', textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {leads.length === 0 ? (
               <tr>
-                <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                <td colSpan={8} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
                   No leads captured yet.
                 </td>
               </tr>
@@ -44,9 +56,18 @@ export default async function AdminLeadsPage() {
                     <div style={{ fontSize: '0.9em', color: '#666', marginTop: '4px' }}>{lead.phone}</div>
                   </td>
                   <td style={{ padding: '1rem' }}>
+                    <div style={{ fontWeight: '500' }}>{lead.country || 'N/A'}</div>
+                    <div style={{ fontSize: '0.85em', color: '#666' }}>{lead.ipAddress || 'No IP'}</div>
+                  </td>
+                  <td style={{ padding: '1rem' }}>
                     <span style={{ background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', fontSize: '0.9em' }}>
                       {lead.printerBrand}
                     </span>
+                  </td>
+                  <td style={{ padding: '1rem', maxWidth: '250px' }}>
+                    <p style={{ fontSize: '0.9em', color: '#444', margin: 0, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {lead.issueDescription || <span style={{ color: '#aaa', fontStyle: 'italic' }}>No description</span>}
+                    </p>
                   </td>
                   <td style={{ padding: '1rem' }}>
                     <span style={{ 
@@ -60,6 +81,13 @@ export default async function AdminLeadsPage() {
                     }}>
                       {lead.status}
                     </span>
+                  </td>
+                  <td style={{ padding: '1rem', textAlign: 'right' }}>
+                    <form action={async () => { "use server"; await deleteLead(lead.id); }} style={{ display: 'inline' }}>
+                      <button type="submit" style={{ background: 'none', border: 'none', color: '#d32f2f', cursor: 'pointer', textDecoration: 'underline' }}>
+                        Delete
+                      </button>
+                    </form>
                   </td>
                 </tr>
               ))
