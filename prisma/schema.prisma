@@ -103,13 +103,16 @@ model User {
 }
 
 model Lead {
-  id           String   @id @default(uuid())
-  name         String
-  email        String
-  phone        String
-  printerBrand String
-  status       String   @default("new")
-  createdAt    DateTime @default(now())
+  id               String   @id @default(uuid())
+  name             String
+  email            String
+  phone            String
+  printerBrand     String
+  status           String   @default("new")
+  ipAddress        String?
+  country          String?
+  issueDescription String?
+  createdAt        DateTime @default(now())
 }
 
 model Author {

@@ -7,8 +7,11 @@ export async function POST(req: NextRequest) {
     
     // Basic validation
     if (!data.name || !data.email || !data.phone || !data.printerBrand) {
-      return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
+      return NextResponse.json({ error: 'All required fields must be provided' }, { status: 400 });
     }
+
+    // Capture IP address
+    const ipAddress = req.headers.get('x-forwarded-for') || null;
 
     const lead = await prisma.lead.create({
       data: {
@@ -16,6 +19,9 @@ export async function POST(req: NextRequest) {
         email: data.email,
         phone: data.phone,
         printerBrand: data.printerBrand,
+        country: data.country || null,
+        issueDescription: data.issueDescription || null,
+        ipAddress: ipAddress,
       },
     });
 

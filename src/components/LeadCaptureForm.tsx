@@ -8,6 +8,8 @@ export default function LeadCaptureForm() {
     email: '',
     phone: '',
     printerBrand: '',
+    country: '',
+    issueDescription: '',
   });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
@@ -30,7 +32,7 @@ export default function LeadCaptureForm() {
 
       if (response.ok) {
         setStatus('success');
-        setFormData({ name: '', email: '', phone: '', printerBrand: '' });
+        setFormData({ name: '', email: '', phone: '', printerBrand: '', country: '', issueDescription: '' });
       } else {
         const errorData = await response.json();
         setStatus('error');
@@ -46,7 +48,7 @@ export default function LeadCaptureForm() {
     return (
       <div className="lead-capture-form success-state">
         <div className="success-icon">✅</div>
-        <h3>Request Received!</h3>
+        <h2>Request Received!</h2>
         <p>Our experts will contact you shortly to help resolve your printer issues.</p>
         <button onClick={() => setStatus('idle')} className="submit-btn outline">
           Submit Another Request
@@ -57,7 +59,7 @@ export default function LeadCaptureForm() {
 
   return (
     <div className="lead-capture-form">
-      <h3>Get Expert Printer Assistance</h3>
+      <h2>Get Expert Printer Assistance</h2>
       <p className="lead-subtitle">Having trouble with your printer? Tell us about your issue and receive step-by-step guidance.</p>
       
       <form onSubmit={handleSubmit} className="lead-form-grid">
@@ -116,6 +118,38 @@ export default function LeadCaptureForm() {
             <option value="Brother">Brother</option>
             <option value="Other">Other</option>
           </select>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="country">Country</label>
+          <select
+            id="country"
+            name="country"
+            value={formData.country}
+            onChange={handleChange}
+            required
+          >
+            <option value="" disabled>Select your country...</option>
+            <option value="US">United States</option>
+            <option value="CA">Canada</option>
+            <option value="UK">United Kingdom</option>
+            <option value="AU">Australia</option>
+            <option value="IN">India</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+          <label htmlFor="issueDescription">Issue Description (in a few words)</label>
+          <textarea
+            id="issueDescription"
+            name="issueDescription"
+            value={formData.issueDescription}
+            onChange={handleChange as any}
+            required
+            placeholder="e.g. Printer won't turn on, or paper jam error..."
+            rows={3}
+          />
         </div>
 
         {status === 'error' && <p className="error-message">{message}</p>}

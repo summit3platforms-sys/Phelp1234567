@@ -1,9 +1,15 @@
 import type { Metadata, Viewport } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import Link from "next/link";
-import Script from "next/script";
 import Image from "next/image";
 
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta-sans",
+  display: "swap",
+});
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -46,22 +52,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Google tag (gtag.js) */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-HW217Z2WG0"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-HW217Z2WG0');
-          `}
-        </Script>
-
       </head>
-      <body>
+      <body className={jakarta.variable}>
+        <GoogleAnalytics gaId="G-HW217Z2WG0" />
         <header className="header">
           <div className="container">
             <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
@@ -101,7 +94,7 @@ export default function RootLayout({
               </div>
 
               <div className="footer-col">
-                <h4 className="footer-col-title">Popular Brands</h4>
+                <h2 className="footer-col-title">Popular Brands</h2>
                 <div className="footer-col-links">
                   <Link href="/hp">HP Printers</Link>
                   <Link href="/canon">Canon Printers</Link>
@@ -112,7 +105,7 @@ export default function RootLayout({
               </div>
 
               <div className="footer-col">
-                <h4 className="footer-col-title">Common Topics</h4>
+                <h2 className="footer-col-title">Common Topics</h2>
                 <div className="footer-col-links">
                   <Link href="/search?q=Connectivity%20Issues">Connectivity Issues</Link>
                   <Link href="/search?q=Setup%20%26%20Installation">Setup & Installation</Link>
@@ -123,7 +116,7 @@ export default function RootLayout({
               </div>
 
               <div className="footer-col">
-                <h4 className="footer-col-title">Legal & Help</h4>
+                <h2 className="footer-col-title">Legal & Help</h2>
                 <div className="footer-col-links">
                   <Link href="/privacy-policy">Privacy Policy</Link>
                   <Link href="/about">About Us</Link>
