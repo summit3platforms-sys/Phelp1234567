@@ -449,8 +449,8 @@ async function main() {
           reviewerId: article.reviewerId,
           reviewedAt: new Date(),
           featuredImage: article.featuredImage,
-          featuredImageAlt: article.imageAlt,
-          featuredImageCaption: article.imageCaption,
+          featuredImageAlt: article.featuredImageAlt,
+          featuredImageCaption: article.featuredImageCaption,
         }
       });
       console.log(`✅ Published: "${created.title}"`);
