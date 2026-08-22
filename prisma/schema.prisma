@@ -123,6 +123,9 @@ model Author {
   image     String?
   role            String?   @default("Technical Expert")
   experienceYears Int?      @default(10)
+  linkedinUrl     String?
+  twitterUrl      String?
+  credentialsUrl  String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   articles        Article[] @relation("ArticleAuthor")

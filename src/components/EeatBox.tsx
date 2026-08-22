@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 interface AuthorProps {
   name: string;
@@ -75,10 +76,12 @@ export default function EeatBox({
           {author && (
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
               {author.image ? (
-                <img
+                <Image
                   src={author.image}
                   alt={author.name}
-                  style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }}
+                  width={48}
+                  height={48}
+                  style={{ borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }}
                 />
               ) : (
                 <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#fff' }}>
@@ -105,10 +108,12 @@ export default function EeatBox({
           {reviewer && (
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
               {reviewer.image ? (
-                <img
+                <Image
                   src={reviewer.image}
                   alt={reviewer.name}
-                  style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }}
+                  width={48}
+                  height={48}
+                  style={{ borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }}
                 />
               ) : (
                 <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#fff' }}>

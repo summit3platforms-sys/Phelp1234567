@@ -21,6 +21,7 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
   return {
     title: `${brand.name} Printer ${category.name} - Troubleshooting Guides`,
     description: `Resolve ${brand.name} printer issues related to ${category.name.toLowerCase()}. Find step-by-step guides, error code solutions, and help.`,
+    alternates: { canonical: `https://libertyprinterfix.com/${brand.slug}/${category.slug}` },
   };
 }
 

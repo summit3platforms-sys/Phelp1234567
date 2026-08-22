@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
   return {
     title: article.seoTitle || `${article.title} - ${article.brand?.name || "Support"}`,
     description: article.metaDescription || `Troubleshooting guide for ${article.title}.`,
-    alternates: article.canonicalUrl ? { canonical: article.canonicalUrl } : undefined,
+    alternates: { canonical: article.canonicalUrl || `https://libertyprinterfix.com${currentPath}` },
     openGraph: {
       title: article.seoTitle || `${article.title} - ${article.brand?.name || "Support"}`,
       description: article.metaDescription || `Troubleshooting guide for ${article.title}.`,
@@ -172,15 +172,21 @@ export default async function ArticlePage({ params }: PageParams) {
       "author": {
         "@type": "Person",
         "name": article.author?.name || "Technical Expert",
-        "jobTitle": article.author?.role || "Printer Support Specialist"
+        "jobTitle": article.author?.role || "Printer Support Specialist",
+        "url": article.author ? `https://libertyprinterfix.com/author/${article.author.slug}` : undefined
       },
       "publisher": {
         "@type": "Organization",
+        "@id": "https://libertyprinterfix.com/#organization",
         "name": "LibertyPrinterFix",
         "logo": {
           "@type": "ImageObject",
           "url": "https://libertyprinterfix.com/logo.png"
         }
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": `https://libertyprinterfix.com/${article.brand?.slug || "uncategorized"}/${article.category?.slug || "uncategorized"}/${article.slug}`
       }
     }
   ];
@@ -211,7 +217,7 @@ export default async function ArticlePage({ params }: PageParams) {
         return (
           <Image 
             src={src} 
-            alt={alt || "Article image"} 
+            alt={alt || `Illustration for ${article?.title || 'this guide'}`} 
             width={width ? parseInt(width, 10) : 800} 
             height={height ? parseInt(height, 10) : 450} 
             sizes="(max-width: 768px) 100vw, 800px"

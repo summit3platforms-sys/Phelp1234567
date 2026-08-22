@@ -59,6 +59,45 @@ export default function RootLayout({
           `}
         </Script>
 
+        {/* Site-wide Organization & WebSite JSON-LD for E-E-A-T */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Organization",
+                "@id": "https://libertyprinterfix.com/#organization",
+                "name": "LibertyPrinterFix",
+                "url": "https://libertyprinterfix.com",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": "https://libertyprinterfix.com/logo.png",
+                  "width": 200,
+                  "height": 50
+                },
+                "description": "The ultimate independent database for printer troubleshooting, setup guides, ink/toner fixes, and diagnostic error codes.",
+                "sameAs": []
+              },
+              {
+                "@type": "WebSite",
+                "@id": "https://libertyprinterfix.com/#website",
+                "name": "LibertyPrinterFix",
+                "url": "https://libertyprinterfix.com",
+                "publisher": { "@id": "https://libertyprinterfix.com/#organization" },
+                "potentialAction": {
+                  "@type": "SearchAction",
+                  "target": {
+                    "@type": "EntryPoint",
+                    "urlTemplate": "https://libertyprinterfix.com/search?q={search_term_string}"
+                  },
+                  "query-input": "required name=search_term_string"
+                }
+              }
+            ]
+          }) }}
+        />
+
       </head>
       <body>
         <header className="header">

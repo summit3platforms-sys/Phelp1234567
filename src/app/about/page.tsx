@@ -1,11 +1,16 @@
 import { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "About Us - Liberty Printer Fix",
   description: "Learn more about Liberty Printer Fix, your independent online resource for printer troubleshooting, setup assistance, maintenance, and technical solutions.",
+  alternates: { canonical: "https://libertyprinterfix.com/about" },
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  // Fetch real authors from DB for dynamic team section
+  const authors = await prisma.author.findMany({ orderBy: { name: 'asc' } });
   const headingStyle = { fontSize: '1.75rem', fontWeight: 700, color: '#0f172a', marginTop: '2rem', marginBottom: '1rem', letterSpacing: '-0.02em' };
   const subHeadingStyle = { fontSize: '1.25rem', fontWeight: 700, color: '#1e293b', marginTop: '1.5rem', marginBottom: '0.75rem' };
   const paragraphStyle = { color: '#334155', lineHeight: '1.75', marginBottom: '1.25rem' };
@@ -13,6 +18,21 @@ export default function AboutPage() {
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 0' }}>
+      {/* AboutPage JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          "name": "About Liberty Printer Fix",
+          "url": "https://libertyprinterfix.com/about",
+          "description": "Learn more about Liberty Printer Fix, your independent online resource for printer troubleshooting.",
+          "mainEntity": {
+            "@type": "Organization",
+            "@id": "https://libertyprinterfix.com/#organization"
+          }
+        }) }}
+      />
       <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1.5rem', letterSpacing: '-0.03em', color: '#0f172a' }}>
         About Liberty Printer Fix
       </h1>
@@ -139,23 +159,20 @@ export default function AboutPage() {
 
       <h2 style={headingStyle}>Meet Our Team</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.5rem', marginTop: '1.5rem' }}>
-        {[
-          { name: "Michael Anderson", role: "Founder & Editor-in-Chief", desc: "Michael leads the editorial direction of Liberty Printer Fix and oversees content quality, publishing standards, and long-term growth initiatives." },
-          { name: "Sarah Mitchell", role: "Senior Technical Writer", desc: "Sarah specializes in creating detailed troubleshooting guides, installation tutorials, and printer maintenance resources." },
-          { name: "David Thompson", role: "Printer Support Specialist", desc: "David researches printer hardware issues, common faults, and manufacturer troubleshooting procedures." },
-          { name: "Jennifer Roberts", role: "Content Editor", desc: "Jennifer reviews all published content to ensure consistency, readability, and editorial quality." },
-          { name: "Robert Wilson", role: "Research Analyst", desc: "Robert monitors manufacturer updates, support documentation, and announcements to ensure accuracy." },
-          { name: "Emily Carter", role: "Network & Connectivity Expert", desc: "Emily specializes in printer networking, wireless printing systems, and connectivity troubleshooting." },
-          { name: "Daniel Garcia", role: "POS & Thermal Printer Specialist", desc: "Daniel focuses on receipt printers, barcode printers, and POS printing systems used in retail." },
-          { name: "Olivia Martinez", role: "Technical Content Reviewer", desc: "Olivia performs technical validation and quality assurance reviews of troubleshooting content." },
-          { name: "Christopher Evans", role: "Knowledge Base Manager", desc: "Christopher organizes and manages the site's growing library of printer support resources." },
-          { name: "Jessica Moore", role: "Community & Support Coordinator", desc: "Jessica manages reader feedback, content suggestions, and communication channels." }
-        ].map((member, index) => (
-          <div key={index} style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '6px', background: '#f8fafc' }}>
-            <h4 style={{ margin: '0 0 0.25rem 0', color: '#0f172a', fontWeight: 'bold' }}>{member.name}</h4>
-            <p style={{ margin: '0 0 0.5rem 0', color: 'var(--primary-color)', fontSize: '0.85rem', fontWeight: 600 }}>{member.role}</p>
-            <p style={{ margin: 0, color: '#475569', fontSize: '0.85rem', lineHeight: '1.5' }}>{member.desc}</p>
-          </div>
+        {authors.map((member) => (
+          <Link href={`/author/${member.slug}`} key={member.id} style={{ textDecoration: 'none' }}>
+            <div style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '6px', background: '#f8fafc', transition: 'box-shadow 0.15s', cursor: 'pointer' }}>
+              <h4 style={{ margin: '0 0 0.25rem 0', color: '#0f172a', fontWeight: 'bold' }}>{member.name}</h4>
+              <p style={{ margin: '0 0 0.5rem 0', color: 'var(--primary-color)', fontSize: '0.85rem', fontWeight: 600 }}>
+                {member.role || 'Technical Expert'} {member.experienceYears ? `• ${member.experienceYears}+ Yrs` : ''}
+              </p>
+              {member.bio && (
+                <p style={{ margin: 0, color: '#475569', fontSize: '0.85rem', lineHeight: '1.5' }}>
+                  {member.bio.length > 120 ? member.bio.substring(0, 120) + '...' : member.bio}
+                </p>
+              )}
+            </div>
+          </Link>
         ))}
       </div>
 
