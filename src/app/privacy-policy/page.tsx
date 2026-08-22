@@ -4,6 +4,9 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Privacy Policy - LibertyPrinterFix",
   description: "Read the comprehensive Privacy Policy for LibertyPrinterFix, detailing how we collect, use, and safeguard your data.",
+  alternates: {
+    canonical: "https://libertyprinterfix.com/privacy-policy",
+  },
 };
 
 export default function PrivacyPolicyPage() {

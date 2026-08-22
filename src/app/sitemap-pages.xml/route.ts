@@ -13,6 +13,7 @@ export const dynamic = 'force-dynamic';
 
 // Known static pages (only pages that actually exist in the app)
 const STATIC_PAGES = [
+  { path: '/brands',         lastmodFixed: '2025-01-01' },
   { path: '/about',          lastmodFixed: '2025-01-01' },
   { path: '/contact',        lastmodFixed: '2025-01-01' },
   { path: '/privacy-policy', lastmodFixed: '2025-01-01' },

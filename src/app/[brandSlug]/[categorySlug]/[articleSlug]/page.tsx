@@ -413,7 +413,7 @@ export default async function ArticlePage({ params }: PageParams) {
                         {article.author.name.charAt(0)}
                       </div>
                     )}
-                    <span>By <strong>{article.author.name}</strong></span>
+                    <span>By <Link href={`/author/${article.author.slug}`} style={{ color: 'inherit', textDecoration: 'none', borderBottom: '1px dotted #94a3b8' }}><strong>{article.author.name}</strong></Link></span>
                   </div>
                 )}
                 <span>Published: <time dateTime={article.publishedAt ? new Date(article.publishedAt).toISOString() : new Date(article.createdAt).toISOString()}>{new Date(article.publishedAt || article.createdAt).toLocaleDateString()}</time></span>
@@ -497,6 +497,35 @@ export default async function ArticlePage({ params }: PageParams) {
                     </div>
                   </details>
                 ))}
+              </div>
+            )}
+
+            {/* Semantic Topic Tags */}
+            {article.tags && (
+              <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Topics:</span>
+                {article.tags.split(',').map((tag, idx) => {
+                  const cleanTag = tag.trim();
+                  if (!cleanTag) return null;
+                  return (
+                    <Link
+                      key={idx}
+                      href={`/search?q=${encodeURIComponent(cleanTag)}`}
+                      style={{
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        color: 'var(--primary-color)',
+                        background: '#f1f5f9',
+                        padding: '0.2rem 0.6rem',
+                        borderRadius: '9999px',
+                        textDecoration: 'none',
+                        transition: 'background 0.15s',
+                      }}
+                    >
+                      #{cleanTag}
+                    </Link>
+                  );
+                })}
               </div>
             )}
           </article>

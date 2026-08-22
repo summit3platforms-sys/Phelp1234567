@@ -8,12 +8,43 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "All Supported Printer Brands - LibertyPrinterFix",
   description: "Browse all supported printer brands for troubleshooting guides and error codes, including HP, Canon, Epson, Brother, and more.",
+  alternates: {
+    canonical: "https://libertyprinterfix.com/brands",
+  },
 };
 
 export default async function BrandsPage() {
   const brands = await prisma.brand.findMany({
     orderBy: { name: 'asc' }
   });
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://libertyprinterfix.com/" },
+          { "@type": "ListItem", "position": 2, "name": "All Brands", "item": "https://libertyprinterfix.com/brands" }
+        ]
+      },
+      {
+        "@type": "CollectionPage",
+        "name": "All Supported Printer Brands",
+        "description": "Browse all supported printer brands for troubleshooting guides and error codes.",
+        "url": "https://libertyprinterfix.com/brands",
+        "mainEntity": {
+          "@type": "ItemList",
+          "itemListElement": brands.map((brand, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "name": brand.name,
+            "url": `https://libertyprinterfix.com/${brand.slug}`
+          }))
+        }
+      }
+    ]
+  };
 
   const getBrandEmoji = (name: string): string => {
     const key = name.toLowerCase();
@@ -38,6 +69,16 @@ export default async function BrandsPage() {
 
   return (
     <div className="page-top">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      {/* Breadcrumbs */}
+      <nav aria-label="Breadcrumb" style={{ marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+        <Link href="/">Home</Link> &gt; 
+        <span style={{ color: 'var(--text-muted)' }}> All Brands</span>
+      </nav>
+
       <div style={{ marginBottom: '3rem', textAlign: 'center' }}>
         <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '-0.03em' }}>
           All Printer Brands

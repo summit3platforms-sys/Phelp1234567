@@ -19,6 +19,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://libertyprinterfix.com'),
   title: "LibertyPrinterFix - Printer Troubleshooting & Error Codes",
   description: "Find solutions, error codes, and troubleshooting steps for all major printer brands including HP, Canon, Epson, and Brother.",
   openGraph: {

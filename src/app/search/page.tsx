@@ -5,6 +5,13 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Search Printer Errors - LibertyPrinterFix",
   description: "Search our database for printer error codes, models, and troubleshooting steps.",
+  robots: {
+    index: false,
+    follow: true,
+  },
+  alternates: {
+    canonical: "https://libertyprinterfix.com/search",
+  },
 };
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {

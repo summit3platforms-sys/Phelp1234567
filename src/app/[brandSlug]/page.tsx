@@ -19,6 +19,9 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
   return {
     title: `${brand.name} Printer Troubleshooting & Error Codes`,
     description: brand.description || `Find solutions for ${brand.name} printer errors, setup issues, and offline problems.`,
+    alternates: {
+      canonical: `https://libertyprinterfix.com/${brand.slug}`,
+    },
   };
 }
 
@@ -58,18 +61,29 @@ export default async function BrandPage({ params }: PageParams) {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": `${brand.name} Printer Troubleshooting & Error Codes`,
-    "description": brand.description || `Find solutions for ${brand.name} printer errors, setup issues, and offline problems.`,
-    "url": `https://libertyprinterfix.com/${brand.slug}`,
-    "mainEntity": {
-      "@type": "ItemList",
-      "itemListElement": brand.articles.map((article, index) => ({
-        "@type": "ListItem",
-        "position": index + 1,
-        "url": `https://libertyprinterfix.com/${brand.slug}/${article.category?.slug || "uncategorized"}/${article.slug}`
-      }))
-    }
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://libertyprinterfix.com/" },
+          { "@type": "ListItem", "position": 2, "name": brand.name, "item": `https://libertyprinterfix.com/${brand.slug}` }
+        ]
+      },
+      {
+        "@type": "CollectionPage",
+        "name": `${brand.name} Printer Troubleshooting & Error Codes`,
+        "description": brand.description || `Find solutions for ${brand.name} printer errors, setup issues, and offline problems.`,
+        "url": `https://libertyprinterfix.com/${brand.slug}`,
+        "mainEntity": {
+          "@type": "ItemList",
+          "itemListElement": brand.articles.map((article, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "url": `https://libertyprinterfix.com/${brand.slug}/${article.category?.slug || "uncategorized"}/${article.slug}`
+          }))
+        }
+      }
+    ]
   };
 
   return (

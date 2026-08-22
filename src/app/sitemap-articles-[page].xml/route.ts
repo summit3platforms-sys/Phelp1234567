@@ -46,7 +46,9 @@ export async function GET(
       categoryId: { not: null },
     },
     select: {
+      title: true,
       slug: true,
+      featuredImage: true,
       updatedAt: true,
       brand: { select: { slug: true } },
       category: { select: { slug: true } },
@@ -61,6 +63,10 @@ export async function GET(
     .map((a) => ({
       loc: `${BASE_URL}/${a.brand!.slug}/${a.category!.slug}/${a.slug}`,
       lastmod: a.updatedAt,
+      image: a.featuredImage ? {
+        loc: a.featuredImage.startsWith('http') ? a.featuredImage : `${BASE_URL}${a.featuredImage}`,
+        title: a.title,
+      } : undefined,
     }));
 
   return xmlResponse(buildSitemapXml(urls));

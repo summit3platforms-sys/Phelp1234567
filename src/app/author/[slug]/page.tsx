@@ -41,29 +41,41 @@ export default async function AuthorPage({ params }: PageParams) {
   if ((author as any).twitterUrl) sameAs.push((author as any).twitterUrl);
   if ((author as any).credentialsUrl) sameAs.push((author as any).credentialsUrl);
 
-  // Person JSON-LD for E-E-A-T
-  const personJsonLd = {
+  // JSON-LD graph (BreadcrumbList + Person) for E-E-A-T
+  const authorJsonLd = {
     "@context": "https://schema.org",
-    "@type": "Person",
-    "name": author.name,
-    "url": `https://libertyprinterfix.com/author/${author.slug}`,
-    "jobTitle": author.role || "Technical Expert",
-    "description": author.bio || `Technical writer and printer support specialist at LibertyPrinterFix.`,
-    "worksFor": {
-      "@type": "Organization",
-      "@id": "https://libertyprinterfix.com/#organization",
-      "name": "LibertyPrinterFix"
-    },
-    ...(author.image ? { "image": author.image } : {}),
-    ...(sameAs.length > 0 ? { "sameAs": sameAs } : {}),
-    ...(author.experienceYears ? { "knowsAbout": ["Printer Troubleshooting", "Technical Support", "Hardware Diagnostics"] } : {})
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://libertyprinterfix.com/" },
+          { "@type": "ListItem", "position": 2, "name": "About", "item": "https://libertyprinterfix.com/about" },
+          { "@type": "ListItem", "position": 3, "name": author.name, "item": `https://libertyprinterfix.com/author/${author.slug}` }
+        ]
+      },
+      {
+        "@type": "Person",
+        "name": author.name,
+        "url": `https://libertyprinterfix.com/author/${author.slug}`,
+        "jobTitle": author.role || "Technical Expert",
+        "description": author.bio || `Technical writer and printer support specialist at LibertyPrinterFix.`,
+        "worksFor": {
+          "@type": "Organization",
+          "@id": "https://libertyprinterfix.com/#organization",
+          "name": "LibertyPrinterFix"
+        },
+        ...(author.image ? { "image": author.image } : {}),
+        ...(sameAs.length > 0 ? { "sameAs": sameAs } : {}),
+        ...(author.experienceYears ? { "knowsAbout": ["Printer Troubleshooting", "Technical Support", "Hardware Diagnostics"] } : {})
+      }
+    ]
   };
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem' }}>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(authorJsonLd) }}
       />
 
       {/* Breadcrumb */}

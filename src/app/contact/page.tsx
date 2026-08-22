@@ -1,13 +1,49 @@
 import { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Contact Us - LibertyPrinterFix",
   description: "Get in touch with the team at LibertyPrinterFix for support, feedback, or inquiries.",
+  alternates: {
+    canonical: "https://libertyprinterfix.com/contact",
+  },
 };
 
 export default function ContactPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://libertyprinterfix.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Contact Us", "item": "https://libertyprinterfix.com/contact" }
+        ]
+      },
+      {
+        "@type": "ContactPage",
+        "name": "Contact LibertyPrinterFix",
+        "url": "https://libertyprinterfix.com/contact",
+        "description": "Get in touch with the team at LibertyPrinterFix for support, feedback, or inquiries.",
+        "mainEntity": {
+          "@type": "Organization",
+          "@id": "https://libertyprinterfix.com/#organization"
+        }
+      }
+    ]
+  };
+
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem 0' }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      {/* Breadcrumbs */}
+      <nav aria-label="Breadcrumb" style={{ marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+        <Link href="/">Home</Link> &gt; 
+        <span style={{ color: 'var(--text-muted)' }}> Contact Us</span>
+      </nav>
       <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '-0.03em' }}>
         Contact Us
       </h1>

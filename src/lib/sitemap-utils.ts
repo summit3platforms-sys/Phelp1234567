@@ -1,5 +1,5 @@
 // Sitemap utilities — shared across all sitemap route handlers
-// UTF-8, sitemaps.org compliant, no priority/changefreq
+// UTF-8, sitemaps.org compliant, with optional Google Image Sitemap extension
 
 export const BASE_URL = 'https://libertyprinterfix.com';
 export const CHUNK_SIZE = 5000; // max URLs per sitemap file
@@ -25,28 +25,41 @@ export function toIso(date: Date | string): string {
 }
 
 // ---------------------------------------------------------------------------
-// URL entry builder — Google requires only <loc> and <lastmod>
+// URL entry builder — Google requires only <loc> and <lastmod> (+ optional <image:image>)
 // ---------------------------------------------------------------------------
 
 export interface SitemapUrl {
   loc: string;
   lastmod: Date | string;
+  image?: {
+    loc: string;
+    title?: string;
+  };
 }
 
-export function buildUrlEntry({ loc, lastmod }: SitemapUrl): string {
-  return `  <url>\n    <loc>${escapeXml(loc)}</loc>\n    <lastmod>${toIso(lastmod)}</lastmod>\n  </url>`;
+export function buildUrlEntry({ loc, lastmod, image }: SitemapUrl): string {
+  let entry = `  <url>\n    <loc>${escapeXml(loc)}</loc>\n    <lastmod>${toIso(lastmod)}</lastmod>`;
+  if (image && image.loc) {
+    entry += `\n    <image:image>\n      <image:loc>${escapeXml(image.loc)}</image:loc>`;
+    if (image.title) {
+      entry += `\n      <image:title>${escapeXml(image.title)}</image:title>`;
+    }
+    entry += `\n    </image:image>`;
+  }
+  entry += `\n  </url>`;
+  return entry;
 }
 
 // ---------------------------------------------------------------------------
 // Sitemap document builders
 // ---------------------------------------------------------------------------
 
-/** Wraps URL entries in a <urlset> document. */
+/** Wraps URL entries in a <urlset> document with Google Image extension namespace. */
 export function buildSitemapXml(urls: SitemapUrl[]): string {
   const entries = urls.map(buildUrlEntry).join('\n');
   return (
     `<?xml version="1.0" encoding="UTF-8"?>\n` +
-    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n` +
     entries +
     `\n</urlset>`
   );

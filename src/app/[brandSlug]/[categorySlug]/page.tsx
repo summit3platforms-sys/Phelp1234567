@@ -6,8 +6,9 @@ import Image from "next/image";
 
 type PageParams = { params: Promise<{ brandSlug: string; categorySlug: string }>; searchParams: Promise<{ page?: string }> };
 
-export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageParams): Promise<Metadata> {
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   const brand = await prisma.brand.findUnique({ where: { slug: resolvedParams.brandSlug } });
   const category = await prisma.category.findUnique({ where: { slug: resolvedParams.categorySlug } });
   
@@ -18,10 +19,15 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
     return { title: 'Not Found' };
   }
   
+  const page = parseInt(resolvedSearchParams.page || '1', 10);
+  const canonicalUrl = page > 1
+    ? `https://libertyprinterfix.com/${brand.slug}/${category.slug}?page=${page}`
+    : `https://libertyprinterfix.com/${brand.slug}/${category.slug}`;
+
   return {
-    title: `${brand.name} Printer ${category.name} - Troubleshooting Guides`,
+    title: `${brand.name} Printer ${category.name} - Troubleshooting Guides${page > 1 ? ` (Page ${page})` : ''}`,
     description: `Resolve ${brand.name} printer issues related to ${category.name.toLowerCase()}. Find step-by-step guides, error code solutions, and help.`,
-    alternates: { canonical: `https://libertyprinterfix.com/${brand.slug}/${category.slug}` },
+    alternates: { canonical: canonicalUrl },
   };
 }
 
@@ -73,18 +79,31 @@ export default async function BrandCategoryPage({ params, searchParams }: PagePa
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": `${brand.name} Printer: ${category.name}`,
-    "description": `Browse all troubleshooting articles and solutions for ${brand.name} printers under the ${category.name.toLowerCase()} category.`,
-    "url": `https://libertyprinterfix.com/${brand.slug}/${category.slug}`,
-    "mainEntity": {
-      "@type": "ItemList",
-      "itemListElement": articles.map((article, index) => ({
-        "@type": "ListItem",
-        "position": index + 1,
-        "url": `https://libertyprinterfix.com/${brand.slug}/${category.slug}/${article.slug}`
-      }))
-    }
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://libertyprinterfix.com/" },
+          { "@type": "ListItem", "position": 2, "name": brand.name, "item": `https://libertyprinterfix.com/${brand.slug}` },
+          { "@type": "ListItem", "position": 3, "name": category.name, "item": `https://libertyprinterfix.com/${brand.slug}/${category.slug}` }
+        ]
+      },
+      {
+        "@type": "CollectionPage",
+        "name": `${brand.name} Printer: ${category.name}`,
+        "description": `Browse all troubleshooting articles and solutions for ${brand.name} printers under the ${category.name.toLowerCase()} category.`,
+        "url": `https://libertyprinterfix.com/${brand.slug}/${category.slug}`,
+        "mainEntity": {
+          "@type": "ItemList",
+          "itemListElement": articles.map((article, index) => ({
+            "@type": "ListItem",
+            "position": skip + index + 1,
+            "name": article.title,
+            "url": `https://libertyprinterfix.com/${brand.slug}/${category.slug}/${article.slug}`
+          }))
+        }
+      }
+    ]
   };
 
   return (
