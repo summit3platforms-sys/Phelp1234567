@@ -205,6 +205,31 @@ export default async function ArticlePage({ params }: PageParams) {
     });
   }
 
+  // HowTo JSON-LD: Auto-extract steps from ordered lists in the article content
+  const olRegex = /<ol[^>]*>([\s\S]*?)<\/ol>/i;
+  const olMatch = article.content.match(olRegex);
+  if (olMatch) {
+    const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi;
+    const steps: { "@type": string; text: string; position: number }[] = [];
+    let liMatch;
+    let pos = 1;
+    while ((liMatch = liRegex.exec(olMatch[1])) !== null) {
+      const stepText = liMatch[1].replace(/<[^>]*>/g, '').trim();
+      if (stepText.length > 5) {
+        steps.push({ "@type": "HowToStep", text: stepText, position: pos++ });
+      }
+    }
+    if (steps.length >= 2) {
+      jsonLdGraph.push({
+        "@type": "HowTo",
+        "name": article.title,
+        "description": article.metaDescription || article.excerpt || "",
+        "totalTime": article.timeToFix ? `PT${article.timeToFix.replace(/[^0-9]/g, '')}M` : "PT15M",
+        "step": steps
+      });
+    }
+  }
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": jsonLdGraph

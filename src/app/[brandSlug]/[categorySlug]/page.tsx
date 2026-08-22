@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import Image from "next/image";
 
-type PageParams = { params: Promise<{ brandSlug: string; categorySlug: string }> };
+type PageParams = { params: Promise<{ brandSlug: string; categorySlug: string }>; searchParams: Promise<{ page?: string }> };
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
   const resolvedParams = await params;
@@ -25,8 +25,9 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
   };
 }
 
-export default async function BrandCategoryPage({ params }: PageParams) {
+export default async function BrandCategoryPage({ params, searchParams }: PageParams) {
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   const brand = await prisma.brand.findUnique({
     where: { slug: resolvedParams.brandSlug }
   });
@@ -44,14 +45,31 @@ export default async function BrandCategoryPage({ params }: PageParams) {
     notFound();
   }
 
-  const articles = await prisma.article.findMany({
-    where: {
-      brandId: brand.id,
-      categoryId: category.id,
-      status: 'published'
-    },
-    orderBy: { publishedAt: 'desc' }
-  });
+  const ITEMS_PER_PAGE = 20;
+  const currentPage = Math.max(1, parseInt(resolvedSearchParams.page || '1', 10) || 1);
+  const skip = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  const [articles, totalCount] = await Promise.all([
+    prisma.article.findMany({
+      where: {
+        brandId: brand.id,
+        categoryId: category.id,
+        status: 'published'
+      },
+      orderBy: { publishedAt: 'desc' },
+      skip,
+      take: ITEMS_PER_PAGE,
+    }),
+    prisma.article.count({
+      where: {
+        brandId: brand.id,
+        categoryId: category.id,
+        status: 'published'
+      }
+    })
+  ]);
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -100,7 +118,7 @@ export default async function BrandCategoryPage({ params }: PageParams) {
         <div className="articles-section" style={{ padding: '2rem' }}>
           <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '1.5rem' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--text-color)' }}>
-              Guides & Solutions ({articles.length})
+              Guides & Solutions ({totalCount})
             </h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
@@ -146,6 +164,28 @@ export default async function BrandCategoryPage({ params }: PageParams) {
               </div>
             ))}
           </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <nav aria-label="Pagination" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
+              {currentPage > 1 ? (
+                <Link href={`/${brand.slug}/${category.slug}?page=${currentPage - 1}`} style={{ padding: '0.5rem 1rem', background: '#f1f5f9', borderRadius: '6px', fontWeight: 600, fontSize: '0.9rem', color: 'var(--primary-color)', textDecoration: 'none' }}>
+                  ← Previous
+                </Link>
+              ) : (
+                <span style={{ padding: '0.5rem 1rem', background: '#f8fafc', borderRadius: '6px', fontWeight: 600, fontSize: '0.9rem', color: '#94a3b8' }}>← Previous</span>
+              )}
+              <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 500 }}>
+                Page {currentPage} of {totalPages}
+              </span>
+              {currentPage < totalPages ? (
+                <Link href={`/${brand.slug}/${category.slug}?page=${currentPage + 1}`} style={{ padding: '0.5rem 1rem', background: '#f1f5f9', borderRadius: '6px', fontWeight: 600, fontSize: '0.9rem', color: 'var(--primary-color)', textDecoration: 'none' }}>
+                  Next →
+                </Link>
+              ) : (
+                <span style={{ padding: '0.5rem 1rem', background: '#f8fafc', borderRadius: '6px', fontWeight: 600, fontSize: '0.9rem', color: '#94a3b8' }}>Next →</span>
+              )}
+            </nav>
+          )}
         </div>
       )}
     </div>
