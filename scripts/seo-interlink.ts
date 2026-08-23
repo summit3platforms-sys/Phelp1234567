@@ -86,6 +86,9 @@ async function main() {
       if (kwData.articleId === article.id) continue; // Don't link to self
       if (linkedArticleIds.has(kwData.articleId)) continue; // Only one link to a specific article
 
+      // Fast in-memory pre-filter before DOM traversal
+      if (!article.content.toLowerCase().includes(kwData.keyword)) continue;
+
       const regex = new RegExp(`\\b(${escapeRegExp(kwData.keyword)})\\b`, 'i');
       let keywordMatched = false;
 
