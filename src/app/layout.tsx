@@ -68,7 +68,7 @@ export default function RootLayout({
           `}
         </Script>
 
-        {/* Site-wide Organization & WebSite JSON-LD for E-E-A-T */}
+        {/* Site-wide Organization & WebSite JSON-LD for E-E-A-T & GEO Entity Graph */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify({
@@ -86,7 +86,23 @@ export default function RootLayout({
                   "height": 50
                 },
                 "description": "The ultimate independent database for printer troubleshooting, setup guides, ink/toner fixes, and diagnostic error codes.",
-                "sameAs": []
+                "knowsAbout": [
+                  "Printer Hardware Repair",
+                  "Laser Printer Diagnostics",
+                  "Thermal & POS Label Printing",
+                  "Inkjet Micro Piezo Technology",
+                  "Print Spooler & Network Configuration",
+                  "Error Code Decoders"
+                ],
+                "contactPoint": {
+                  "@type": "ContactPoint",
+                  "contactType": "Customer Support",
+                  "email": "info@libertyprinterfix.com",
+                  "availableLanguage": ["English"]
+                },
+                "sameAs": [
+                  "https://twitter.com/libertyprinterfix"
+                ]
               },
               {
                 "@type": "WebSite",

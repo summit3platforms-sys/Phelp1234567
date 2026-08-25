@@ -6,6 +6,7 @@ import Image from "next/image";
 import parse, { domToReact, Element } from 'html-react-parser';
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import EeatBox from "@/components/EeatBox";
+import QuickAnswerBox from "@/components/QuickAnswerBox";
 
 type PageParams = { params: Promise<{ brandSlug: string; categorySlug: string; articleSlug: string }> };
 
@@ -151,7 +152,7 @@ export default async function ArticlePage({ params }: PageParams) {
     }
   }
 
-  // Schema.org JSON-LD Structured Data
+  // Schema.org JSON-LD Structured Data (Optimized for AEO / GEO / Generative Engines)
   const jsonLdGraph: any[] = [
     {
       "@type": "BreadcrumbList",
@@ -163,17 +164,33 @@ export default async function ArticlePage({ params }: PageParams) {
       ]
     },
     {
-      "@type": "Article",
+      "@type": "TechArticle",
+      "@id": `https://libertyprinterfix.com/${article.brand?.slug || "uncategorized"}/${article.category?.slug || "uncategorized"}/${article.slug}#techarticle`,
       "headline": article.title,
       "description": article.metaDescription || article.excerpt,
-      "image": article.featuredImage ? [article.featuredImage] : [],
-      "datePublished": article.publishedAt?.toISOString(),
+      "image": article.featuredImage ? [article.featuredImage] : ['https://libertyprinterfix.com/logo.png'],
+      "datePublished": article.publishedAt?.toISOString() || article.createdAt.toISOString(),
       "dateModified": article.updatedAt.toISOString(),
+      "proficiencyLevel": article.difficultyLevel || "Intermediate",
+      "dependencies": "Standard tools, 99% isopropyl alcohol, lint-free cloth, screwdriver",
+      "about": {
+        "@type": "Product",
+        "name": article.printerModel || `${article.brand?.name || 'Printer'} Hardware`,
+        "brand": {
+          "@type": "Brand",
+          "name": article.brand?.name || "Printer Manufacturer"
+        }
+      },
+      "speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": [".direct-answer-summary", ".eeat-box", ".quick-answer-box"]
+      },
       "author": {
         "@type": "Person",
-        "name": article.author?.name || "Technical Expert",
-        "jobTitle": article.author?.role || "Printer Support Specialist",
-        "url": article.author ? `https://libertyprinterfix.com/author/${article.author.slug}` : undefined
+        "name": article.author?.name || "Printer Technical Specialist",
+        "jobTitle": article.author?.role || "Hardware Diagnostics Engineer",
+        "url": article.author ? `https://libertyprinterfix.com/author/${article.author.slug}` : undefined,
+        "knowsAbout": ["Printer Hardware Repair", "Firmware Diagnostics", "Micro Piezo Systems", "Laser Printing Electronics"]
       },
       "publisher": {
         "@type": "Organization",
@@ -210,21 +227,36 @@ export default async function ArticlePage({ params }: PageParams) {
   const olMatch = article.content.match(olRegex);
   if (olMatch) {
     const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi;
-    const steps: { "@type": string; text: string; position: number }[] = [];
+    const steps: { "@type": string; text: string; position: number; name?: string }[] = [];
     let liMatch;
     let pos = 1;
     while ((liMatch = liRegex.exec(olMatch[1])) !== null) {
       const stepText = liMatch[1].replace(/<[^>]*>/g, '').trim();
       if (stepText.length > 5) {
-        steps.push({ "@type": "HowToStep", text: stepText, position: pos++ });
+        const titleMatch = stepText.match(/^([^:\.\n]+)/);
+        steps.push({
+          "@type": "HowToStep",
+          "name": titleMatch ? titleMatch[1].trim() : `Step ${pos}`,
+          "text": stepText,
+          "position": pos++
+        });
       }
     }
     if (steps.length >= 2) {
       jsonLdGraph.push({
         "@type": "HowTo",
-        "name": article.title,
-        "description": article.metaDescription || article.excerpt || "",
-        "totalTime": article.timeToFix ? `PT${article.timeToFix.replace(/[^0-9]/g, '')}M` : "PT15M",
+        "name": `How to Fix: ${article.title}`,
+        "description": article.metaDescription || article.excerpt || `Step-by-step diagnostic and repair instructions for ${article.title}.`,
+        "totalTime": article.timeToFix ? `PT${article.timeToFix.replace(/[^0-9]/g, '') || '15'}M` : "PT15M",
+        "tool": [
+          { "@type": "HowToTool", "name": "99% Anhydrous Isopropyl Alcohol" },
+          { "@type": "HowToTool", "name": "Lint-Free Microfiber Cleaning Swabs" },
+          { "@type": "HowToTool", "name": "Precision Phillips Screwdriver" }
+        ],
+        "supply": [
+          { "@type": "HowToSupply", "name": "Clean Distilled Water" },
+          { "@type": "HowToSupply", "name": "Compatible OEM Replacement Part / Ink" }
+        ],
         "step": steps
       });
     }
@@ -234,6 +266,20 @@ export default async function ArticlePage({ params }: PageParams) {
     "@context": "https://schema.org",
     "@graph": jsonLdGraph
   };
+
+  // Extract up to 3-4 quick bullet steps for the QuickAnswerBox
+  const quickStepsList: string[] = [];
+  const quickOlMatch = article.content.match(/<ol[^>]*>([\s\S]*?)<\/ol>/i);
+  if (quickOlMatch) {
+    const quickLiRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi;
+    let match;
+    while ((match = quickLiRegex.exec(quickOlMatch[1])) !== null && quickStepsList.length < 4) {
+      const plain = match[1].replace(/<[^>]*>/g, '').trim();
+      if (plain.length > 10) {
+        quickStepsList.push(plain.length > 140 ? plain.substring(0, 137) + '...' : plain);
+      }
+    }
+  }
 
   const parseOptions = {
     replace: (domNode: any) => {
@@ -423,6 +469,16 @@ export default async function ArticlePage({ params }: PageParams) {
                 {article.printerModel && <span>Model: <strong>{article.printerModel}</strong></span>}
               </div>
             </header>
+
+            <QuickAnswerBox
+              title={article.title}
+              brandName={article.brand?.name}
+              errorCode={article.errorCode}
+              summary={article.metaDescription || article.excerpt}
+              quickSteps={quickStepsList}
+              timeToFix={article.timeToFix}
+              difficulty={article.difficultyLevel}
+            />
 
             <EeatBox 
               author={article.author}
