@@ -7,6 +7,9 @@ import parse, { domToReact, Element } from 'html-react-parser';
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import EeatBox from "@/components/EeatBox";
 import QuickAnswerBox from "@/components/QuickAnswerBox";
+import FieldBenchmarkBox from "@/components/FieldBenchmarkBox";
+import DiagnosticDecisionTree from "@/components/DiagnosticDecisionTree";
+import { getBrandEntity } from "@/lib/brandEntities";
 
 type PageParams = { params: Promise<{ brandSlug: string; categorySlug: string; articleSlug: string }> };
 
@@ -152,6 +155,14 @@ export default async function ArticlePage({ params }: PageParams) {
     }
   }
 
+  // Extract brand entity metadata (Wikidata, Wikipedia, official URL) for GEO knowledge graph
+  const brandEntity = getBrandEntity(article.brand?.slug);
+  const brandSameAs = [
+    brandEntity?.wikidataUrl,
+    brandEntity?.wikipediaUrl,
+    brandEntity?.officialUrl,
+  ].filter(Boolean) as string[];
+
   // Schema.org JSON-LD Structured Data (Optimized for AEO / GEO / Generative Engines)
   const jsonLdGraph: any[] = [
     {
@@ -178,7 +189,8 @@ export default async function ArticlePage({ params }: PageParams) {
         "name": article.printerModel || `${article.brand?.name || 'Printer'} Hardware`,
         "brand": {
           "@type": "Brand",
-          "name": article.brand?.name || "Printer Manufacturer"
+          "name": brandEntity?.name || article.brand?.name || "Printer Manufacturer",
+          ...(brandSameAs.length > 0 ? { "sameAs": brandSameAs } : {})
         }
       },
       "speakable": {
@@ -491,6 +503,14 @@ export default async function ArticlePage({ params }: PageParams) {
               wordCount={article.wordCount}
             />
 
+            <FieldBenchmarkBox
+              brandName={article.brand?.name}
+              printerModel={article.printerModel}
+              errorCode={article.errorCode}
+              difficulty={article.difficultyLevel}
+              timeToFix={article.timeToFix}
+            />
+
             {/* Featured Image */}
             {article.featuredImage && (
               <figure style={{ margin: '0 0 2rem', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
@@ -523,6 +543,13 @@ export default async function ArticlePage({ params }: PageParams) {
                 </ul>
               </div>
             )}
+
+            {/* Diagnostic Decision Tree for GEO & AI Answer Extraction */}
+            <DiagnosticDecisionTree
+              title={article.title}
+              brandName={article.brand?.name}
+              errorCode={article.errorCode}
+            />
 
             {/* Featured SEO Snippet Box */}
             {article.featuredSnippet && (
