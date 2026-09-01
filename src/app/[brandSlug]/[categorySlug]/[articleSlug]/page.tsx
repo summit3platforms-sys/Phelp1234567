@@ -185,13 +185,9 @@ export default async function ArticlePage({ params }: PageParams) {
       "proficiencyLevel": article.difficultyLevel || "Intermediate",
       "dependencies": "Standard tools, 99% isopropyl alcohol, lint-free cloth, screwdriver",
       "about": {
-        "@type": "Product",
+        "@type": "Thing",
         "name": article.printerModel || `${article.brand?.name || 'Printer'} Hardware`,
-        "brand": {
-          "@type": "Brand",
-          "name": brandEntity?.name || article.brand?.name || "Printer Manufacturer",
-          ...(brandSameAs.length > 0 ? { "sameAs": brandSameAs } : {})
-        }
+        ...(brandSameAs.length > 0 ? { "sameAs": brandSameAs } : {})
       },
       "speakable": {
         "@type": "SpeakableSpecification",
