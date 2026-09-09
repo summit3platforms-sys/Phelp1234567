@@ -135,7 +135,7 @@ export default function EeatBox({
           )}
         </div>
 
-        {/* Right Column: Meta Stats */}
+        {/* Right Column: Honest Meta Stats */}
         <div
           style={{
             display: 'grid',
@@ -147,24 +147,6 @@ export default function EeatBox({
             border: '1px solid #e2e8f0'
           }}
         >
-          {/* Difficulty */}
-          <div>
-            <p style={{ margin: 0, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94a3b8', fontWeight: 'bold' }}>Difficulty</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.3rem' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              <span style={{ fontSize: '0.9rem', fontWeight: '500', color: '#334155' }}>{difficultyLevel || 'Intermediate'}</span>
-            </div>
-          </div>
-
-          {/* Time to Fix */}
-          <div>
-            <p style={{ margin: 0, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94a3b8', fontWeight: 'bold' }}>Time to Fix</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.3rem' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              <span style={{ fontSize: '0.9rem', fontWeight: '500', color: '#334155' }}>{timeToFix || '15 mins'}</span>
-            </div>
-          </div>
-
           {/* Reading Time */}
           <div>
             <p style={{ margin: 0, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94a3b8', fontWeight: 'bold' }}>Read Time</p>
@@ -174,22 +156,16 @@ export default function EeatBox({
             </div>
           </div>
 
-          {/* Compatible */}
+          {/* Word Count */}
           <div>
-            <p style={{ margin: 0, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94a3b8', fontWeight: 'bold' }}>Tested On</p>
+            <p style={{ margin: 0, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94a3b8', fontWeight: 'bold' }}>Word Count</p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.3rem' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              <span style={{ fontSize: '0.9rem', fontWeight: '500', color: '#334155' }}>
-                {brandName ? (
-                  <span style={{ display: 'inline-block', background: '#e0f2fe', color: '#0369a1', padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', marginRight: '4px' }}>
-                    {brandName.toUpperCase()}
-                  </span>
-                ) : null}
-                {printerModel ? printerModel : 'Most Models'}
-              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+              <span style={{ fontSize: '0.9rem', fontWeight: '500', color: '#334155' }}>{wordCount ? `${wordCount.toLocaleString()} words` : 'In-depth guide'}</span>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );

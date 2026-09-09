@@ -193,13 +193,15 @@ export default async function ArticlePage({ params }: PageParams) {
         "@type": "SpeakableSpecification",
         "cssSelector": [".direct-answer-summary", ".eeat-box", ".quick-answer-box"]
       },
-      "author": {
-        "@type": "Person",
-        "name": article.author?.name || "Printer Technical Specialist",
-        "jobTitle": article.author?.role || "Hardware Diagnostics Engineer",
-        "url": article.author ? `https://libertyprinterfix.com/author/${article.author.slug}` : undefined,
-        "knowsAbout": ["Printer Hardware Repair", "Firmware Diagnostics", "Micro Piezo Systems", "Laser Printing Electronics"]
-      },
+      ...(article.author ? {
+        "author": {
+          "@type": "Person",
+          "name": article.author.name,
+          "jobTitle": article.author.role || undefined,
+          "url": `https://libertyprinterfix.com/author/${article.author.slug}`,
+          "knowsAbout": ["Printer Hardware Repair", "Firmware Diagnostics", "Inkjet Systems", "Laser Printing Electronics"]
+        }
+      } : {}),
       "publisher": {
         "@type": "Organization",
         "@id": "https://libertyprinterfix.com/#organization",
@@ -296,7 +298,7 @@ export default async function ArticlePage({ params }: PageParams) {
         return (
           <Image 
             src={src} 
-            alt={alt || `Illustration for ${article?.title || 'this guide'}`} 
+            alt={alt || `Diagram showing ${article?.title || 'this guide'}`} 
             width={width ? parseInt(width, 10) : 800} 
             height={height ? parseInt(height, 10) : 450} 
             sizes="(max-width: 768px) 100vw, 800px"
