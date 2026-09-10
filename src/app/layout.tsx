@@ -213,12 +213,12 @@ export default function RootLayout({
 
             <hr className="footer-divider" />
 
-            <div className="footer-bottom">
-              <p className="footer-copyright">
-                &copy; {new Date().getFullYear()} libertyprinterfix.com. All rights reserved. Real-time solutions for printer errors.
-              </p>
-              <p className="footer-disclaimer">
+            <div className="footer-bottom" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem' }}>
+              <p className="footer-disclaimer" style={{ fontSize: '0.75rem', textAlign: 'left', margin: 0 }}>
                 Not affiliated with HP, Canon, Epson, Brother, or any OEM printer manufacturer.
+              </p>
+              <p className="footer-copyright" style={{ margin: 0 }}>
+                &copy; {new Date().getFullYear()} libertyprinterfix.com. All rights reserved. Real-time solutions for printer errors.
               </p>
             </div>
           </div>
