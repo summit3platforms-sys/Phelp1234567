@@ -177,18 +177,33 @@ export default async function Home() {
             </div>
           </div>
           <div className="brand-grid">
-            {brands.map(brand => (
-              <Link href={`/${brand.slug}`} key={brand.id}>
-                <div className="card brand-card">
-                  <div className="card-emoji" style={{ width: '40px', height: '40px', fontSize: '1.35rem', borderRadius: 'var(--radius-sm)' }}>
-                    {getBrandEmoji(brand.name)}
+            {brands.map(brand => {
+              const brandLower = brand.name.toLowerCase();
+              let logoSrc = null;
+              if (brandLower.includes('brother')) logoSrc = '/images/brands/brother.png';
+              else if (brandLower.includes('canon')) logoSrc = '/images/brands/canon.png';
+              else if (brandLower.includes('citizen')) logoSrc = '/images/brands/citizen.png';
+              // Could also match PrinterFixed if it's a category/brand, but based on naming, assuming these.
+
+              return (
+                <Link href={`/${brand.slug}`} key={brand.id}>
+                  <div className="card brand-card">
+                    {logoSrc ? (
+                      <div className="card-emoji" style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-sm)', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px solid var(--border-color)', padding: '4px' }}>
+                        <Image src={logoSrc} alt={`${brand.name} logo`} width={32} height={32} style={{ objectFit: 'contain' }} />
+                      </div>
+                    ) : (
+                      <div className="card-emoji" style={{ width: '40px', height: '40px', fontSize: '1.35rem', borderRadius: 'var(--radius-sm)' }}>
+                        {getBrandEmoji(brand.name)}
+                      </div>
+                    )}
+                    <div className="card-info">
+                      <h3 className="card-title" style={{ fontSize: '1.05rem', margin: 0 }}>{brand.name}</h3>
+                    </div>
                   </div>
-                  <div className="card-info">
-                    <h3 className="card-title" style={{ fontSize: '1.05rem', margin: 0 }}>{brand.name}</h3>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
           
           {totalBrandsCount > 9 && (
