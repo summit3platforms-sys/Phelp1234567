@@ -109,6 +109,8 @@ export default async function BrandsPage() {
           else if (brandLower.includes('primera')) logoSrc = '/images/brands/primera.webp';
           else if (brandLower.includes('phomemo')) logoSrc = '/images/brands/phomemo.png';
           else if (brandLower.includes('munbyn')) logoSrc = '/images/brands/munbyn.png';
+          else if (brandLower.includes('lexmark')) logoSrc = '/images/brands/lexmark.jpg';
+          else if (brandLower.includes('nelko')) logoSrc = '/images/brands/nelko.png';
 
           return (
             <Link href={`/${brand.slug}`} key={brand.id}>
