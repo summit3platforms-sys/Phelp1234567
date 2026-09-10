@@ -115,6 +115,7 @@ export default async function BrandsPage() {
           else if (brandLower.includes('seiko')) logoSrc = '/images/brands/seiko.png';
           else if (brandLower.includes('pantum')) logoSrc = '/images/brands/pantum.png';
           else if (brandLower.includes('kodak')) logoSrc = '/images/brands/kodak.png';
+          else if (brandLower.includes('zebra')) logoSrc = '/images/brands/zebra.jpg';
 
           return (
             <Link href={`/${brand.slug}`} key={brand.id}>
