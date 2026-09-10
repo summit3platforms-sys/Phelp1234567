@@ -190,6 +190,9 @@ export default async function Home() {
               else if (brandLower.includes('dascom')) logoSrc = '/images/brands/dascom.webp';
               else if (brandLower.includes('fujifilm')) logoSrc = '/images/brands/fujifilm.png';
               else if (brandLower.includes('xerox')) logoSrc = '/images/brands/xerox.png';
+              else if (brandLower.includes('rollo')) logoSrc = '/images/brands/rollo.webp';
+              else if (brandLower.includes('star')) logoSrc = '/images/brands/star.png';
+              else if (brandLower.includes('polaroid')) logoSrc = '/images/brands/polaroid.jpg';
 
               return (
                 <Link href={`/${brand.slug}`} key={brand.id}>
