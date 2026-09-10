@@ -198,6 +198,7 @@ export default async function Home() {
               else if (brandLower.includes('munbyn')) logoSrc = '/images/brands/munbyn.png';
               else if (brandLower.includes('lexmark')) logoSrc = '/images/brands/lexmark.jpg';
               else if (brandLower.includes('nelko')) logoSrc = '/images/brands/nelko.png';
+              else if (brandLower.includes('niimbot')) logoSrc = '/images/brands/niimbot.jpg';
 
               return (
                 <Link href={`/${brand.slug}`} key={brand.id}>
