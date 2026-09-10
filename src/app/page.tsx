@@ -193,6 +193,9 @@ export default async function Home() {
               else if (brandLower.includes('rollo')) logoSrc = '/images/brands/rollo.webp';
               else if (brandLower.includes('star')) logoSrc = '/images/brands/star.png';
               else if (brandLower.includes('polaroid')) logoSrc = '/images/brands/polaroid.jpg';
+              else if (brandLower.includes('primera')) logoSrc = '/images/brands/primera.webp';
+              else if (brandLower.includes('phomemo')) logoSrc = '/images/brands/phomemo.png';
+              else if (brandLower.includes('munbyn')) logoSrc = '/images/brands/munbyn.png';
 
               return (
                 <Link href={`/${brand.slug}`} key={brand.id}>
