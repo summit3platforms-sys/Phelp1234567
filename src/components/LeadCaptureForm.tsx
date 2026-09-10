@@ -7,14 +7,12 @@ export default function LeadCaptureForm() {
     name: '',
     email: '',
     phone: '',
-    printerBrand: '',
-    country: '',
     issueDescription: '',
   });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -32,7 +30,7 @@ export default function LeadCaptureForm() {
 
       if (response.ok) {
         setStatus('success');
-        setFormData({ name: '', email: '', phone: '', printerBrand: '', country: '', issueDescription: '' });
+        setFormData({ name: '', email: '', phone: '', issueDescription: '' });
       } else {
         const errorData = await response.json();
         setStatus('error');
@@ -46,9 +44,9 @@ export default function LeadCaptureForm() {
 
   if (status === 'success') {
     return (
-      <div className="lead-capture-form success-state">
+      <div className="lead-capture-form success-state" style={{ padding: '1.5rem', borderRadius: '12px' }}>
         <div className="success-icon">✅</div>
-        <h2>Request Received!</h2>
+        <h2 style={{ fontSize: '1.4rem' }}>Request Received!</h2>
         <p>Our experts will contact you shortly to help resolve your printer issues.</p>
         <button onClick={() => setStatus('idle')} className="submit-btn outline">
           Submit Another Request
@@ -58,13 +56,13 @@ export default function LeadCaptureForm() {
   }
 
   return (
-    <div className="lead-capture-form">
-      <h2>Get Expert Printer Assistance</h2>
-      <p className="lead-subtitle">Having trouble with your printer? Tell us about your issue and receive step-by-step guidance.</p>
+    <div className="lead-capture-form" style={{ padding: '1.5rem', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', backgroundColor: 'white', border: '1px solid #e2e8f0' }}>
+      <h2 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', color: '#0f172a', fontWeight: 'bold' }}>Get Expert Printer Assistance in 10 Minutes</h2>
+      <p className="lead-subtitle" style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.5rem', lineHeight: '1.4' }}>Having trouble with your printer? Tell us about your issue and receive step-by-step guidance.</p>
       
-      <form onSubmit={handleSubmit} className="lead-form-grid">
-        <div className="form-group">
-          <label htmlFor="name">Name</label>
+      <form onSubmit={handleSubmit} className="lead-form-grid" style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr' }}>
+        <div className="form-group" style={{ marginBottom: '0' }}>
+          <label htmlFor="name" style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#334155', marginBottom: '0.25rem' }}>Name</label>
           <input
             type="text"
             id="name"
@@ -73,11 +71,12 @@ export default function LeadCaptureForm() {
             onChange={handleChange}
             required
             placeholder="John Doe"
+            style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
           />
         </div>
         
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
+        <div className="form-group" style={{ marginBottom: '0' }}>
+          <label htmlFor="email" style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#334155', marginBottom: '0.25rem' }}>Email</label>
           <input
             type="email"
             id="email"
@@ -86,11 +85,12 @@ export default function LeadCaptureForm() {
             onChange={handleChange}
             required
             placeholder="john@example.com"
+            style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="phone">Phone Number</label>
+        <div className="form-group" style={{ marginBottom: '0' }}>
+          <label htmlFor="phone" style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#334155', marginBottom: '0.25rem' }}>Phone Number</label>
           <input
             type="tel"
             id="phone"
@@ -99,62 +99,27 @@ export default function LeadCaptureForm() {
             onChange={handleChange}
             required
             placeholder="(555) 123-4567"
+            style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="printerBrand">Printer Brand</label>
-          <select
-            id="printerBrand"
-            name="printerBrand"
-            value={formData.printerBrand}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>Select your brand...</option>
-            <option value="HP">HP</option>
-            <option value="Canon">Canon</option>
-            <option value="Epson">Epson</option>
-            <option value="Brother">Brother</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="country">Country</label>
-          <select
-            id="country"
-            name="country"
-            value={formData.country}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>Select your country...</option>
-            <option value="US">United States</option>
-            <option value="CA">Canada</option>
-            <option value="UK">United Kingdom</option>
-            <option value="AU">Australia</option>
-            <option value="IN">India</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-
-        <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-          <label htmlFor="issueDescription">Issue Description (in a few words)</label>
+        <div className="form-group" style={{ marginBottom: '0' }}>
+          <label htmlFor="issueDescription" style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#334155', marginBottom: '0.25rem' }}>Issue</label>
           <textarea
             id="issueDescription"
             name="issueDescription"
             value={formData.issueDescription}
-            onChange={handleChange as any}
+            onChange={handleChange}
             required
-            placeholder="e.g. Printer won't turn on, or paper jam error..."
-            rows={3}
+            placeholder="e.g. Printer won't turn on..."
+            rows={2}
+            style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem', resize: 'vertical' }}
           />
         </div>
 
-        {status === 'error' && <p className="error-message">{message}</p>}
+        {status === 'error' && <p className="error-message" style={{ color: '#ef4444', fontSize: '0.85rem', margin: '0' }}>{message}</p>}
 
-        <button type="submit" disabled={status === 'loading'} className="submit-btn">
+        <button type="submit" disabled={status === 'loading'} className="submit-btn" style={{ width: '100%', padding: '0.75rem', backgroundColor: '#002d62', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.95rem', cursor: 'pointer', marginTop: '0.5rem' }}>
           {status === 'loading' ? 'Submitting...' : '🟦 Get Help Now'}
         </button>
       </form>

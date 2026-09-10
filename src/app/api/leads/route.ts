@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     
     // Basic validation
-    if (!data.name || !data.email || !data.phone || !data.printerBrand) {
+    if (!data.name || !data.email || !data.phone) {
       return NextResponse.json({ error: 'All required fields must be provided' }, { status: 400 });
     }
 
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
         name: data.name,
         email: data.email,
         phone: data.phone,
-        printerBrand: data.printerBrand,
+        printerBrand: data.printerBrand || 'Unknown',
         country: data.country || null,
         issueDescription: data.issueDescription || null,
         ipAddress: ipAddress,
