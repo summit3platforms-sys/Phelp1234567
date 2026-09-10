@@ -112,6 +112,9 @@ export default async function BrandsPage() {
           else if (brandLower.includes('lexmark')) logoSrc = '/images/brands/lexmark.jpg';
           else if (brandLower.includes('nelko')) logoSrc = '/images/brands/nelko.png';
           else if (brandLower.includes('niimbot')) logoSrc = '/images/brands/niimbot.jpg';
+          else if (brandLower.includes('seiko')) logoSrc = '/images/brands/seiko.png';
+          else if (brandLower.includes('pantum')) logoSrc = '/images/brands/pantum.png';
+          else if (brandLower.includes('kodak')) logoSrc = '/images/brands/kodak.png';
 
           return (
             <Link href={`/${brand.slug}`} key={brand.id}>
