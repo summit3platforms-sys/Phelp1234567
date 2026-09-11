@@ -68,21 +68,6 @@ export default function RootLayout({
           `}
         </Script>
 
-        {/* Tawk.to Chat Widget */}
-        <Script id="tawk-to" strategy="afterInteractive">
-          {`
-            var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-            (function(){
-            var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-            s1.async=true;
-            s1.src='https://embed.tawk.to/6aa16d88a9c2983442420a77/1k2397net';
-            s1.charset='UTF-8';
-            s1.setAttribute('crossorigin','*');
-            s0.parentNode.insertBefore(s1,s0);
-            })();
-          `}
-        </Script>
-
         {/* Site-wide Organization & WebSite JSON-LD for E-E-A-T & GEO Entity Graph */}
         <script
           type="application/ld+json"
@@ -223,6 +208,24 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
+        {/* Tawk.to Chat Widget */}
+        <Script 
+          id="tawk-to" 
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+              (function(){
+              var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+              s1.async=true;
+              s1.src='https://embed.tawk.to/6aa16d88a9c2983442420a77/1k2397net';
+              s1.charset='UTF-8';
+              s1.setAttribute('crossorigin','*');
+              s0.parentNode.insertBefore(s1,s0);
+              })();
+            `
+          }}
+        />
       </body>
     </html>
   );
