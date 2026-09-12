@@ -208,20 +208,19 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
-        {/* Tawk.to Chat Widget */}
+        {/* Crisp Chat Widget */}
         <Script 
-          id="tawk-to" 
+          id="crisp-chat" 
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
-              var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+              window.$crisp=[];
+              window.CRISP_WEBSITE_ID="02cee74b-dbd8-4dfc-b7a9-4d6dfb3d4a6b";
               (function(){
-              var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-              s1.async=true;
-              s1.src='https://embed.tawk.to/6aa16d88a9c2983442420a77/1k2397net';
-              s1.charset='UTF-8';
-              s1.setAttribute('crossorigin','*');
-              s0.parentNode.insertBefore(s1,s0);
+                d=document;s=d.createElement("script");
+                s.src="https://client.crisp.chat/l.js";
+                s.async=1;
+                d.getElementsByTagName("head")[0].appendChild(s);
               })();
             `
           }}
