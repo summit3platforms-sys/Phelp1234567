@@ -54,6 +54,23 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Crisp Chat Widget */}
+        <Script 
+          id="crisp-chat" 
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.$crisp=[];
+              window.CRISP_WEBSITE_ID="02cee74b-dbd8-4dfc-b7a9-4d6dfb3d4a6b";
+              (function(){
+                d=document;s=d.createElement("script");
+                s.src="https://client.crisp.chat/l.js";
+                s.async=1;
+                d.getElementsByTagName("head")[0].appendChild(s);
+              })();
+            `
+          }}
+        />
         {/* Google tag (gtag.js) */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-HW217Z2WG0"
@@ -208,23 +225,6 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
-        {/* Crisp Chat Widget */}
-        <Script 
-          id="crisp-chat" 
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.$crisp=[];
-              window.CRISP_WEBSITE_ID="02cee74b-dbd8-4dfc-b7a9-4d6dfb3d4a6b";
-              (function(){
-                d=document;s=d.createElement("script");
-                s.src="https://client.crisp.chat/l.js";
-                s.async=1;
-                d.getElementsByTagName("head")[0].appendChild(s);
-              })();
-            `
-          }}
-        />
       </body>
     </html>
   );
