@@ -609,6 +609,9 @@ export default async function ArticlePage({ params }: PageParams) {
                 })}
               </div>
             )}
+            {/* User Interaction Feedback Widget */}
+            <FeedbackWidget />
+
           </article>
 
           {/* Author Biography Box below Article */}
