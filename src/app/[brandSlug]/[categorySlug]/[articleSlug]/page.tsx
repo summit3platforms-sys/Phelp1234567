@@ -191,7 +191,7 @@ export default async function ArticlePage({ params }: PageParams) {
       },
       "speakable": {
         "@type": "SpeakableSpecification",
-        "cssSelector": [".direct-answer-summary", ".eeat-box", ".quick-answer-box"]
+        "cssSelector": [".featured-snippet-text", ".eeat-box", ".quick-answer-box"]
       },
       ...(article.author ? {
         "author": {

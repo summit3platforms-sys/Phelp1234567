@@ -40,12 +40,19 @@ export async function GET() {
       .replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, '\n### $1\n')
       .replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '- $1\n')
       .replace(/<details>[\s\S]*?<summary>([\s\S]*?)<\/summary>([\s\S]*?)<\/details>/gi, '\n**Q: $1**\n$2\n')
+      .replace(/<tr[^>]*>/gi, '\n| ')
+      .replace(/<\/tr>/gi, '')
+      .replace(/<th[^>]*>/gi, '')
+      .replace(/<\/th>/gi, ' | ')
+      .replace(/<td[^>]*>/gi, '')
+      .replace(/<\/td>/gi, ' | ')
       .replace(/<[^>]+>/g, ' ')
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
-      .replace(/\s+/g, ' ')
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n\s*\n/g, '\n\n')
       .trim();
 
     markdown += `\n---\n\n# ${a.title}\n`;
