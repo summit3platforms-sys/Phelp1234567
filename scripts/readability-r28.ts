@@ -30,19 +30,21 @@ function processText(text: string): string {
     .replace(/Make sure that you/gi, "Make sure")
     .replace(/Be sure to/gi, "Make sure to");
 
-  // Split long sentences (rough heuristic for sentences > 20 words)
-  // We'll split on ", and " or ", but " or ", or " if the first part is long enough.
-  res = res.replace(/([^.?!]{40,}), (and|but|so) ([^.?!]{40,}[.?!])/g, (match, p1, p2, p3) => {
-    // Capitalize first letter of p3
-    const capitalized = p3.charAt(0).toUpperCase() + p3.slice(1);
-    return `${p1}. ${capitalized}`;
-  });
+  // A regex loop to continually split sentences that are still too long (approx 20 words is ~100-120 chars)
+  // Let's use 100 chars as a rough heuristic for "over 20 words"
+  let previous = "";
+  while (res !== previous) {
+    previous = res;
+    res = res.replace(/([^.?!]{100,}), (and|but|so|or|because|which|while) ([^.?!]{30,}[.?!])/gi, (match, p1, p2, p3) => {
+      let cap = p3.charAt(0).toUpperCase() + p3.slice(1);
+      return `${p1}. ${cap}`;
+    });
+  }
 
   return res;
 }
 
 function processHtml(html: string): string {
-  // A simple regex to process only text outside HTML tags
   const parts = html.split(/(<[^>]+>)/g);
   for (let i = 0; i < parts.length; i++) {
     if (!parts[i].startsWith('<')) {
