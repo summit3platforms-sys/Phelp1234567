@@ -1,0 +1,553 @@
+--- bixolon-printer-printing-garbled-text ---
+<h2>The Quick Answer</h2>
+<p><strong>If your Bixolon printer is printing garbage text, nonsense characters, or weird symbols, it is almost certainly a <a href="/zebra-technologies/drivers-software-firmware/zebra-zpl-label-prints-garbled-text-raw-code-issues" title="Fix Zebra ZPL Label Prints Garbled Text or Raw Code">driver issue</a>. Learn how to fix it with these troubleshooting steps.</strong></p>
+
+<p>If your Bixolon printer is churning out random characters, symbols, or nonsense text instead of your actual print jobs, here's the good news: this is almost never a <a href="/epson/error-codes-alerts/epson-error-code-0x97-motherboard-printhead-short" title="Fix Epson Error 0x97: Motherboard and Printhead Diagnostics">hardware failure</a>. Garbled or "garbage" output on Bixolon printers is one of the most predictable software-side problems in the entire troubleshooting playbook — the printer is receiving data, but the wrong data, or the right data in the wrong language.</p>
+<p>Here's what's actually happening and how to fix it.</p>
+
+<h2>Why This Happens (The Short Explanation)</h2>
+<p><a href="/bixolon/error-codes-alerts/bixolon-printer-blinking-light-meaning" title="Bixolon Printer Blinking Light Meaning: Full LED Code Chart">Bixolon</a> thermal printers speak specific command languages — ESC/POS, SLCS, or SBPL depending on the model. When your computer sends data using the wrong language for that printer, the printer doesn't know it's receiving garbage — it just tries to render whatever bytes come in as text. The result: streams of random characters, weird symbols, or half-recognizable output surrounded by junk.</p>
+
+<p>This happens in a handful of specific situations:</p>
+<ol>
+  <li>Wrong <a href="/dymo/setup-installation/dymo-labelwriter-4xl-5xl-setup-driver-guide" title="DYMO LabelWriter 4XL &amp; 5XL Driver Download &amp; Setup">driver</a> installed (most common)</li>
+  <li><a href="/dymo/drivers-software-firmware/dymo-550-rfid-drm-third-party-labels-compatibility" title="DYMO 550 RFID DRM &amp; Third-Party Labels Compatibility">Generic</a> Windows driver being used instead of the correct Bixolon driver</li>
+  <li><a href="/dascom/connectivity-issues/dascom-pos-printer-offline-esc-pos-driver" title="Fix Dascom POS Printer Offline (Driver &amp; Network Setup)">Driver</a> installed on the wrong communication port</li>
+  <li>Character encoding mismatch (particularly with non-Latin languages)</li>
+  <li>Damaged interface cable causing data corruption in transit</li>
+  <li>Wrong emulation mode selected on the printer</li>
+</ol>
+
+<h2>Step 1: Run a Self-Test First</h2>
+<p>Before touching any software, hold the Feed button while powering on the printer to trigger a self-test. This prints directly from the printer's internal memory using its own <a href="/epson/error-codes-alerts/epson-controller-error-printer-fix" title="Fix Epson Controller Error (Motherboard &amp; Firmware)">firmware</a> — no computer, driver, or cable involved.</p>
+<ul>
+  <li><strong>Self-test prints cleanly with readable text</strong> → your printer hardware is fine. The garbled output is 100% a driver/<a href="/dascom/connectivity-issues/dascom-pos-printer-cash-drawer-not-opening" title="Fix Dascom POS Printer Cash Drawer Not Opening (RJ11 Fix)">software</a> issue. Skip to Step 2.</li>
+  <li><strong>Self-test itself prints garbled</strong> → this is unusual and points to a genuine hardware fault or corrupted <a href="/epson/error-codes-alerts/epson-controller-error-printer-fix" title="Fix Epson Controller Error (Motherboard &amp; Firmware)">firmware</a>. Skip to the last section about contacting support.</li>
+</ul>
+
+<h2>Step 2: Reinstall the Correct Bixolon Driver</h2>
+<p>The most common cause of garbled printing is the wrong driver. Even if you had a working driver installed months ago, a Windows update, an OS upgrade, or an accidental driver replacement can silently substitute a <a href="/rollo/drivers-software-firmware/rollo-printer-driver-download-install-guide" title="Rollo Printer Driver Download &amp; Installation Guide (Win &amp; Mac)">generic driver</a> that no longer speaks your printer's command language correctly.</p>
+<ol>
+  <li>Uninstall the current <a href="/kodak/setup-installation/kodak-printer-driver-unavailable-fix" title="Fix Kodak Printer Driver Unavailable on Windows 10 &amp; 11">printer driver</a> completely — both from <strong>Devices and Printers</strong> and from <strong>Programs &amp; Features</strong>. Leaving remnants in either place causes conflicts.</li>
+  <li>Restart your computer.</li>
+  <li><a href="/dymo/setup-installation/dymo-labelwriter-4xl-5xl-setup-driver-guide" title="DYMO LabelWriter 4XL &amp; 5XL Driver Download &amp; Setup">Download</a> the driver matched to your <strong>exact printer model</strong> and <strong>exact OS version</strong> from Bixolon's official support site. Precision matters here more than with many other brands — a driver for a slightly different model or Windows build can install successfully while silently sending garbled data.</li>
+  <li>Install as Administrator.</li>
+  <li>Send a test print before reconnecting any POS <a href="/dascom/connectivity-issues/dascom-pos-printer-cash-drawer-not-opening" title="Fix Dascom POS Printer Cash Drawer Not Opening (RJ11 Fix)">software</a>.</li>
+</ol>
+<p>If the test print is clean after this <a href="/kodak/setup-installation/how-to-reset-kodak-printer-to-factory-settings" title="How to Reset a Kodak Printer: ESP, Hero, &amp; Portable Models">step</a>, you're done. If it's still garbled, continue below.</p>
+
+<h2>Step 3: Confirm It's Not a Generic Windows Driver</h2>
+<p>Sometimes Windows automatically installs a generic <a href="/kodak/setup-installation/kodak-printer-driver-unavailable-fix" title="Fix Kodak Printer Driver Unavailable on Windows 10 &amp; 11">printer driver</a> during device recognition, overriding what you thought was the Bixolon driver. To check:</p>
+<ol>
+  <li>Open <strong>Devices and Printers</strong> (Control Panel) or <strong>Settings → <a href="/kodak/connectivity-issues/kodak-photo-printer-bluetooth-pairing-failed" title="Kodak Printer Bluetooth Pairing Failed: Android &amp; iOS Fixes">Bluetooth</a> &amp; devices → Printers &amp; scanners</strong>.</li>
+  <li>Right-click your printer and select <strong>Printer properties</strong>.</li>
+  <li>On the Advanced tab, look at which <a href="/dymo/setup-installation/dymo-labelwriter-4xl-5xl-setup-driver-guide" title="DYMO LabelWriter 4XL &amp; 5XL Driver Download &amp; Setup">driver</a> is listed.</li>
+  <li>If it says anything like "Text Only," "<a href="/dymo/drivers-software-firmware/dymo-550-rfid-drm-third-party-labels-compatibility" title="DYMO 550 RFID DRM &amp; Third-Party Labels Compatibility">Generic</a> / Text Only," or a Windows built-in name rather than a specific Bixolon model driver, that's your problem.</li>
+  <li>Change the driver to the correct <a href="/bixolon/error-codes-alerts/bixolon-printer-flashing-red-light" title="Bixolon Printer Flashing Red Light: What It Means &amp; How to Fix It">Bixolon</a> one; if it doesn't appear in the list, install it via <strong>Add Printer → Have Disk</strong> pointed at the Bixolon driver files.</li>
+</ol>
+
+<h2>Step 4: Check the Communication Port (Especially Important)</h2>
+<p>Wrong-port assignments are a hidden cause of garbled output that most guides miss. For USB printers, Windows may install the driver targeting the wrong USB port entry, or for <a href="/kodak/connectivity-issues/kodak-instant-printer-app-not-connecting" title="Fix Kodak Instant Printer App Not Connecting to Printer">Bluetooth</a> serial printers, on the wrong virtual COM port.</p>
+<ul>
+  <li><strong><a href="/dymo/connectivity-issues/dymo-connect-not-detecting-printer" title="Fix DYMO Connect Not Detecting Printer (USB &amp; Wi-Fi)">USB</a> printers:</strong> in the printer's Ports tab, confirm it's targeting the correct USB entry (usually the highest-numbered USB00X entry for the physical port your printer uses).</li>
+  <li><strong>Bluetooth printers:</strong> for models like the SPP-R310, the driver must be installed on the specific COM port your <a href="/fujifilm/connectivity-issues/instax-mini-link-bluetooth-connection-pairing-failed" title="Fix Instax Mini Link &amp; Square Link Bluetooth Pairing Failed">Bluetooth pairing</a> created. Windows typically creates two COM ports for a paired Bluetooth serial printer, and one of them is inbound-only — the outbound port (usually the higher number) is the one the driver needs to target.</li>
+  <li><strong>Serial printers (older SRP models):</strong> confirm the <a href="/dascom/setup-installation/dascom-printer-serial-parallel-port-setup" title="Dascom Serial (RS-232) &amp; Parallel Port Setup Guide">baud rate</a>, parity, data bits, and flow control in the driver match the DIP switch or memory switch settings on the printer itself.</li>
+</ul>
+
+<h2>Step 5: Check the Emulation Mode on the Printer</h2>
+<p>This one only applies to certain models, but it's a real fix for a specific class of garbled-output problems. Some Bixolon printers support <a href="/epson/error-codes-alerts/epson-error-code-list-by-model-master-index" title="Epson Printer Error Code List (Master Hex Index)">multiple</a> emulation modes — for example, the SRP-275III can switch between BXL/POS (standard receipt) and BXL/POS-KP (kitchen printer) emulation.</p>
+<p>If your printer is set to the wrong emulation for what your POS <a href="/dascom/connectivity-issues/dascom-pos-printer-cash-drawer-not-opening" title="Fix Dascom POS Printer Cash Drawer Not Opening (RJ11 Fix)">software</a> expects to send, you'll get exactly this: garbled output that doesn't look like an error, just meaningless printed characters. Consult your specific model's manual for how to check and change emulation mode — it usually involves entering the setting menu through a self-test button sequence.</p>
+
+<h2>Step 6: Try a Different Cable</h2>
+<p>Cables can cause garbled output when they're mostly working but corrupting individual bytes in transit — the printer receives <em>most</em> of the data correctly, but enough is scrambled to produce garbage. This is more common with damaged <a href="/dymo/connectivity-issues/dymo-connect-not-detecting-printer" title="Fix DYMO Connect Not Detecting Printer (USB &amp; Wi-Fi)">USB</a> cables than serial ones, but it happens to both.</p>
+<p>Swap the cable — ideally with a short, high-quality one — before assuming your <a href="/dascom/connectivity-issues/dascom-pos-printer-offline-esc-pos-driver" title="Fix Dascom POS Printer Offline (Driver &amp; Network Setup)">driver</a> work is at fault. If the output cleans up with a different cable, you've found the cause.</p>
+
+<h2>Step 7: Check Character Encoding (Non-Latin Languages)</h2>
+<p>If your <a href="/bixolon/error-codes-alerts/bixolon-printer-blinking-light-meaning" title="Bixolon Printer Blinking Light Meaning: Full LED Code Chart">Bixolon</a> printer is printing English text fine but garbles non-Latin scripts (Arabic, Hebrew, Chinese, Thai, etc.), the issue is character encoding:</p>
+<ul>
+  <li>Confirm your POS <a href="/dascom/connectivity-issues/dascom-pos-printer-cash-drawer-not-opening" title="Fix Dascom POS Printer Cash Drawer Not Opening (RJ11 Fix)">software</a> is sending text in the correct code page or encoding for the printer's configured code page.</li>
+  <li>Bixolon printers support <a href="/epson/error-codes-alerts/epson-error-code-list-by-model-master-index" title="Epson Printer Error Code List (Master Hex Index)">multiple</a> code pages (see the code page manual for your model) — set the printer's code page to match what your software sends, using the Unified Utility software or the printer's setting menu.</li>
+  <li>For Unicode text, the printer may need a downloaded font file specifically for that script — Bixolon's utility software includes font <a href="/dymo/setup-installation/dymo-labelwriter-4xl-5xl-setup-driver-guide" title="DYMO LabelWriter 4XL &amp; 5XL Driver Download &amp; Setup">download</a> functions.</li>
+</ul>
+
+<h2>Step 8: Data Dump Mode (Advanced Diagnostic)</h2>
+<p>If the previous steps haven't resolved it, most Bixolon printers include a Data <a href="/zebra-technologies/drivers-software-firmware/zebra-zpl-label-prints-garbled-text-raw-code-issues" title="Fix Zebra ZPL Label Prints Garbled Text or Raw Code">Dump Mode</a> that shows exactly what data is arriving at the printer, printed in hexadecimal alongside the ASCII equivalent. This is mainly a developer tool, but it definitively answers "is the printer receiving the right data or not?"</p>
+<p>To enable Data <a href="/zebra-technologies/drivers-software-firmware/zebra-zpl-label-prints-garbled-text-raw-code-issues" title="Fix Zebra ZPL Label Prints Garbled Text or Raw Code">Dump Mode</a>:</p>
+<ol>
+  <li>Consult your specific model's manual for the exact button sequence — commonly involves powering on while holding Feed, then selecting Data Dump from the menu.</li>
+  <li>Send a normal print job from your computer.</li>
+  <li>Instead of your intended print, the printer will print <a href="/epson/error-codes-alerts/epson-error-code-list-by-model-master-index" title="Epson Printer Error Code List (Master Hex Index)">hex codes</a> matched to ASCII characters.</li>
+  <li>Compare what should have been sent against what actually arrived — significant differences point to a cable, driver, or <a href="/dascom/connectivity-issues/dascom-pos-printer-cash-drawer-not-opening" title="Fix Dascom POS Printer Cash Drawer Not Opening (RJ11 Fix)">software</a> fault.</li>
+</ol>
+<p>This is more <a href="/kodak/error-codes-alerts/kodak-printer-flashing-red-light-error" title="Kodak Printer Flashing Red Light: Diagnostic Fixes">diagnostic</a> than fix, but for stubborn cases it tells you where in the chain the corruption is happening.</p>
+
+<h2>Step 9: For Kitchen Printers Specifically</h2>
+<p>If the printer is being used as a kitchen ticket printer (common for SRP-275III and similar models), and it's suddenly garbling tickets after previously working:</p>
+<ul>
+  <li>Confirm your POS software's kitchen printer settings haven't been reset to a different <a href="/zebra-technologies/drivers-software-firmware/zebra-zpl-vs-epl-difference-configuration-format-guide" title="Zebra ZPL vs EPL: Differences &amp; Configuration Format Guide">printer language</a> or code page after an update.</li>
+  <li>Check whether a recent POS update changed the ticket format template — some updates require re-selecting the printer type after <a href="/dymo/drivers-software-firmware/dymo-550-turbo-vs-450-turbo-upgrade" title="DYMO 550 Turbo vs 450 Turbo (Comparison &amp; Warning)">upgrade</a>.</li>
+</ul>
+
+<h2>When It's Genuinely a Hardware Issue</h2>
+<p>The rare cases where garbled output actually indicates a hardware problem:</p>
+<ul>
+  <li>The self-test itself prints garbled (extremely rare, points to <a href="/epson/error-codes-alerts/epson-controller-error-printer-fix" title="Fix Epson Controller Error (Motherboard &amp; Firmware)">firmware</a> corruption)</li>
+  <li>The output is garbled AND the printer is behaving strangely in other ways — random paper feeds, error lights coming on unpredictably, sounds it didn't make before</li>
+  <li>Nothing above has resolved it after methodical work through all applicable steps</li>
+</ul>
+<p>In these cases, contact Bixolon support. <a href="/fujifilm/error-codes-alerts/instax-mini-link-3-not-printing-battery-drain-fix" title="Fix Instax Mini Link 3 Not Printing &amp; Fast Battery Drain">Firmware</a> corruption can sometimes be recovered through a firmware re-flash, but this generally requires either the utility software with specific instructions or service intervention.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Why does my Bixolon printer suddenly print <a href="/zebra-technologies/drivers-software-firmware/zebra-zpl-label-prints-garbled-text-raw-code-issues" title="Fix Zebra ZPL Label Prints Garbled Text or Raw Code">garbled text</a> when it was working yesterday?</strong> An automatic OS or driver update overnight is the most common cause. Reinstall the correct driver for your specific model and current OS version to fix it.</p>
+<p><strong>Can a bad USB cable really cause garbled printing?</strong> Yes — damaged or partially failing cables can corrupt data in transit while still appearing to work. Swap the cable as a <a href="/kodak/error-codes-alerts/kodak-printer-flashing-red-light-error" title="Kodak Printer Flashing Red Light: Diagnostic Fixes">diagnostic</a> step; a clean print with a different cable confirms it.</p>
+<p><strong>Why does my printer only garble certain languages but print English fine?</strong> Character encoding mismatch. Your POS software is sending text in an encoding the printer's current code page doesn't understand. Match the code pages, or <a href="/dymo/setup-installation/dymo-labelwriter-4xl-5xl-setup-driver-guide" title="DYMO LabelWriter 4XL &amp; 5XL Driver Download &amp; Setup">download</a> the appropriate font file.</p>
+<p><strong>Should I try to update <a href="/epson/error-codes-alerts/epson-controller-error-printer-fix" title="Fix Epson Controller Error (Motherboard &amp; Firmware)">firmware</a> to fix garbled output?</strong> Only if you've exhausted driver and cable fixes — firmware updates should be a last resort for this symptom, since a bad update can cause worse problems than the one you're trying to fix.</p>
+
+<h2>Quick Checklist</h2>
+<ul>
+  <li>[ ] Self-test run — confirmed hardware itself works</li>
+  <li>[ ] Correct Bixolon driver (not <a href="/dymo/drivers-software-firmware/dymo-550-rfid-drm-third-party-labels-compatibility" title="DYMO 550 RFID DRM &amp; Third-Party Labels Compatibility">generic</a>) installed for exact model and OS</li>
+  <li>[ ] Previous <a href="/kodak/setup-installation/how-to-print-from-macos-to-legacy-kodak-printer" title="How to Print from macOS to a Legacy Kodak Printer">driver</a> fully uninstalled from both Devices and Programs list</li>
+  <li>[ ] Correct communication port confirmed in printer properties</li>
+  <li>[ ] Cable swapped as a <a href="/kodak/error-codes-alerts/kodak-printer-flashing-red-light-error" title="Kodak Printer Flashing Red Light: Diagnostic Fixes">diagnostic</a> check</li>
+  <li>[ ] Emulation mode confirmed correct for your model (if applicable)</li>
+  <li>[ ] Character encoding / code page matched to POS <a href="/dascom/connectivity-issues/dascom-pos-printer-cash-drawer-not-opening" title="Fix Dascom POS Printer Cash Drawer Not Opening (RJ11 Fix)">software</a> output</li>
+  <li>[ ] Data <a href="/zebra-technologies/drivers-software-firmware/zebra-zpl-label-prints-garbled-text-raw-code-issues" title="Fix Zebra ZPL Label Prints Garbled Text or Raw Code">Dump Mode</a> used to verify what data actually arrives (if all else fails)</li>
+  <li>[ ] <a href="/polaroid/drivers-software-firmware/polaroid-hi-print-firmware-update-factory-reset-guide" title="Polaroid Hi-Print Firmware Update &amp; Factory Reset Guide">Firmware update</a> only considered as last resort</li>
+</ul>
+<p>Garbled printing feels like a hardware disaster but almost always turns out to be a communication or <a href="/bixolon/error-codes-alerts/printer-error-codes" title="Bixolon Printer Error Codes: The Complete Guide (All Models) | 2026">driver</a> mismatch. Work through the steps in order — self-test first, then driver, then port, then cable — and you'll typically resolve it within one or two attempts. The rare cases that require service are usually obvious because the self-test itself fails.</p>
+--- hp-printer-keeps-disconnecting-from-wifi ---
+<h2>The Quick Answer</h2>
+<p><strong>HP printer keeps disconnecting from Wi-Fi? A repair tech explains <a href="/brother/error-codes-alerts/brother-printer-error-ts-04" title="Fix Brother Printer Error TS-04: WPA3 Security Mismatch">router settings</a>, sleep modes, and the hidden EWS power setting most guides miss.</strong></p>
+
+<p>It's not your imagination, and it's not a coincidence that it happens most often after the printer's been idle a while. When an HP printer <a href="/fujifilm/connectivity-issues/instax-link-keeps-disconnecting-connected-wont-print" title="Instax Link Disconnecting or Won't Print (Fix Bluetooth Drops)">keeps disconnecting</a> from Wi-Fi — showing offline every morning, dropping mid-afternoon, needing a restart to reconnect — there's almost always a specific, fixable reason, and in my repair shop the reason is rarely a weak signal. It's usually one of a short list of settings actively working against a stable connection, on either the router's side or the printer's own power-saving side.</p>
+<p>Let's go through the causes in the order I'd check them, ending with a setting that's completely invisible from the printer's own control panel — which is exactly why almost nobody finds it.</p>
+
+<h2>Quick-Fix Summary</h2>
+<p>Fast version:</p>
+<ol>
+  <li><strong>Move to 2.4GHz</strong> if your router splits bands — better range, better <a href="/kodak/ink-toner-issues/kodak-ink-cartridge-compatibility-guide-series-10-vs-30" title="Kodak Ink Cartridge Compatibility Chart: Series 10, 30, Verite 5">compatibility</a>.</li>
+  <li><strong>Give the printer a fixed spot in your router's <a href="https://www.cloudflare.com/learning/network-layer/what-is-dhcp/" target="_blank" rel="noopener noreferrer">DHCP</a></strong> so its address never gets reassigned mid-print.</li>
+  <li><strong>Check for mesh network roaming issues</strong> — printers often struggle when they're supposed to hand off between nodes.</li>
+  <li><strong>Update the printer's <a href="/epson/error-codes-alerts/epson-controller-error-printer-fix" title="Fix Epson Controller Error (Motherboard &amp; Firmware)">firmware</a> and router's firmware</strong> — both, not just one.</li>
+  <li><strong>Disable the printer's aggressive Wi-Fi <a href="/epson/error-codes-alerts/epson-printer-power-light-blinking-wont-print" title="Fix Epson Printer Power Light Blinking and Won't Print">sleep mode</a></strong> via its hidden web-based settings page — my uncommon tip.</li>
+</ol>
+
+<h2>Fix 1: Get on the 2.4GHz Band</h2>
+<p>If your router broadcasts both <a href="/brother/connectivity-issues/brother-printer-ts-02-5ghz-vs-2.4ghz" title="Brother Printer Can't See Wi-Fi: TS-02 2.4GHz vs 5GHz Fix">2.4GHz</a> and 5GHz — as separate network names, or combined under one name with automatic band-switching — connect your printer specifically to the <strong>2.4GHz</strong> network.</p>
+<p><strong>Why this works:</strong> 5GHz is faster but has noticeably shorter range and weaker penetration through walls and floors. A printer sitting in a back office or a kitchen counter, one room away from the router, can hold a 5GHz <a href="/canon/setup-installation/canon-pixma-tr4720-wifi-setup" title="Canon PIXMA TR4720 Wireless Setup (Easy Wi-Fi Guide)">connection</a> just well enough to seem fine — until normal household interference (a microwave, a neighbor's Wi-Fi, someone walking between it and the router) knocks it loose. 2.4GHz reaches farther and tolerates more interference, at the cost of speed you'll never notice on a print job.</p>
+
+<h2>Fix 2: Reserve the Printer's IP Address</h2>
+<p>In your router's settings (usually reached by typing the router's <a href="/brother/connectivity-issues/brother-printer-network-configuration-page-how-to-print" title="How to Print a Brother Network Configuration Page">IP address</a> into a browser — check the label on the router itself, or its app), find the DHCP client list and locate your printer. Set up a <strong>DHCP reservation</strong> (sometimes called a "static lease") so the printer always receives the exact same local IP address rather than getting a new one assigned periodically.</p>
+<p><strong>Why this works:</strong> by default, routers hand out addresses on a lease that expires and renews. Most of the time renewal is invisible — but occasionally a printer's address changes while a print job or a monitoring <a href="/canon/setup-installation/canon-pixma-tr4720-wifi-setup" title="Canon PIXMA TR4720 Wireless Setup (Easy Wi-Fi Guide)">connection</a> still expects the old one, and from your computer's point of view that looks exactly like the printer vanishing off the network. A reservation removes this entire category of disconnect permanently, and it's a five-minute one-time setup.</p>
+
+<h2>Fix 3: Watch for Mesh Network Roaming Trouble</h2>
+<p>If you run a <a href="/rollo/connectivity-issues/rollo-printer-wifi-disconnecting-network-not-found-fix" title="Fix Rollo Wi-Fi Keeps Disconnecting &amp; Network Not Found">mesh Wi-Fi</a> system (multiple nodes covering a large home), check which node the printer is actually connected to, and see if it's switching between nodes as you or the system trigger a "roam." Some mesh systems aggressively push connected devices toward whichever node currently has the strongest signal — great for phones that move around the house, often disastrous for a printer that sits in exactly one spot and doesn't need to roam at all.</p>
+<p><strong>Why this works:</strong> printers generally have simpler Wi-Fi radios than phones or laptops, and many handle a forced hand-off between mesh nodes poorly — dropping the <a href="/canon/setup-installation/canon-pixma-tr4720-wifi-setup" title="Canon PIXMA TR4720 Wireless Setup (Easy Wi-Fi Guide)">connection</a> entirely rather than smoothly transferring it. If your mesh system's app allows you to pin a device to a specific node, or exclude certain devices from aggressive roaming, do that for the printer. It removes the printer from a negotiation it was never built to handle gracefully.</p>
+
+<h2>Fix 4: Update Both Firmwares</h2>
+<p>Check for and install the latest <a href="/fujifilm/error-codes-alerts/instax-mini-link-3-not-printing-battery-drain-fix" title="Fix Instax Mini Link 3 Not Printing &amp; Fast Battery Drain">firmware</a> on the printer itself (usually through its control panel's network or update menu, or via the HP Smart app) <strong>and</strong> on your router separately, through the router manufacturer's app or web interface.</p>
+<p><strong>Why this works:</strong> Wi-Fi compatibility bugs get discovered and patched on both sides of a connection over a device's lifetime. A printer firmware from its release year and a router firmware from years later can develop small incompatibilities neither manufacturer anticipated at launch — patched individually on each side as issues surface, but only if you actually install the updates. This is boring, unglamorous maintenance, and it quietly resolves more <a href="/kodak/connectivity-issues/kodak-photo-printer-bluetooth-pairing-failed" title="Kodak Printer Bluetooth Pairing Failed: Android &amp; iOS Fixes">connectivity</a> oddities than people expect.</p>
+
+<h2>Fix 5: Disable Wi-Fi Sleep Through the Printer's Hidden Web Page (My Uncommon Tip)</h2>
+<p>Here's the fix for the specific pattern that fools almost everyone: the printer works perfectly all day, then shows offline first thing every morning, or after any long idle stretch — but reconnects fine the moment you walk over and press a button on it.</p>
+<p>Most HP printers include an aggressive power-saving feature that puts the Wi-Fi radio into a deep sleep state after extended inactivity, to save a small amount of energy. On many models, this setting is either buried several menus deep on the control panel or <strong>not exposed on the control panel at all</strong> — it only lives in the printer's Embedded Web Server (EWS), a built-in configuration webpage most owners never know exists.</p>
+<p>To reach it: find your printer's IP address (usually under its network settings menu, or by printing a <a href="/brother/connectivity-issues/brother-printer-network-configuration-page-how-to-print" title="How to Print a Brother Network Configuration Page">network configuration page</a>), then type that IP address directly into a web browser on any computer on the same network. This opens the EWS — a full settings dashboard living inside the printer itself. Look under <strong>Power Management</strong>, <strong>Network</strong>, or <strong>Sleep Settings</strong> for something labeled <strong>Wireless Sleep</strong>, <strong>Wi-Fi Auto-Off</strong>, or similar, and set it to disabled, or extend the delay to its maximum.</p>
+<p><strong>Why this works:</strong> deep Wi-Fi sleep doesn't just dim a screen — it powers the radio down enough that reconnecting cleanly isn't guaranteed, and some printers wake sluggishly or fail to rejoin the network automatically at all, requiring a manual nudge to come back. The EWS exists specifically because printers have more configuration options than a simple front panel can display, and power management is exactly the kind of setting HP tucks away there rather than surfacing on the touchscreen. In my shop, this single toggle has ended more "offline every morning" service calls than any <a href="/kodak/connectivity-issues/kodak-printer-blinking-wifi-light" title="How to Fix a Kodak Printer Blinking Wi-Fi Light">router</a> setting on this list — because the printer, not the network, turned its own radio off on purpose.</p>
+
+<h2>When to Call a Professional</h2>
+<p>If you've moved to 2.4GHz, reserved the <a href="/brother/connectivity-issues/brother-printer-network-configuration-page-how-to-print" title="How to Print a Brother Network Configuration Page">IP address</a>, ruled out mesh roaming issues, updated both firmwares, and disabled Wi-Fi sleep through the EWS — and disconnections still happen randomly throughout active use, not just after idle periods — a failing Wi-Fi radio inside the printer becomes the more likely explanation. Contact HP support with your model and serial number; wireless module faults are a standard warranty repair category. Out of warranty, a wired Ethernet or USB connection is often the more practical fix on an older printer than a wireless module replacement, and it's worth mentioning as a permanent workaround while you decide.</p>
+
+<h2>FAQ</h2>
+<h3>Why does my HP printer go offline every morning specifically?</h3>
+<p>That pattern points to the printer's own Wi-Fi sleep setting, not your <a href="/brother/connectivity-issues/brother-printer-wps-button-not-connecting" title="Fix Brother Printer WPS Button Not Connecting">router</a>. After a long idle stretch overnight, the radio powers down aggressively and doesn't always reconnect cleanly. Disable Wireless Sleep in the printer's Embedded Web Server (EWS).</p>
+
+<h3>What is the printer's Embedded Web Server and how do I find it?</h3>
+<p>It's a settings dashboard built into the printer, reached by typing the printer's IP address into any browser on the same network. Find the IP under the printer's network settings menu, or on a printed <a href="/brother/connectivity-issues/brother-printer-network-configuration-page-how-to-print" title="How to Print a Brother Network Configuration Page">network configuration page</a>.</p>
+
+<h3>Should I use 2.4GHz or 5GHz for my printer?</h3>
+<p><a href="/brother/connectivity-issues/brother-printer-ts-02-5ghz-vs-2.4ghz" title="Brother Printer Can't See Wi-Fi: TS-02 2.4GHz vs 5GHz Fix">2.4GHz</a>, generally — it has better range and tolerates interference and distance better than 5GHz, and a print job doesn't need 5GHz's extra speed.</p>
+
+<h3>Can my mesh Wi-Fi system really cause printer disconnects?</h3>
+<p>Yes. Some mesh systems aggressively hand devices off between nodes to chase the strongest <a href="/brother/error-codes-alerts/brother-printer-error-ts-02" title="Fix Brother Printer Error TS-02: Cannot Detect Router">signal</a>, and printers often handle that hand-off poorly. If your mesh app allows pinning a device to one node, use it for the printer.</p>
+
+<p>An <a href="/hp/printing-problems/hp-printer-fax-error-no-dial-tone" title="HP Printer Fax Error: No Dial Tone Detected? Fix">HP printer</a> that keeps disconnecting from Wi-Fi is almost always fighting one specific setting, not a weak signal in general. Get it on 2.4GHz, reserve its IP address, watch for mesh roaming trouble, keep both firmwares current, and check that hidden EWS Wi-Fi sleep setting most owners never knew existed. That last one alone solves the "fine all day, offline every morning" pattern more often than everything else on this list combined.</p>
+--- kodak-scan-to-email-not-working ---
+<p>If your Kodak All-in-One printer previously scanned documents directly to your email inbox but has suddenly stopped working, you are not alone. This feature broke for millions of printer owners worldwide when Google, Microsoft, and Yahoo <strong>permanently disabled "Less Secure Apps" (Basic Authentication)</strong> for their email services. Kodak printers that relied on sending scans through a plain username/password SMTP login can no longer authenticate with these modernized servers. The good news is that you can restore the functionality using <strong>App Passwords</strong> — special 16-character tokens that bypass the need for modern OAuth2 authentication.</p>
+
+<h2>Why Scan to Email Stopped Working</h2>
+<p>When you configured "Scan to Email" on your Kodak printer, you entered your Gmail or Outlook email address and password into the printer's SMTP (Simple Mail Transfer Protocol) settings. The printer used this login to send the scanned document as an email attachment. This worked because email providers allowed <strong>Basic Authentication</strong> — a simple username + password handshake.</p>
+<p>In 2022, Google removed support for Basic Authentication entirely, requiring all third-party apps to use <strong>OAuth2</strong> — a modern token-based system. Since Kodak printers cannot perform OAuth2 handshakes (they lack the firmware and display interface), the SMTP login permanently fails with an authentication error.</p>
+
+<h2>Solution A: Generate a Google App Password (Gmail Users)</h2>
+<p>Google provides a workaround called <strong>App Passwords</strong> — unique 16-character codes that allow legacy devices to authenticate without OAuth2:</p>
+<ol>
+  <li>On your computer, navigate to <a href="https://myaccount.google.com/security">https://myaccount.google.com/security</a>.</li>
+  <li><strong>Important:</strong> You must have <strong>2-Step Verification</strong> enabled on your Google account. If it is not enabled, turn it on first under the "Signing in to Google" section.</li>
+  <li>Once 2-Step Verification is active, search for <strong>"App passwords"</strong> in the Security settings page.</li>
+  <li>Under "Select app", choose <strong>Other (Custom name)</strong> and type <strong>"Kodak Printer"</strong>.</li>
+  <li>Click <strong>Generate</strong>. Google will display a 16-character password (e.g., <code>abcd efgh ijkl mnop</code>).</li>
+  <li>Copy this password immediately — it will only be shown once.</li>
+</ol>
+
+<h2>Solution B: Generate a Microsoft App Password (Outlook/Hotmail Users)</h2>
+<ol>
+  <li>Navigate to <a href="https://account.microsoft.com/security">https://account.microsoft.com/security</a>.</li>
+  <li>Enable <strong>Two-Step Verification</strong> if not already active.</li>
+  <li>Go to <strong>Security &gt; Advanced security options &gt; App passwords</strong>.</li>
+  <li>Click <strong>Create a new app password</strong>.</li>
+  <li>Microsoft will generate and display a one-time password. Copy it.</li>
+</ol>
+
+<h2>Entering the App Password into Your Kodak Printer</h2>
+<p>Now configure the printer's SMTP settings with the new App Password:</p>
+<ol>
+  <li>On the Kodak printer control panel, navigate to <strong>Network Settings &gt; Email Settings</strong> (or <strong>Scan Settings &gt; Scan to Email</strong>).</li>
+  <li>Enter the following SMTP parameters:</li>
+</ol>
+
+<table class="diagnostic-table">
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Gmail Value</th>
+      <th>Outlook Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>SMTP Server</strong></td>
+      <td>smtp.gmail.com</td>
+      <td>smtp-mail.outlook.com</td>
+    </tr>
+    <tr>
+      <td><strong>Port</strong></td>
+      <td>587</td>
+      <td>587</td>
+    </tr>
+    <tr>
+      <td><strong>Security / Encryption</strong></td>
+      <td>TLS (or STARTTLS)</td>
+      <td>TLS (or STARTTLS)</td>
+    </tr>
+    <tr>
+      <td><strong>Username</strong></td>
+      <td>your.email@gmail.com</td>
+      <td>your.email@outlook.com</td>
+    </tr>
+    <tr>
+      <td><strong>Password</strong></td>
+      <td><strong>The 16-character App Password</strong> (not your regular Gmail password)</td>
+      <td><strong>The App Password</strong> (not your regular Outlook password)</td>
+    </tr>
+  </tbody>
+</table>
+
+<ol start="3">
+  <li>Save the settings and send a test scan to your own email address to verify.</li>
+</ol>
+
+<div class="warning-box warning" style="background:#fffbeb; border-left:4px solid #d97706; padding:1rem; margin:1.5rem 0;">
+  <strong>Workaround if Your Printer Lacks SMTP Settings:</strong> If your Kodak model does not have an onboard SMTP configuration menu, use the <strong>"Scan to Computer"</strong> function instead. Scan the document to your PC, then attach it to an email manually. You can also use the <strong>"Scan to USB"</strong> feature if your printer has a USB port.
+</div>
+
+<h2>Related Kodak Troubleshooting Guides</h2>
+<ul class="related-articles">
+    <li>Kodak Printer Scanner Not Working? WIA Driver &amp; Firewall Fixes</li>
+    <li>How to Fix a Kodak Printer Showing Offline on Windows 11</li>
+    <li>How to Run KODAK All-in-One Printer Software on Windows 11</li>
+</ul>
+
+<h2>Technical Diagnostics for Kodak Scan-to-Email SMTP Failures</h2>
+<p>When Kodak all-in-one printers (ESP 7250, ESP 9250, HERO 7.1, HERO 9.1) fail to send scans via email, the issue is almost always tied to modern email security protocols. In recent years, major email providers (Google Gmail, Microsoft Outlook/Office 365, Yahoo) disabled legacy Basic Authentication (plain username/password) in favor of OAuth 2.0. Because legacy Kodak printer firmware only supports standard SMTP Basic Auth, email connections are rejected at the server level.</p>
+
+<h2>How to Configure Kodak Scan-to-Email with Modern Email Providers</h2>
+<ol>
+  <li><strong>Creating a Dedicated App Password (For Gmail &amp; Yahoo):</strong>
+    <ul>
+      <li>Log into your Google or Yahoo account settings via a web browser.</li>
+      <li>Navigate to <strong>Security &gt; 2-Step Verification</strong> (must be enabled).</li>
+      <li>Click on <strong>App Passwords</strong>.</li>
+      <li>Generate a new app password named "Kodak Printer". Google will generate a 16-character code (e.g., <code>abcd efgh ijkl mnop</code>).</li>
+      <li>Use this 16-character code as your SMTP password inside the Kodak printer settings, NOT your regular account password.</li>
+    </ul>
+  </li>
+  <li><strong>Accessing the Kodak Embedded Web Server (EWS):</strong>
+    <ul>
+      <li>Find your printer's IP address on the Network Configuration sheet.</li>
+      <li>Enter the IP address into a web browser on your computer.</li>
+      <li>Navigate to <strong>Settings &gt; Email / Scan to Email Settings</strong>.</li>
+    </ul>
+  </li>
+  <li><strong>Configuring Correct SMTP Server Parameters:</strong>
+    <table style="width:100%; border-collapse: collapse; margin: 20px 0;">
+      <thead>
+        <tr style="background-color: #f3f4f6; text-align: left;">
+          <th style="padding: 10px; border: 1px solid #d1d5db;">Provider</th>
+          <th style="padding: 10px; border: 1px solid #d1d5db;">SMTP Server</th>
+          <th style="padding: 10px; border: 1px solid #d1d5db;">Port &amp; Encryption</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 10px; border: 1px solid #d1d5db;"><strong>Gmail</strong></td>
+          <td style="padding: 10px; border: 1px solid #d1d5db;"><code>smtp.gmail.com</code></td>
+          <td style="padding: 10px; border: 1px solid #d1d5db;">Port <code>587</code> (STARTTLS) or Port <code>465</code> (SSL)</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border: 1px solid #d1d5db;"><strong>Outlook / Hotmail</strong></td>
+          <td style="padding: 10px; border: 1px solid #d1d5db;"><code>smtp.office365.com</code></td>
+          <td style="padding: 10px; border: 1px solid #d1d5db;">Port <code>587</code> (STARTTLS)</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border: 1px solid #d1d5db;"><strong>Yahoo Mail</strong></td>
+          <td style="padding: 10px; border: 1px solid #d1d5db;"><code>smtp.mail.yahoo.com</code></td>
+          <td style="padding: 10px; border: 1px solid #d1d5db;">Port <code>465</code> (SSL) or Port <code>587</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ol>
+
+<h2>Frequently Asked Questions</h2>
+<details>
+  <summary>Why does the printer say "Authentication Failed" with my correct Gmail password?</summary>
+  <p>Google blocks standard login attempts from third-party legacy devices. You must generate an App Password in your Google Account Security settings and enter that specific code into the printer.</p>
+</details>
+<details>
+  <summary>Can I scan to my computer instead if email remains blocked?</summary>
+  <p>Yes. You can scan directly to your PC via USB or Wi-Fi using the Kodak <a href="/kodak/setup-installation/kodak-printer-software-crashes-windows-11" title="Fix Kodak All-in-One Software Crashes on Windows 11/10">Home Center software</a> or the native Windows Scan app via standard WIA/TWAIN drivers.</p>
+</details>
+
+--- polaroid-hi-print-streaky-lines-wrong-colors-fix ---
+The Polaroid Hi-Print is a fantastic pocket photo printer that uses dye-sublimation technology to produce vibrant, waterproof, and smudge-proof 2x3 prints. However, like all dye-sublimation printers, it is not immune to print quality issues. One of the most common complaints from users is the sudden appearance of streaky lines, banding, or incorrect color reproduction on their prints. This can be incredibly frustrating, especially when you're trying to capture and share a special moment on the go. When your prints come out looking less than stellar, with strange horizontal lines or colors that seem washed out or improperly mixed, it's a clear sign that the printing process has been interrupted or compromised. Fortunately, resolving these issues is usually a straightforward process that involves understanding how dye-sublimation works and addressing the root causes of the interference. This comprehensive guide will walk you through the various reasons why your Polaroid Hi-Print might be producing streaky or discolored prints and provide you with actionable steps to get your printer back to producing flawless, vibrant photos.
+
+<h2>Why This Happens</h2>
+Dye-sublimation printing works by using heat to transfer dye onto the paper. The Polaroid Hi-Print uses an all-in-one cartridge that contains both the paper and the color ribbon. The ribbon has alternating panels of yellow, magenta, cyan, and a clear protective overcoat. The printer passes the paper back and forth, heating the ribbon to sublimate (turn from solid to gas) the dye onto the paper. Streaky lines and wrong colors typically occur when this precise thermal transfer process is disrupted.
+One primary cause is dirt or dust accumulation on the thermal print head. The print head is a delicate component that applies exact amounts of heat to the ribbon. If even a microscopic speck of dust gets between the print head and the ribbon, it acts as an insulator, preventing the heat from transferring properly. This results in an unprinted or lighter line running across the photo.
+Another common reason is a defective or improperly stored cartridge. The dye ribbons are sensitive to extreme temperatures and humidity. If a cartridge has been stored in a hot car or a damp environment, the dye can degrade or the ribbon can become warped, leading to uneven transfer and strange color shifts. For instance, if the magenta dye panel is compromised, your prints might look overly green or lack warmth.
+Low battery levels can also cause print quality issues. The thermal printing process requires a consistent and significant amount of power to heat the print head quickly and accurately. If the battery is running low, the printer might not be able to generate enough heat, leading to faint colors or incomplete transfers. Additionally, physical damage to the printer, such as a misaligned roller caused by dropping the device, can prevent the paper from feeding smoothly, resulting in banding and streaking. Lastly, outdated firmware can sometimes cause communication errors between the app and the printer, leading to incorrect color profiles being applied to the image data before it's sent to the printer.
+
+<h2>Step-by-Step Fix</h2>
+<ol>
+<li><strong>Check and Charge the Battery:</strong> Before attempting any complex fixes, ensure your Polaroid Hi-Print is fully charged. Connect it to a reliable power source using the provided micro-USB cable and wait until the charging indicator confirms a full battery. A low battery is a frequent culprit for weak color transfer.</li>
+<li><strong>Clean the Print Head:</strong> This is the most crucial step. Power off the printer and open the cartridge door. Carefully remove the current cartridge. Locate the thermal print head, which is usually a straight metallic line inside the printer cavity. Take a lint-free microfiber cloth or a specialized thermal printer cleaning pen and gently wipe across the print head. Do not use excessive force or abrasive materials, as this can permanently damage the component. If using isopropyl alcohol, ensure it is 99% pure and apply it sparingly to a cotton swab, allowing it to dry completely before reinserting a cartridge.</li>
+<li><strong>Inspect and Replace the Cartridge:</strong> Examine the cartridge you just removed. Look for any visible signs of damage, slack in the ribbon, or creases. If the ribbon looks wrinkled or torn, the cartridge is defective and must be replaced. Even if it looks fine, if cleaning the print head didn't work, try installing a brand new, factory-sealed cartridge. Make sure the new cartridge has been stored at room temperature, away from direct sunlight and high humidity.</li>
+<li><strong>Update the Printer Firmware:</strong> Connect your smartphone to the printer via Bluetooth and open the Polaroid Hi-Print app. Navigate to the device settings and look for any available firmware updates. Manufacturers frequently release updates to improve color processing algorithms and resolve known hardware communication bugs. Download and install any pending updates, ensuring your phone and printer remain connected and powered during the process.</li>
+<li><strong>Calibrate the Color Settings:</strong> Sometimes the issue isn't hardware but how the image is being processed. Within the Polaroid Hi-Print app, check if there are any color correction or calibration settings. Try printing a standard color test chart to see exactly which colors are failing. Adjust the brightness, contrast, and saturation slightly in the app before printing to see if it compensates for the issue.</li>
+</ol>
+
+<h2>Advanced Troubleshooting</h2>
+If you have completed the basic steps and the streaks or color issues persist, you may need to explore more advanced troubleshooting. One potential issue is a misaligned internal roller. The paper must feed at a very specific speed; if a roller is dirty, sticky, or slightly out of alignment, the paper will hesitate during the pass, causing a noticeable band of heavier or lighter color. You can try gently cleaning the rubber feed rollers with a lightly dampened lint-free cloth (using water, not alcohol, which can dry out rubber). Turn the rollers manually if possible to clean the entire circumference.
+Another advanced issue is a failing thermal print head element. The print head is made up of hundreds of tiny heating elements. If one or more of these elements burn out, they will consistently fail to transfer dye, resulting in a permanent, sharp white line down the length of every print. Unfortunately, if a print head element is dead, it cannot be repaired, and the entire printer will need to be replaced or serviced by the manufacturer.
+Interference from Bluetooth signals can also rarely cause data packet loss during transmission, leading to corruption in the print data. Try disconnecting other Bluetooth devices in the area, moving closer to the printer, and ensuring there are no strong sources of electromagnetic interference nearby. You can also try resetting the printer to its factory defaults. Look for a small reset pinhole near the charging port; use a paperclip to press and hold the button inside for 10 seconds while the printer is powered on. This will clear the internal memory and reset all network connections. Finally, test printing from a completely different smartphone or tablet to rule out any quirks or corruption within the specific app installation on your primary device.
+
+<h2>FAQ</h2>
+<details><summary>Can I reuse a jammed cartridge in my Polaroid Hi-Print?</summary>
+<p>Generally, no. If a cartridge jams and the ribbon is stretched, torn, or exposed, it is compromised. Attempting to reuse a damaged cartridge can further damage the printer's delicate internal mechanisms, especially the thermal print head. It is always safer to discard a jammed cartridge and start fresh.</p>
+</details>
+<details><summary>Why do my photos look much darker than on my phone screen?</summary>
+<p>Smartphone screens are backlit and incredibly bright, which makes photos look more luminous than they will appear on physical media. The Polaroid Hi-Print relies on ambient light to view the photo. Additionally, the color profile of your phone's display may differ from the printer's output. Try increasing the brightness of your photo by 10-15% in the app before printing.</p>
+</details>
+<details><summary>How often should I clean the print head?</summary>
+<p>It is good practice to clean the print head every time you open a new pack of cartridges (usually every 20 prints) or immediately if you notice any decline in print quality. Regular maintenance prevents the build-up of dust and debris that causes streaking.</p>
+</details>
+<details><summary>Does the environment affect print quality?</summary>
+<p>Yes, significantly. Dye-sublimation relies on controlled heat. Printing in very cold environments can prevent the dye from transferring fully, leading to faint colors. High humidity can cause the paper to stick or the dye to bleed slightly. For best results, print at normal room temperature (around 68-77°F or 20-25°C).</p>
+</details>
+--- printer-not-printing ---
+<h2>The Quick Answer</h2>
+<p><strong>Bixolon printer <a href="/epson/ink-toner-issues/epson-l3210-not-printing-black" title="Fix Epson L3210 Not Printing Black Ink (EcoTank Guide)">not printing</a>? Work through these fixes in order — from paper and cables to drivers and POS settings — to get it working again in minutes.</strong></p>
+
+<p>A Bixolon printer that <a href="/epson/error-codes-alerts/epson-printer-power-light-blinking-wont-print" title="Fix Epson Printer Power Light Blinking and Won't Print">won't print</a> is almost never actually broken — it's usually one small thing standing between a print job and the paper coming out. In the vast majority of cases, the cause falls into one of three buckets: something physical (paper, cover, cable), something software-related (driver, queue, POS settings), or, far less often, an actual hardware fault.</p>
+
+<p>The fixes below are ordered by how often they're actually the cause, starting with the fastest checks first. Work through them in order rather than jumping around — most people who jump straight to reinstalling drivers or calling support end up solving a paper-loading issue they could have caught in 20 seconds. Most cases are resolved within five minutes using nothing more than the printer itself.</p>
+
+<div style="margin: 2rem 0; text-align: center;">
+  <img src="/bixolon-printer-not-printing.jpg" alt="Bixolon Printer Not Printing Troubleshooting Guide" style="max-width: 100%; height: auto; border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+</div>
+
+<h2>Why This Happens: A Quick Mental Model</h2>
+
+<p>Before working through the steps, it helps to know what "<a href="/dymo/drivers-software-firmware/fix-dymo-web-service-shopify-amazon-ebay-chrome" title="Fix DYMO Not Printing from Shopify, Amazon, eBay (Chrome Plugin)">not printing</a>" actually covers, because it's not one single problem:</p>
+
+<ul>
+  <li><strong>Nothing happens at all</strong> when you send a job — usually a <a href="/canon/setup-installation/canon-pixma-tr4720-wifi-setup" title="Canon PIXMA TR4720 Wireless Setup (Easy Wi-Fi Guide)">connection</a>, driver, or software issue.</li>
+  <li><strong>The printer feeds paper but <a href="/phomemo/print-quality-issues/phomemo-printer-feeds-prints-blank-paper-orientation" title="Fix Phomemo Feeds But Prints Blank (Paper Orientation)">prints nothing</a> visible</strong> — usually a paper-loading issue (wrong side facing out) or a worn print head.</li>
+  <li><strong>The printer attempts to print but jams or stops mid-job</strong> — usually a <a href="/epson/error-codes-alerts/epson-l3250-red-light-blinking-fix" title="Fix Epson L3250 Red Light Blinking (Wi-Fi &amp; Paper)">paper jam</a>, cover issue, or cutter fault.</li>
+  <li><strong>It worked yesterday and now doesn't, with no changes made</strong> — almost always a driver conflict from an automatic OS update, or a network <a href="/brother/connectivity-issues/brother-printer-network-configuration-page-how-to-print" title="How to Print a Brother Network Configuration Page">IP address</a> that changed.</li>
+</ul>
+
+<p>Keep your specific version of the problem in mind as you go — it'll help you skip straight to the right section if you want to move faster than the full sequence below.</p>
+
+<h2>1. Check the Paper First</h2>
+
+<p>This sounds obvious, but it's the single most common cause of a "dead" printer, especially in busy retail and restaurant environments where paper gets swapped quickly and not always correctly. Open the cover and confirm all of the following:</p>
+
+<ul>
+  <li><strong>There's actually a roll loaded</strong> — not just an empty cardboard core sitting in the tray, which is easy to miss at a glance.</li>
+  <li><strong>The paper isn't <a href="/fujifilm/error-codes-alerts/instax-square-link-wide-errors-film-loading-guide" title="Instax Square Link &amp; Link WIDE Error Codes &amp; Fixes">jammed</a> or torn</strong> at the feed point, where small torn fragments can block the sensor without being obviously visible.</li>
+  <li><strong>It's genuine <a href="/rollo/print-quality-issues/rollo-printer-blank-faint-light-uneven-print-density-fix" title="Fix Rollo Printer Blank, Faint &amp; Light Prints (Density Fix)">thermal paper</a></strong>, loaded thermal-side facing the print head. This is the single most common paper mistake — load it backward, or use non-thermal paper by accident, and you'll get a printer that feeds paper perfectly normally while printing absolutely nothing, which looks exactly like a broken printer but isn't one.</li>
+  <li><strong>The roll isn't too tightly wound or warped</strong>, which can create just enough drag to trigger a <a href="/polaroid/paper-handling-issues/polaroid-printer-paper-jam-no-jam-visible-blank-fix" title="Fix Polaroid Hi-Print Paper Jam &amp; Blank Prints (No Jam Visible)">false jam</a> reading on some models.</li>
+</ul>
+
+<p>Close the cover firmly until it clicks audibly. This matters more than people expect: many <a href="/bixolon/error-codes-alerts/bixolon-printer-flashing-red-light" title="Bixolon Printer Flashing Red Light: What It Means &amp; How to Fix It">Bixolon</a> models use a cover-latch safety sensor, and if it's not fully seated, the printer will refuse to print at all — even if every other condition is perfect — without necessarily showing an obvious error.</p>
+
+<p><strong>How to tell if this was the cause:</strong> if the <a href="/epson/error-codes-alerts/epson-printer-error-light-stays-on-solid" title="Fix Epson Printer Solid Red Error Light">error light</a> turns off and the printer accepts a test print immediately after reloading and closing the cover, this was it. No further troubleshooting needed.</p>
+
+<h2>2. Look at the Error Light</h2>
+
+<p>Before touching your computer, check the printer's <a href="/brother/connectivity-issues/brother-printer-wont-connect-to-wlan-access-point" title="Fix Brother Printer Won't Connect to WLAN Access Point">LED</a> — it usually tells you exactly which category of problem you're dealing with before you've spent any real time on it:</p>
+
+<ul>
+  <li><strong><a href="/epson/error-codes-alerts/epson-printer-blinking-red-light-no-display" title="Fix Epson Printer Blinking Red Light (No Display Models)">Blinking red light</a></strong> → usually means an open cover or paper-out condition you may have just fixed in Step 1. Power cycle and check again.</li>
+  <li><strong>Solid light, no <a href="/bixolon/error-codes-alerts/bixolon-printer-blinking-light-meaning" title="Bixolon Printer Blinking Light Meaning: Full LED Code Chart">blinking</a>, printer otherwise idle</strong> → the printer believes it's ready and waiting, which tells you the problem is upstream of the printer itself — your computer or POS software isn't successfully sending the print job. Skip ahead to Step 4.</li>
+  <li><strong>Fast, rapid blinking (roughly every 200 milliseconds)</strong> → typically indicates the <a href="/dascom/error-codes-alerts/dascom-printer-skipping-characters-grinding" title="Fix Dascom Skipping Characters &amp; Grinding Noises (Print Head Error)">print head</a> has overheated, usually after a burst of high-volume printing. This resolves on its own — see Step 8.</li>
+  <li><strong>No lights at all, completely dark</strong> → this is a power issue, not strictly a printing issue. Check the power cable, the wall outlet, and the power brick itself (these are a common failure point on printers left on 12+ hours a day) before going any further.</li>
+</ul>
+
+<h2>3. Power Cycle the Printer</h2>
+
+<p>Turn it off, wait a full 10 seconds, and turn it back on. This clears minor internal errors and stuck states that don't always show up as an obvious <a href="/kodak/connectivity-issues/kodak-printer-blinking-wifi-light" title="How to Fix a Kodak Printer Blinking Wi-Fi Light">blinking light</a> but still quietly block printing — things like a half-processed job stuck in the printer's internal buffer, or a sensor that briefly misfired and needs a clean restart to reset. It's a 10-second step that resolves more cases than most people expect, and it costs nothing to try even if you're fairly sure it won't work.</p>
+
+<h2>4. Confirm the Print Job Is Actually Reaching the Printer</h2>
+
+<p>If the printer itself looks completely fine — lights normal, no errors — but nothing happens when you send a print job, the issue is almost always on the computer or <a href="/dascom/hardware-maintenance/dascom-thermal-printer-not-cutting-paper-cutter-jam" title="Fix Dascom Thermal Receipt Printer Not Cutting Paper">POS</a> side rather than the printer:</p>
+
+<p><strong>On Windows:</strong></p>
+<ol>
+  <li>Open <strong>Settings → <a href="/kodak/connectivity-issues/kodak-instant-printer-app-not-connecting" title="Fix Kodak Instant Printer App Not Connecting to Printer">Bluetooth</a> &amp; devices → Printers &amp; scanners</strong> (or <strong>Devices and Printers</strong> on older versions).</li>
+  <li>Right-click your <a href="/bixolon/error-codes-alerts/bixolon-printer-blinking-light-meaning" title="Bixolon Printer Blinking Light Meaning: Full LED Code Chart">Bixolon</a> printer and select <strong>See what's printing</strong>.</li>
+  <li>If there's a stuck or stalled job in the <a href="/dymo/error-codes-alerts/dymo-printer-error-printing-message-not-printing" title="Fix DYMO 'Error Printing' Message (Windows 11 / 10)">queue</a>, cancel it and clear the queue completely — a single stuck job will silently block every job sent after it, which is one of the most common reasons a printer that "was working fine" suddenly stops.</li>
+  <li>If the printer shows <strong>"Offline"</strong> here even though it's powered on and connected, right-click and deselect "Use <a href="/rollo/connectivity-issues/rollo-printer-static-ip-setup-windows-offline-fix" title="Rollo Printer Static IP Setup &amp; Windows Offline Fix Guide">Printer Offline</a>" if that option is checked.</li>
+</ol>
+
+<p><strong>On <a href="/dymo/connectivity-issues/dymo-printer-not-showing-up-mac-os-fix" title="Fix DYMO Printer Not Showing Up on Mac (Driver &amp; CUPS Setup)">macOS</a>:</strong></p>
+<ol>
+  <li>Open <strong>System Settings → Printers &amp; Scanners.</strong></li>
+  <li>Click your <a href="/bixolon/connectivity-issues/bixolon-printer-showing-offline" title="Bixolon Printer Showing Offline? Here's the Fix">Bixolon</a> printer and check whether it shows as <strong>paused</strong> — if so, resume it.</li>
+  <li>Clear any stuck jobs from the <a href="/dymo/error-codes-alerts/dymo-printer-error-printing-message-not-printing" title="Fix DYMO 'Error Printing' Message (Windows 11 / 10)">queue</a> the same way as above.</li>
+</ol>
+
+<p><strong>Inside your POS <a href="/dascom/connectivity-issues/dascom-pos-printer-cash-drawer-not-opening" title="Fix Dascom POS Printer Cash Drawer Not Opening (RJ11 Fix)">software</a> (Square, Toast, Shopify POS, Clover, etc.):</strong></p>
+<ol>
+  <li>Open the printer or hardware settings specifically inside the app — many POS platforms maintain their own separate printer configuration that's independent of the operating system's printer list, and it's easy to have the wrong device selected after an <a href="/polaroid/drivers-software-firmware/polaroid-hi-print-app-crashing-permissions-update-fix" title="Fix Polaroid Hi-Print App Crashing &amp; Permissions (iOS/Android)">app update</a>.</li>
+  <li>Re-select the correct Bixolon printer if it's listed as <a href="/canon/connectivity-issues/canon-pixma-mg3620-offline" title="Fix Canon PIXMA MG3620 Offline Error (Wi-Fi Reconnect)">disconnected</a> or unselected.</li>
+  <li>Fully close and restart the POS application itself, not just the printer. A surprising number of "the printer just <a href="/epson/error-codes-alerts/epson-printer-stopped-working-suddenly" title="Fix Epson Printer Stopped Working Suddenly (No Warning)">stopped working</a>" support tickets clear up after nothing more than restarting the software that's sending the print job.</li>
+</ol>
+
+<h2>5. Run a Self-Test to Isolate the Problem</h2>
+
+<p>This is the fastest way to determine whether the printer itself works at all, completely independent of any computer, cable, or <a href="/dascom/connectivity-issues/dascom-pos-printer-cash-drawer-not-opening" title="Fix Dascom POS Printer Cash Drawer Not Opening (RJ11 Fix)">software</a>. Hold the feed button while powering the printer on (the exact combination varies slightly by model — check your specific model's manual if it doesn't trigger immediately, since some require holding it for a few seconds after power-on rather than before).</p>
+
+<ul>
+  <li><strong>Self-test prints fine</strong> → your printer hardware is confirmed working. The issue is 100% on the <a href="/canon/setup-installation/canon-pixma-tr4720-wifi-setup" title="Canon PIXMA TR4720 Wireless Setup (Easy Wi-Fi Guide)">connection</a> or software side from here — focus your attention on Steps 4, 6, or 7 rather than anything physical.</li>
+  <li><strong>Self-test fails, prints blank, or comes out faded/streaky</strong> → you likely have a paper-loading issue (go back and recheck Step 1 carefully) or a deeper hardware fault such as a worn <a href="/dascom/error-codes-alerts/dascom-printer-skipping-characters-grinding" title="Fix Dascom Skipping Characters &amp; Grinding Noises (Print Head Error)">print head</a>.</li>
+  <li><strong>Self-test won't trigger at all</strong> → this usually means an error condition (open cover, <a href="/bixolon/error-codes-alerts/printer-error-codes" title="Bixolon Printer Error Codes: The Complete Guide (All Models) | 2026">paper jam</a>) is actively blocking it — resolve that first, then retry.</li>
+</ul>
+
+<h2>6. Reinstall or Update the Driver</h2>
+
+<p>Outdated, corrupted, or mismatched drivers are one of the most common reasons a printer "stops printing" with no <a href="/kodak/ink-toner-issues/kodak-printer-low-ink-warning-override" title="Override Kodak Printer Low Ink Warning: Keep Printing Guide">warning</a>, especially right after an operating system update pushes through automatically overnight:</p>
+
+<ol>
+  <li>Uninstall the existing <a href="/bixolon/error-codes-alerts/bixolon-printer-flashing-red-light" title="Bixolon Printer Flashing Red Light: What It Means &amp; How to Fix It">Bixolon</a> driver completely through your OS's installed-programs list — don't just delete the printer from the printers list, which often leaves driver files behind that cause conflicts.</li>
+  <li>Restart your computer fully before reinstalling anything.</li>
+  <li><a href="/dymo/setup-installation/dymo-labelwriter-4xl-5xl-setup-driver-guide" title="DYMO LabelWriter 4XL &amp; 5XL Driver Download &amp; Setup">Download</a> the driver version matched to your <strong>exact printer model and exact OS version</strong> from Bixolon's official support site. This precision matters more with Bixolon hardware than with many consumer printer brands — a driver built for a slightly different model or OS build can install without errors but still fail silently when sending jobs.</li>
+  <li>Install it fresh, then immediately send a test print before reconnecting any POS <a href="/dascom/connectivity-issues/dascom-pos-printer-cash-drawer-not-opening" title="Fix Dascom POS Printer Cash Drawer Not Opening (RJ11 Fix)">software</a>, so you know the base driver layer works before adding complexity back on top.</li>
+</ol>
+
+<p>Resist the temptation to use a generic or "universal" ESC/POS <a href="/kodak/setup-installation/kodak-printer-driver-unavailable-fix" title="Fix Kodak Printer Driver Unavailable on Windows 10 &amp; 11">printer driver</a> as a shortcut — it may appear to install correctly while still causing inconsistent or failed print jobs down the line.</p>
+
+<h2>7. Check the Connection Itself</h2>
+
+<p>If the <a href="/dymo/setup-installation/dymo-labelwriter-4xl-5xl-setup-driver-guide" title="DYMO LabelWriter 4XL &amp; 5XL Driver Download &amp; Setup">driver</a> is current and the self-test passes but jobs still aren't reaching the printer, the issue is specific to how it's connected:</p>
+
+<ul>
+  <li><strong><a href="/dymo/connectivity-issues/dymo-connect-not-detecting-printer" title="Fix DYMO Connect Not Detecting Printer (USB &amp; Wi-Fi)">USB</a>:</strong> try a different cable entirely (not just a different port) — cables fail more often than the ports themselves. Avoid USB hubs, especially unpowered ones, which can cause intermittent dropouts under load.</li>
+  <li><strong>Network:</strong> print the printer's <a href="/brother/connectivity-issues/brother-printer-network-configuration-page-how-to-print" title="How to Print a Brother Network Configuration Page">network configuration page</a> (button combination varies by model) to check its current IP address. If it's changed since your POS software was configured, your system is silently sending every job to an address that no longer exists. Assigning the printer a static IP through its configuration utility prevents this from recurring.</li>
+  <li><strong><a href="/kodak/connectivity-issues/kodak-photo-printer-bluetooth-pairing-failed" title="Kodak Printer Bluetooth Pairing Failed: Android &amp; iOS Fixes">Bluetooth</a>:</strong> unpair completely from your device's Bluetooth settings rather than trying to reconnect to an existing pairing that's gone stale, then put the printer back into pairing mode and reconnect from scratch.</li>
+</ul>
+
+<h2>8. Rule Out an Overheated Print Head</h2>
+
+<p>If the printer was running heavy print volume right before it stopped — a busy lunch rush, a batch of <a href="/dymo/setup-installation/dymo-labelwriter-4xl-5xl-setup-driver-guide" title="DYMO LabelWriter 4XL &amp; 5XL Driver Download &amp; Setup">shipping labels</a>, a long restaurant ticket run — it may have simply paused to protect itself, not malfunctioned. This is a built-in safety behavior, not a fault. Let it sit powered on and idle for 5–10 minutes without sending additional jobs, then try again.</p>
+
+<h2>Common Error Messages Tied to This Symptom</h2>
+
+<p>If your POS software or operating system is showing a specific message alongside "<a href="/epson/ink-toner-issues/epson-l3210-not-printing-black" title="Fix Epson L3210 Not Printing Black Ink (EcoTank Guide)">not printing</a>," here's what it usually maps back to:</p>
+
+<table class="error-table">
+  <thead>
+    <tr>
+      <th>Message Seen</th>
+      <th>Most Likely Cause</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>"Printer Offline"</td>
+      <td>Stuck print queue, or printer genuinely disconnected — check Step 4 and 7</td>
+    </tr>
+    <tr>
+      <td>"Printer Not Found"</td>
+      <td>Driver not installed, or wrong connection type configured</td>
+    </tr>
+    <tr>
+      <td>"Print Spooler Error"</td>
+      <td>Windows print spooler service needs restarting (Services → Print Spooler → Restart)</td>
+    </tr>
+    <tr>
+      <td>"Device Not Responding"</td>
+      <td>Cable/connection issue, or printer stuck mid-job — power cycle first</td>
+    </tr>
+    <tr>
+      <td>No message at all, job just vanishes</td>
+      <td>Job sent to wrong/old printer in POS settings — recheck Step 4</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>If Nothing Above Works</h2>
+
+<p>At this point, you're likely dealing with a genuine hardware fault rather than a settings issue — most commonly a failing <a href="/dascom/error-codes-alerts/dascom-printer-skipping-characters-grinding" title="Fix Dascom Skipping Characters &amp; Grinding Noises (Print Head Error)">print head</a>, a damaged internal sensor, or a mechanical fault that isn't user-serviceable. Contact Bixolon support or an authorized repair center, and check your warranty status before paying out of pocket for a repair, since many Bixolon POS printers carry multi-year coverage that's easy to forget about.</p>
+
+<h2>Frequently Asked Questions</h2>
+
+<div class="faq-item">
+  <p><strong>Why did my <a href="/bixolon/error-codes-alerts/bixolon-printer-blinking-light-meaning" title="Bixolon Printer Blinking Light Meaning: Full LED Code Chart">Bixolon</a> printer suddenly stop printing with no changes made?</strong></p>
+  <p>This is almost always either an automatic OS/driver update that happened in the background, or a network <a href="/brother/connectivity-issues/brother-printer-network-configuration-page-how-to-print" title="How to Print a Brother Network Configuration Page">IP address</a> change after a router restart — both are common, both are software-side, and neither indicates a hardware problem.</p>
+</div>
+
+<div class="faq-item">
+  <p><strong>My printer feeds paper but nothing prints on it — is that the same issue?</strong></p>
+  <p>No — this is almost always paper loaded with the thermal-sensitive side facing the wrong way, or non-<a href="/rollo/print-quality-issues/rollo-printer-blank-faint-light-uneven-print-density-fix" title="Fix Rollo Printer Blank, Faint &amp; Light Prints (Density Fix)">thermal paper</a> used by mistake, rather than a connection or driver problem. Recheck Step 1 specifically.</p>
+</div>
+
+<div class="faq-item">
+  <p><strong>Can a stuck print job really block everything after it?</strong></p>
+  <p>Yes. Many printers, including <a href="/bixolon/connectivity-issues/bixolon-printer-showing-offline" title="Bixolon Printer Showing Offline? Here's the Fix">Bixolon</a> models, process jobs in order, so one stalled job at the front of the queue will hold up every job sent afterward until it's manually cleared.</p>
+</div>
+
+<div class="faq-item">
+  <p><strong>Should I reinstall the <a href="/dymo/setup-installation/dymo-labelwriter-4xl-5xl-setup-driver-guide" title="DYMO LabelWriter 4XL &amp; 5XL Driver Download &amp; Setup">driver</a> every time this happens?</strong></p>
+  <p>No — only do this if a self-test passes (confirming hardware is fine) but jobs still aren't being received. Reinstalling a <a href="/dascom/connectivity-issues/dascom-pos-printer-offline-esc-pos-driver" title="Fix Dascom POS Printer Offline (Driver &amp; Network Setup)">driver</a> unnecessarily can sometimes introduce a new mismatch rather than fix anything.</p>
+</div>
+
+<h2>Quick Checklist</h2>
+
+<ul class="checklist">
+  <li><input type="checkbox" disabled=""> Paper loaded correctly, <a href="/kodak/error-codes-alerts/kodak-step-printer-orange-light-flashing" title="Kodak Step Printer Orange Light Flashing? Diagnostic Fixes">thermal</a>-side facing the head</li>
+  <li><input type="checkbox" disabled=""> Cover fully closed and latched</li>
+  <li><input type="checkbox" disabled=""> Power cycled the printer</li>
+  <li><input type="checkbox" disabled=""> <a href="/fujifilm/drivers-software-firmware/instax-link-factory-reset-stuck-firmware-update-overheating" title="Instax Link Factory Reset &amp; Stuck Firmware Update Fix">Print queue</a> cleared (both OS-level and inside POS software)</li>
+  <li><input type="checkbox" disabled=""> Correct printer selected inside POS <a href="/dascom/connectivity-issues/dascom-pos-printer-cash-drawer-not-opening" title="Fix Dascom POS Printer Cash Drawer Not Opening (RJ11 Fix)">software</a>, app restarted</li>
+  <li><input type="checkbox" disabled=""> Self-test run and passed</li>
+  <li><input type="checkbox" disabled=""> <a href="/kodak/setup-installation/how-to-print-from-macos-to-legacy-kodak-printer" title="How to Print from macOS to a Legacy Kodak Printer">Driver</a> fully reinstalled/updated for exact model and OS</li>
+  <li><input type="checkbox" disabled=""> Cable/<a href="/canon/setup-installation/canon-pixma-tr4720-wifi-setup" title="Canon PIXMA TR4720 Wireless Setup (Easy Wi-Fi Guide)">connection</a> checked or swapped</li>
+  <li><input type="checkbox" disabled=""> <a href="/dascom/error-codes-alerts/dascom-printer-skipping-characters-grinding" title="Fix Dascom Skipping Characters &amp; Grinding Noises (Print Head Error)">Print head</a> given time to cool if recently under heavy use</li>
+</ul>
+
+<hr>
+
+<p>In most cases, a Bixolon printer that "isn't printing" is a paper, cover, queue, or driver issue rather than a <a href="/epson/error-codes-alerts/epson-error-code-0x97-motherboard-printhead-short" title="Fix Epson Error 0x97: Motherboard and Printhead Diagnostics">hardware failure</a>. Work through the checklist above in order, and you'll know within a few minutes whether you're dealing with a quick fix or something that genuinely needs a closer look from a technician.</p>

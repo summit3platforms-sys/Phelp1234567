@@ -1,29 +1,37 @@
 'use client';
 
 import React, { useState } from 'react';
+import LeadCaptureForm from './LeadCaptureForm';
 
 export default function FeedbackWidget() {
-  const [feedbackState, setFeedbackState] = useState<'idle' | 'submitted'>('idle');
+  const [feedbackState, setFeedbackState] = useState<'idle' | 'yes' | 'no'>('idle');
 
   const handleFeedback = (type: 'yes' | 'no') => {
-    // In a real app, you would send this to an analytics endpoint or database
     console.log(`User feedback: ${type}`);
-    setFeedbackState('submitted');
+    setFeedbackState(type);
   };
 
-  if (feedbackState === 'submitted') {
+  if (feedbackState === 'yes') {
     return (
       <div style={{
         marginTop: '2.5rem',
         padding: '1.5rem',
-        background: '#f8fafc',
+        background: '#f0fdf4',
         borderRadius: '8px',
         textAlign: 'center',
-        border: '1px solid #e2e8f0',
+        border: '1px solid #bbf7d0',
         animation: 'fadeIn 0.5s ease-in'
       }}>
-        <h4 style={{ margin: '0 0 0.5rem', color: '#0f172a' }}>Thank you for your feedback!</h4>
-        <p style={{ margin: 0, color: '#475569', fontSize: '0.95rem' }}>We use this data to constantly improve our printer guides.</p>
+        <h4 style={{ margin: '0 0 0.5rem', color: '#166534' }}>Thanks for the feedback!</h4>
+        <p style={{ margin: 0, color: '#15803d', fontSize: '0.95rem' }}>We're glad this article helped you resolve your issue.</p>
+      </div>
+    );
+  }
+
+  if (feedbackState === 'no') {
+    return (
+      <div style={{ marginTop: '2.5rem', animation: 'fadeIn 0.5s ease-in' }}>
+        <LeadCaptureForm />
       </div>
     );
   }
@@ -47,7 +55,7 @@ export default function FeedbackWidget() {
           onClick={() => handleFeedback('yes')}
           style={{
             padding: '0.6rem 1.5rem',
-            background: 'var(--primary-color)',
+            background: 'var(--primary-color, #002d62)',
             color: 'white',
             border: 'none',
             borderRadius: '6px',

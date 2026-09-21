@@ -1,15 +1,45 @@
 import { PrismaClient } from '@prisma/client';
+
 const prisma = new PrismaClient();
+
 async function main() {
-  const missing = await prisma.article.count({
-    where: { featuredImage: null }
+  const total = await prisma.article.count();
+  const withoutImage = await prisma.article.count({
+    where: {
+      OR: [
+        { featuredImage: null },
+        { featuredImage: '' }
+      ]
+    }
   });
-  const missingArticles = await prisma.article.findMany({
-    where: { featuredImage: null },
-    select: { slug: true, title: true },
-    take: 10
+  
+  const withoutImageByBrand = await prisma.article.groupBy({
+    by: ['brandId'],
+    where: {
+      OR: [
+        { featuredImage: null },
+        { featuredImage: '' }
+      ]
+    },
+    _count: {
+      id: true
+    }
   });
-  console.log(`Total missing images: ${missing}`);
-  console.log(missingArticles);
+
+  const brands = await prisma.brand.findMany();
+  
+  console.log(`Total Articles: ${total}`);
+  console.log(`Articles Without Images: ${withoutImage}`);
+  console.log('--- Breakdown by Brand ---');
+  
+  for (const group of withoutImageByBrand) {
+    const brand = brands.find(b => b.id === group.brandId);
+    console.log(`${brand?.name || 'Unknown'}: ${group._count.id} articles`);
+  }
 }
-main().finally(() => prisma.$disconnect());
+
+main()
+  .catch(e => console.error(e))
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

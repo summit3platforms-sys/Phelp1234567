@@ -1,0 +1,130 @@
+<h2>The Quick Answer</h2>
+<p><strong>Driver installation failures for Bixolon printers usually trace back to 5 predictable causes. Learn how to fix issues with Windows permissions, leftover driver packages, and automatic updates.</strong></p>
+
+<p>Driver installation failures on Windows tend to look like a computer problem, but for Bixolon printers specifically, they usually trace back to one of five predictable causes. Before you waste time reinstalling Windows or blaming the printer, work through what's actually preventing installation.</p>
+<h2>Symptom-First: What You're Seeing Tells You Where to Start</h2>
+<p>Driver installation can fail in different ways, and each way points to a different underlying cause:</p>
+<p><strong>Installer starts, then closes without an error message.</strong> Almost always missing administrator rights — Windows silently blocks installer functions the user account can't execute.</p>
+<p><strong>Installer runs, reports success, but the printer doesn't appear in Devices and Printers.</strong> The driver installed to the wrong port, or Windows automatically assigned a generic driver that's overriding yours.</p>
+<p><strong>Installer stalls or hangs partway through.</strong> Leftover files from a previous installation are interfering. Requires a full manual cleanup before retry.</p>
+<p><strong>Explicit error: "Driver not compatible with this version of Windows."</strong> You've downloaded a driver for the wrong Windows version. Download again from Bixolon's support site, matched to your exact OS.</p>
+<p><strong>Windows automatically installs its own driver instead.</strong> Windows Update pushed a generic driver that's now the default. Requires removing that first before your Bixolon driver can take precedence.</p>
+<p>Match your symptom above, then work through the corresponding fix below.</p>
+<h2>Fix 1: Install as Administrator</h2>
+<p>The single most common cause of installer failures. Bixolon driver installers write to system directories, register services, and modify printer configuration — all of which require admin rights. If you're running the installer as a standard user or through a right-click default action, it may fail silently.</p>
+<p><strong>How to install correctly:</strong></p>
+<ol>
+<li>Right-click the installer executable.</li>
+<li>Select <strong>Run as administrator</strong>.</li>
+<li>Confirm the User Account Control prompt.</li>
+<li>Complete the installer through to the end.</li>
+</ol>
+<p>If you're on a work computer without admin rights, you'll need someone with those permissions to run the installer for you.</p>
+<h2>Fix 2: Full Cleanup of Previous Installations</h2>
+<p>Bixolon driver installations don't always cleanly uninstall — leftover files, registry entries, and stale printer objects can prevent a fresh install from completing. A full manual cleanup is often necessary before retry:</p>
+<h3>Remove the Old Printer Entry</h3>
+<ol>
+<li>Open <strong>Settings → Bluetooth &amp; devices → Printers &amp; scanners</strong>.</li>
+<li>Click any existing Bixolon printer and select <strong>Remove device</strong>.</li>
+<li>Repeat for any old or stale entries — including ones showing as "Unspecified" or "Unknown."</li>
+</ol>
+<h3>Remove the Driver Package</h3>
+<ol>
+<li>Open <strong>Settings → Apps</strong> (or <strong>Programs and Features</strong> on older Windows).</li>
+<li>Find any Bixolon driver package (usually named "Bixolon Unified POS Printer Driver" or similar).</li>
+<li>Uninstall it completely.</li>
+</ol>
+<h3>Clean Up Print Server Properties</h3>
+<ol>
+<li>Open <strong>Control Panel → Devices and Printers</strong>.</li>
+<li>Click any printer, then select <strong>Print server properties</strong> from the top bar.</li>
+<li>Go to the <strong>Drivers</strong> tab.</li>
+<li>Select any Bixolon driver entry and click <strong>Remove</strong>.</li>
+<li>Choose <strong>Remove driver and driver package</strong>.</li>
+</ol>
+<h3>Restart</h3>
+<p>Reboot Windows before attempting reinstallation. Some driver removal operations don't complete until after a restart.</p>
+<h2>Fix 3: Download the Exact Right Driver</h2>
+<p>Bixolon's Windows drivers are strictly model-specific. This matters more than for many other printer brands:</p>
+<ul>
+<li>A driver labeled for the SRP-350 won't work correctly with the SRP-350III</li>
+<li>A Windows 10 driver may install on Windows 11 but exhibit erratic behavior</li>
+<li>Some models require separate x86 vs x64 drivers depending on Windows architecture</li>
+</ul>
+<p><strong>Where to find the correct one:</strong></p>
+<ol>
+<li>Note your exact printer model (visible on the printer's label or self-test page)</li>
+<li>Note your Windows version (<strong>Settings → System → About</strong>)</li>
+<li>Note your Windows architecture (32-bit vs 64-bit, also in About)</li>
+<li>Download the driver matching all three from Bixolon's official support site</li>
+</ol>
+<p>Avoid drivers hosted on third-party sites — even legitimate-looking ones sometimes host older versions.</p>
+<h2>Fix 4: Disable Windows Automatic Driver Installation</h2>
+<p>Windows will sometimes automatically install its own driver for a plugged-in printer before you have a chance to install the correct Bixolon driver. This substitution silently blocks the Bixolon driver from being the default.</p>
+<p><strong>To prevent this:</strong></p>
+<ol>
+<li>Unplug the printer from USB.</li>
+<li>Complete the Bixolon driver installation first.</li>
+<li>Only then plug the printer in — Windows will use the pre-installed Bixolon driver instead of downloading a generic one.</li>
+</ol>
+<p><strong>If Windows already installed a generic driver:</strong></p>
+<ol>
+<li>Open <strong>Devices and Printers</strong>.</li>
+<li>Right-click the printer, select <strong>Printer properties → Advanced tab</strong>.</li>
+<li>Change the driver to the correct Bixolon one via the dropdown or <strong>Have Disk</strong> pointing at the Bixolon driver files.</li>
+</ol>
+<h2>Fix 5: Address SmartScreen and Antivirus Blocking</h2>
+<p>On modern Windows, SmartScreen or third-party antivirus can block driver installers from unknown publishers, even when the file is legitimate.</p>
+<p><strong>Signs this is happening:</strong></p>
+<ul>
+<li>Installer briefly appears then vanishes with no error</li>
+<li>Windows Defender or antivirus shows a notification about a blocked file</li>
+<li>The installer file disappears after download</li>
+</ul>
+<p><strong>Fix:</strong></p>
+<ul>
+<li>On Windows: click <strong>More info → Run anyway</strong> on the SmartScreen prompt if it appears</li>
+<li>Temporarily disable third-party antivirus during installation (re-enable after)</li>
+<li>Right-click the installer, select <strong>Properties</strong>, and check <strong>Unblock</strong> at the bottom if it's flagged as downloaded from the internet</li>
+</ul>
+<h2>Fix 6: Check for Windows Update Interference</h2>
+<p>Certain Windows updates have historically caused issues with third-party printer drivers, including some Bixolon setups. If installation started failing right after a Windows update:</p>
+<ul>
+<li>Check <strong>Settings → Windows Update → Update history</strong> for recent installed updates</li>
+<li>If a specific update coincides with the failure, temporarily uninstall it to see if installation succeeds</li>
+<li>Watch Bixolon's support site for driver updates that address specific Windows patches</li>
+</ul>
+<h2>Fix 7: Check the Log File</h2>
+<p>Bixolon driver installers typically generate an installation log, either in a temp folder or the installer's own directory. When silent failures happen, this log often has specific error messages that let you pinpoint the cause:</p>
+<ul>
+<li>Missing dependencies (rare, usually only on older or minimal Windows installations)</li>
+<li>Registry write failures (usually permissions issues)</li>
+<li>File conflicts with existing installations (points to the cleanup step above)</li>
+</ul>
+<p>Search for <code>.log</code> files in the temp directory (<code>%TEMP%</code>) after a failed install attempt.</p>
+<h2>Special Case: Installing on Windows Server</h2>
+<p>If you're installing on Windows Server rather than a desktop Windows version, there can be additional configuration required:</p>
+<ul>
+<li>Point and Print restrictions may block driver installation from non-elevated processes</li>
+<li>Group Policy may restrict driver signing enforcement</li>
+<li>The Print Server role may need to be installed if you're doing print server-based deployment</li>
+</ul>
+<p>Server installations typically require IT involvement for proper policy configuration — this isn't usually a user-level fix.</p>
+<h2>What If Nothing Works?</h2>
+<p>If you've worked through everything above and the driver still won't install, the last resort options:</p>
+<ul>
+<li>Test on a completely different Windows computer to isolate whether the issue is specific to your machine or the driver itself</li>
+<li>Try an older version of the Bixolon driver — sometimes the latest driver has an issue that older versions don't</li>
+<li>Contact Bixolon support with your installation log and OS version — they occasionally identify OS-specific quirks that require a custom driver build</li>
+</ul>
+<h2>Quick Steps for a Successful First-Time Install</h2>
+<p>For future reference or for a fresh machine, here's the cleanest path to installing a Bixolon printer driver:</p>
+<ol>
+<li>Download the correct driver matched to model and OS</li>
+<li>Right-click the installer, choose <strong>Run as administrator</strong></li>
+<li><strong>Do NOT plug the printer in yet</strong></li>
+<li>Complete the installer through to the end</li>
+<li>Plug the printer in once installation reports success</li>
+<li>Print a test page from Devices and Printers to confirm</li>
+</ol>
+<p>Getting all six steps in this order avoids the majority of installation issues that plague retrofitting an already-configured Windows machine.</p>

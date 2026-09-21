@@ -1,0 +1,79 @@
+<h2>The Quick Answer</h2>
+<p><strong>A self test is the single most useful diagnostic step for any Bixolon printer issue. Learn how to run it, what it shows, and how to read the results.</strong></p>
+
+<p>A self test is the single most useful diagnostic step for any Bixolon printer issue, and it's the first thing referenced across nearly every troubleshooting guide on this site for a reason: it tells you, in about 10 seconds, whether your printer's hardware is working at all — completely independent of your computer, cables, network, or POS software.</p>
+<p>If the self test prints cleanly, you know the printer itself is fine, and any issue you're having is on the connection or software side. If it fails, you've just confirmed the problem is physical. This guide covers how to run it, what it actually shows, and how to read the results.</p>
+<h2>What a Self Test Actually Does</h2>
+<p>Unlike a normal print job, a self test is generated entirely from the printer's own internal memory — no computer, cable, or network connection is involved at any point. The printer prints a page showing its own configuration: firmware version, current settings (like baud rate or paper width), and a visible sample of print quality.</p>
+<p>Because nothing outside the printer is involved, a successful self test rules out almost every external cause of a problem in one step.</p>
+<h2>How to Run a Self Test (General Method)</h2>
+<p>The standard method across most Bixolon receipt and POS printers works like this:</p>
+<ol>
+<li><strong>Make sure paper is loaded.</strong> The printer needs paper in the tray to actually produce the test page — without it, you may just get an error light instead of a printed result.</li>
+<li><strong>Power off the printer completely.</strong></li>
+<li><strong>Press and hold the feed button</strong> (the button you'd normally press to advance paper manually).</li>
+<li><strong>While still holding the feed button, power the printer back on.</strong></li>
+<li><strong>Continue holding the feed button</strong> for a few seconds after power-on until the printer begins printing.</li>
+<li><strong>Release the button</strong> once the test page starts printing.</li>
+</ol>
+<p>This sequence is consistent across the majority of Bixolon's SRP-series receipt printers. That said, the exact hold duration and whether the button is pressed before or after power-on can vary slightly by model, so if this doesn't trigger a test print on the first try, check your specific model's quick-start guide — it's almost always illustrated on the very first page.</p>
+<h2>Running a Self Test on Label Printers (XD/XL Series)</h2>
+<p>Bixolon's label printers work a little differently, since they print on label stock and ribbon rather than receipt paper:</p>
+<ol>
+<li>Confirm both label stock and ribbon (if your model uses one) are loaded correctly.</li>
+<li>Most XD/XL models use a similar power-on button-hold sequence, but the test output is a configuration label rather than a receipt-style page.</li>
+<li>The test label typically shows sensor calibration values alongside firmware and settings info — useful not just for confirming the printer works, but for diagnosing media-sensing issues specifically.</li>
+</ol>
+<h2>Running a Self Test on Mobile Printers (SPP Series)</h2>
+<p>Battery-powered mobile printers generally follow the same core method — hold the feed button while powering on — but with two extra things to check first:</p>
+<ol>
+<li>Confirm the battery has enough charge; a critically low battery can prevent the self test from completing even if the printer powers on briefly.</li>
+<li>Make sure the paper compartment is fully closed and latched, since mobile printers tend to be more sensitive to an improperly seated cover than countertop models.</li>
+</ol>
+<h2>How to Read the Self Test Results</h2>
+<p>Once you have a printed test page in hand, here's what to look for:</p>
+<h3>It Printed Cleanly</h3>
+<p>This confirms the print head, paper feed mechanism, and core hardware are functioning correctly. If you were troubleshooting a "won't print" or "won't connect" issue, this tells you the problem is entirely on the computer, cable, network, or software side — not the printer itself.</p>
+<h3>It Printed, But Looks Wrong</h3>
+<ul>
+<li><strong>Faded or very light text</strong> → check that paper is loaded thermal-side facing the print head, or that the print density setting (visible on the test page itself) hasn't been set too low.</li>
+<li><strong>Streaky or partially missing characters</strong> → the print head likely needs cleaning. Power off, let it cool, and clean it with an isopropyl-alcohol cleaning pen or swab — never anything abrasive.</li>
+<li><strong>Garbled or random characters</strong> → this is less common on a true self test, since it bypasses the driver entirely, but if it happens, it usually points to a deeper firmware-level fault rather than a settings issue.</li>
+</ul>
+<h3>Nothing Printed at All</h3>
+<ul>
+<li>Check that paper is actually loaded and the cover is fully latched — an open-cover or paper-out condition will block the self test the same way it blocks a normal print job.</li>
+<li>Check the error LED. If it's actively blinking, resolve whatever that pattern indicates first, then retry the self test.</li>
+<li>If the cover is closed, paper is loaded, and it still won't trigger, double-check the exact button sequence for your specific model — a mistimed button press is a common reason the test simply doesn't start.</li>
+</ul>
+<h2>Why the Self Test Is the Best First Troubleshooting Step</h2>
+<p>It's worth using this as your starting point for almost any Bixolon printer issue, rather than jumping straight to reinstalling drivers or checking cables:</p>
+<ul>
+<li>It isolates hardware from software in a single step.</li>
+<li>It takes about 10 seconds and requires nothing but the printer itself.</li>
+<li>It often reveals the actual setting (like baud rate, paper width, or firmware version) that's causing a separate configuration mismatch with your POS software.</li>
+</ul>
+<p>If you're working through a broader troubleshooting flow, this is exactly why it appears as an early step in our full Bixolon printer troubleshooting guide — confirming the hardware first saves time on every step that follows.</p>
+<h2>What the Test Page Tells You Beyond "It Works"</h2>
+<p>Beyond a simple pass/fail, the printed page itself usually lists:</p>
+<ul>
+<li><strong>Firmware version</strong> — useful when checking whether your printer supports a specific SDK feature or needs an update for a newer POS integration.</li>
+<li><strong>Communication settings</strong> — baud rate, parity, and similar serial settings on models that use serial connections, which matter if you're manually configuring a connection rather than using plug-and-play USB.</li>
+<li><strong>Paper width/sensor settings</strong> — particularly useful on label printers, where a mismatch here can look like a printing problem but is actually a configuration issue.</li>
+</ul>
+<p>It's worth keeping a copy of this page (or a photo of it) on file for each printer, especially in a multi-printer business setup — it makes future support calls faster since you'll already have the firmware version and settings on hand.</p>
+<h2>Frequently Asked Questions</h2>
+<p><strong>Do I need any special tools or software to run a self test?</strong> No — it's triggered entirely through a button sequence on the printer itself, with no computer, cable, or software involved.</p>
+<p><strong>Why won't my printer's self test trigger no matter what I try?</strong> Check for an open cover or paper-out condition first, since these block the self test exactly like they'd block a normal print job. If those are fine, double-check the exact button-hold sequence for your specific model.</p>
+<p><strong>Can a self test damage my printer?</strong> No — it's a standard, built-in diagnostic feature designed to be run safely as often as needed.</p>
+<p><strong>If my self test passes, does that mean my printer definitely isn't the problem?</strong> Essentially, yes. A clean self test confirms the core hardware — print head, feed mechanism, paper sensors — is working, which means any remaining issue is on the connection or software side.</p>
+<h2>Quick Steps Recap</h2>
+<ol>
+<li>Load paper (and ribbon, for label printers)</li>
+<li>Power off completely</li>
+<li>Hold the feed button</li>
+<li>Power on while still holding the button</li>
+<li>Keep holding for a few seconds until printing starts</li>
+<li>Release once the test page begins</li>
+</ol>
+<p>A self test takes seconds to run and answers the single most important troubleshooting question — is this the printer, or is this something around it? Make it your first step whenever a Bixolon printer isn't behaving the way it should.</p>

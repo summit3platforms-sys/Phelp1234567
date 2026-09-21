@@ -1,0 +1,127 @@
+<h2>The Quick Answer</h2>
+<p><strong>The Printer Open error in the Bixolon SDK points to a firmware version mismatch. It can also mean a connection is held by another program. Here is how to debug it.</strong></p>
+
+<p>The "Printer Open" error in the Bixolon SDK is common for developers. They see it when linking Bixolon printers to custom POS software or apps. It is not a hardware fault. The printer works fine with standard drivers. The SDK setup call fails, blocking software control.</p>
+<p>This guide is for developers, not end users. Fixing this needs code and settings changes, not physical printer fixes.</p>
+
+<h2>What the Error Actually Means</h2>
+<p>The error happens when the SDK's <code>openPrinter()</code> function runs. It cannot connect to the target printer. The failure can happen in a few ways:</p>
+<ul>
+  <li>The SDK cannot find the printer on the network or USB line.</li>
+  <li>The SDK finds the printer but login or handshake fails.</li>
+  <li>The SDK connects but the printer's firmware (internal software) fails the version check.</li>
+  <li>The printer is already linked to another app. It cannot take a second connection.</li>
+</ul>
+<p>Each of these has a different fix path.</p>
+
+<h2>Cause 1: Firmware Doesn't Support the Version Check</h2>
+<p>This is the main cause for developers using older Bixolon printers. Bixolon states this error appears with old firmware. The older firmware does not support the SDK's version check commands.</p>
+<p>The SDK tries to check features before opening the printer. It asks for data the firmware does not have.</p>
+
+<p><strong>Fix:</strong></p>
+<ol>
+  <li>Check the firmware version on your printer. Print a self-test page to see this version.</li>
+  <li>Compare this to the minimum firmware version needed by your SDK release. You can find this in the SDK release notes.</li>
+  <li>Update the firmware to a compatible version if it is too old.</li>
+</ol>
+<p>Sometimes updating firmware is not an option. Hardware in the field might not update easily. Use an older SDK version that supports your printer's firmware. Bixolon keeps older SDK releases for this reason.</p>
+
+<h2>Cause 2: Wrong Printer Type or Model Specification</h2>
+<p>The SDK needs the connected printer's model name when calling <code>openPrinter()</code>. The SDK might fail if the model name is wrong. It applies the wrong commands.</p>
+
+<p><strong>Fix:</strong></p>
+<ul>
+  <li>Check the exact model name you use against the SDK guide.</li>
+  <li>Note that similar model names (e.g., SRP-350 vs SRP-350III) use different SDK tags.</li>
+  <li>Check the SDK guide for the correct tag your printer needs.</li>
+</ul>
+
+<h2>Cause 3: Connection Already Held by Another Process</h2>
+<p>Bixolon printers only take one active SDK connection at a time. The <code>openPrinter()</code> command fails if another app is linked.</p>
+
+<p>Common scenarios where this hits:</p>
+<ul>
+  <li>A past run of your app did not cleanly close the connection. This happens on a crash or forced shutdown.</li>
+  <li>Multiple programs on the same machine try to link to the same printer.</li>
+  <li>A Bluetooth printer is still linked to an old paired device.</li>
+</ul>
+
+<p><strong>Fix:</strong></p>
+<ul>
+  <li>Make sure your app always calls <code>closePrinter()</code> on shutdown. Put this in error handling blocks too.</li>
+  <li>Turn the printer's power off and on if a past crash left a bad connection.</li>
+  <li>Make sure no other device is linked to a Bluetooth model. See the Bluetooth troubleshooting guide for the STATUS LED check on the SPP-R310.</li>
+</ul>
+
+<h2>Cause 4: Connection Type Mismatch</h2>
+<p>The SDK needs to know how you connect. This can be USB, network, Bluetooth, or Serial. The open call fails if your code and printer do not match.</p>
+
+<p><strong>Fix:</strong></p>
+<ul>
+  <li>Check that the connection tag matches the physical printer link.</li>
+  <li>Make sure the IP address in your code matches the printer's IP for network links.</li>
+  <li>Make sure the MAC address in your code matches the paired Bluetooth printer.</li>
+</ul>
+
+<h2>Cause 5: Permissions Issues</h2>
+<p>Opening a printer needs specific OS permissions on some systems:</p>
+<ul>
+  <li><strong>Windows:</strong> You may need to run your app as an Administrator. This is true for USB ports that need high access.</li>
+  <li><strong>Android:</strong> You need USB or Bluetooth permissions. Set these in the manifest and ask at runtime.</li>
+  <li><strong>iOS:</strong> The printer must be in MFi mode. You must pair it in iOS settings before your app can use the SDK.</li>
+  <li><strong>Linux:</strong> The user must be in the correct group. This is often <code>lp</code> or <code>dialout</code> for USB or serial devices.</li>
+</ul>
+
+<p><strong>Fix:</strong> Verify your app has the permissions for the connection type you use.</p>
+
+<h2>Cause 6: Network Firewall or Port Blocking</h2>
+<p>Corporate firewalls or Windows Defender can block the SDK. They stop the needed TCP connection to network printers.</p>
+
+<p><strong>Fix:</strong></p>
+<ul>
+  <li>Check the port used by your SDK. It is usually 9100 for standard ESC/POS printing. Check your SDK guide to be sure.</li>
+  <li>Add an inbound and outbound firewall rule for that port and your app.</li>
+  <li>Work with IT on strict corporate networks. Ensure the printer's IP and port are not blocked by network firewalls.</li>
+</ul>
+
+<h2>Debugging Steps</h2>
+<p>Systematic debugging usually finds the cause when the error stays:</p>
+
+<h3>1. Test with the Utility Software</h3>
+<p>Test with Bixolon's Unified Utility software first. Make sure it connects to the printer using the same link type. The problem is with the printer or link if the utility fails too. The problem is in your code if the utility works.</p>
+
+<h3>2. Enable SDK Logging</h3>
+<p>Most Bixolon SDKs have diagnostic logs for development. Turn this on and check the log around the failed <code>openPrinter</code> call. The log usually shows the exact step that failed.</p>
+
+<h3>3. Simplify the Test</h3>
+<p>Strip your code to just the SDK setup and <code>openPrinter</code> call. Use hardcoded values. Add features back one by one if this small version works. The last thing added is the cause of the failure.</p>
+
+<h3>4. Compare Working Versus Failing Scenarios</h3>
+<p>Log what is different if <code>openPrinter</code> works sometimes and fails others. Check connection state, other running apps, power time, and network issues.</p>
+
+<h2>Common Code Mistakes That Trigger This Error</h2>
+<p>A few code patterns are worth double-checking:</p>
+<p><strong>Not waiting for previous close to complete.</strong> The firmware might not process a fast close before a new open. Add a short wait (100-500ms) between close and reopen calls.</p>
+<p><strong>Reusing SDK objects across threads unsafely.</strong> Bixolon SDK objects are not usually thread-safe. Make sure <code>openPrinter</code> and <code>closePrinter</code> run on the same thread. Use locks if your code is multi-threaded.</p>
+<p><strong>Hardcoding paths or port numbers.</strong> Hardcoded values will fail if your test and live machines differ. Use settings that can change for each setup.</p>
+<p><strong>Not handling reconnection.</strong> The connection can drop later even if <code>openPrinter</code> works. Good code finds these drops and links again cleanly.</p>
+
+<h2>When to Contact Bixolon Developer Support</h2>
+<p>Contact Bixolon developer support if your tests do not find the cause, and:</p>
+<ul>
+  <li>The printer works with standard drivers and utility software.</li>
+  <li>Your code matches all SDK guide rules.</li>
+  <li>The failure happens on different machines or setups.</li>
+  <li>The SDK logs do not show the failure point clearly.</li>
+</ul>
+<p>Share your SDK version, firmware version, code snippet, and log output. Sometimes the issue is a known SDK bug or a hidden limit.</p>
+
+<h2>What About End Users Encountering This Error?</h2>
+<p>You cannot fix this directly if you are an end user. It means the POS software's link is failing. Contact your software's support team with:</p>
+<ul>
+  <li>The exact error message text.</li>
+  <li>Your Bixolon printer model.</li>
+  <li>The firmware version from your printer's self-test page.</li>
+  <li>Whether the printer works with standalone tests or Bixolon's utility.</li>
+</ul>
+<p>This info helps them know if their link needs an update for your printer.</p>

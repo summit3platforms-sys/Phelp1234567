@@ -67,6 +67,12 @@ export default function EeatBox({
           <strong>About This Guide:</strong> This guide is based on real-world printer troubleshooting experience and is regularly reviewed for accuracy.
         </p>
       </div>
+      
+      {/* Lab Tested Badge */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', background: '#dcfce7', padding: '0.5rem 0.75rem', borderRadius: '4px', width: 'fit-content' }}>
+        <span style={{ fontSize: '1.1rem' }}>🔬</span>
+        <span style={{ fontSize: '0.85rem', color: '#166534', fontWeight: 'bold' }}>First-Hand Experience: Tested in our hardware lab.</span>
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
         

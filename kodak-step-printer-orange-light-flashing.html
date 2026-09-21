@@ -1,0 +1,133 @@
+<p>The Kodak Step is a portable pocket printer utilizing ZINK (Zero Ink) thermal technology. Because of its compact frame, it does not have a screen, relying instead on a single status LED to communicate errors. When the status indicator flashes orange, it signifies a temporary block in the system. This is typically triggered by a <a href="/kodak/printing-problems/kodak-printer-lines-on-photos-printhead-cleaning" title="Fix Lines and Streaks on Kodak Portable Photo Prints">thermal printhead</a> limit, a critically low battery state, or a ZINK paper feed alignment error. Let's walk through the diagnostics to identify and clear the orange warning light.</p>
+
+<h2>Diagnostic Matrix of Kodak Step LED States</h2>
+<p>The flashing orange light can represent different sub-conditions depending on the frequency of the flashes and whether it occurs during boot, printing, or charging:</p>
+
+<table class="diagnostic-table">
+  <thead>
+    <tr>
+      <th>LED Blink Pattern</th>
+      <th>Indicated Condition</th>
+      <th>Root Cause</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Slow, steady orange flash</strong></td>
+      <td>Low Battery / Charging Error</td>
+      <td>Battery charge is below 10%, or power supply voltage is insufficient.</td>
+    </tr>
+    <tr>
+      <td><strong>Rapid, flashing orange</strong></td>
+      <td>Paper Jam / Feed Error</td>
+      <td>ZINK sheets are misaligned, jammed, or the blue sheet is missing.</td>
+    </tr>
+    <tr>
+      <td><strong>Solid orange (non-blinking)</strong></td>
+      <td>Thermal Cooling Hold</td>
+      <td>The internal thermal printhead has exceeded 104 degrees Fahrenheit.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Resolving Thermal Overheat States</h2>
+<p>Because ZINK printers rely on heating the color-forming crystals embedded in the paper, printing multiple sheets in a row generates substantial heat inside the tiny plastic chassis. Once the internal sensor detects the temperature limit, it halts the carriage and changes the LED to orange.</p>
+<ul>
+  <li>Turn the printer off using the power button.</li>
+  <li>Place it in a cool, well-ventilated room. Do not place it near direct sunlight or warm computers.</li>
+  <li>Leave it powered off for **15 minutes** to let the thermal head cool down to ambient temperature.</li>
+  <li>Turn it back on and try printing a single sheet.</li>
+</ul>
+
+<h2>Correcting Low Voltage Battery States</h2>
+<p>If the battery drops below 10%, the printer lacks the voltage needed to heat the ZINK printhead, triggering the slow orange flash.</p>
+<ol>
+  <li>Connect the printer to a micro-USB cable.</li>
+  <li>Plug the cable into a **5V / 2A wall charger** adapter. Avoid charging via a computer USB port, as computers output 0.5A, which is not enough to charge the printer during a fault lock.</li>
+  <li>Let the device charge undisturbed for **at least 30 minutes** before trying to print.</li>
+  <li>**Crucial Operating Tip:** Never print while the printer is actively charging from a low-battery state, as this draws more current than the adapter can provide, causing the charging circuit to cycle and freeze.</li>
+</ol>
+
+<h2>Clearing ZINK Paper Path Obstructions</h2>
+<p>If the light flashes rapidly, the paper rollers are slipping on the ZINK sheets:</p>
+<ol>
+  <li>Slide open the paper compartment cover.</li>
+  <li>Remove the stack of ZINK photo paper.</li>
+  <li>Inspect the feed slot for any tiny fragments of backing paper or dust. Blow it clear with dry air.</li>
+  <li>Fan the ZINK sheets lightly. Ensure they are not stuck together by humidity.</li>
+  <li>Reload the stack, making sure the **blue Smart Sheet calibration card is at the very bottom** of the pack with the barcodes facing down.</li>
+  <li>Slide the compartment door closed. The printer should automatically pull the blue sheet through to calibrate.</li>
+</ol>
+
+<h2>Related Kodak Troubleshooting Guides</h2>
+<ul class="related-articles">
+    <li>Kodak Dock Plus Flashing Lights: Decoding LED Error Patterns</li>
+    <li>Kodak Printer Flashing Red Light Error: Diagnostic Guide</li>
+    <li>Fixing a Kodak Printer <a href="/kodak/paper-handling-issues/kodak-printer-calibration-sheet-error" title="Kodak Printer Calibration Sheet Error: Troubleshooting Guide">Calibration Sheet</a> Error</li>
+    <li>Kodak Portable Printer Overheating? <a href="/kodak/error-codes-alerts/kodak-portable-printer-overheating-fix" title="Kodak Portable Printer Overheating: Thermal Protection Fix">Thermal Protection</a> Guide</li>
+</ul>
+
+<h2>Decoding LED Light Codes on the Kodak Step Instant Photo Printer</h2>
+<p>The Kodak Step is a portable, battery-powered 2x3 ZINK (Zero Ink) photo printer. Unlike full-size desktop inkjets, it contains no liquid ink cartridges; instead, it uses thermal pulses to activate cyan, magenta, and yellow dye crystals embedded inside specialized ZINK paper. The LED status light on the top/front provides critical diagnostic feedback regarding battery health, paper orientation, thermal safety, and Bluetooth pairing.</p>
+
+<h2>Complete Kodak Step LED Diagnostic Matrix</h2>
+<table style="width:100%; border-collapse: collapse; margin: 20px 0;">
+  <thead>
+    <tr style="background-color: #f3f4f6; text-align: left;">
+      <th style="padding: 10px; border: 1px solid #d1d5db;">LED Indicator State</th>
+      <th style="padding: 10px; border: 1px solid #d1d5db;">Hardware Status</th>
+      <th style="padding: 10px; border: 1px solid #d1d5db;">Required Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #d1d5db;"><strong>Flashing Orange / Amber</strong></td>
+      <td style="padding: 10px; border: 1px solid #d1d5db;">Blue Smartsheet calibration error, out of paper, or paper jam</td>
+      <td style="padding: 10px; border: 1px solid #d1d5db;">Reload ZINK paper pack with blue barcode sheet facing DOWN; clear jam</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #d1d5db;"><strong>Solid Red</strong></td>
+      <td style="padding: 10px; border: 1px solid #d1d5db;">Battery critically low (&lt; 10%) or charging in progress</td>
+      <td style="padding: 10px; border: 1px solid #d1d5db;">Connect Micro-USB charger (5V / 1.0A or higher); wait for solid green</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #d1d5db;"><strong>Flashing Red</strong></td>
+      <td style="padding: 10px; border: 1px solid #d1d5db;">Thermal Printhead Overheating Protection</td>
+      <td style="padding: 10px; border: 1px solid #d1d5db;">Allow the printer to cool down for 10 minutes in a shaded room</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #d1d5db;"><strong>Solid Green</strong></td>
+      <td style="padding: 10px; border: 1px solid #d1d5db;">Fully charged and ready to print</td>
+      <td style="padding: 10px; border: 1px solid #d1d5db;">Normal operational state; send print job via Kodak Step Prints app</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px; border: 1px solid #d1d5db;"><strong>Flashing Blue</strong></td>
+      <td style="padding: 10px; border: 1px solid #d1d5db;">Bluetooth Pairing Mode</td>
+      <td style="padding: 10px; border: 1px solid #d1d5db;">Open iOS or Android Bluetooth settings to pair device</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Fixing the Flashing Orange Light: The Blue Smartsheet Protocol</h2>
+<ol>
+  <li><strong>Ensure Paper is Genuine Kodak ZINK Paper:</strong> Third-party paper (such as HP Sprocket or Canon Ivy sheets) contains different barcode calibrations and thermal activation curves. Kodak Step printers will flash orange and reject non-Kodak packs.</li>
+  <li><strong>Load the Blue Barcode Sheet Correctly:</strong>
+    <ul>
+      <li>Slide open the top paper lid.</li>
+      <li>Load a maximum of 10 photo sheets plus the blue calibration Smartsheet.</li>
+      <li>The <strong>Blue Smartsheet MUST be placed at the very bottom of the stack with the barcode facing DOWN</strong>.</li>
+      <li>Close the lid. The printer will automatically feed and eject the blue calibration sheet, recalibrating the optical color sensors. The light will turn solid green.</li>
+    </ul>
+  </li>
+  <li><strong>Hardware Pin-Hole Reset:</strong> If the orange light continues flashing despite correct paper loading, locate the tiny pin-hole reset button next to the USB charging port. Insert a paperclip and hold for 3 seconds to reset the internal microcontroller.</li>
+</ol>
+
+<h2>Frequently Asked Questions</h2>
+<details>
+  <summary>Can I reuse a blue calibration Smartsheet from an older paper pack?</summary>
+  <p>No. Each pack of 10 ZINK sheets is manufactured in a specific chemical batch. The blue Smartsheet in that specific pouch contains calibration data matching the precise dye emulsion of those 10 sheets. Always use the blue sheet that came in the same foil pouch.</p>
+</details>
+<details>
+  <summary>Why does the printer get hot when printing multiple photos?</summary>
+  <p>ZINK printing uses precise high-temperature heating pulses to activate colors. Printing 4 or 5 photos back-to-back causes heat buildup in the compact plastic body, triggering the thermal safety pause (flashing red light) until the thermal head cools down.</p>
+</details>

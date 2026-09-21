@@ -1,0 +1,80 @@
+<h2>Why the HP OfficeJet Pro 8025e Won't Print in Color</h2>
+<p>The HP OfficeJet Pro 8025e is an all-in-one inkjet printer that uses four separate ink cartridges: black, cyan, magenta, and yellow. When color stops printing, the problem is almost always isolated to one or more of these color cartridges or their corresponding printhead channels. This guide covers every possible cause and fix.</p>
+
+<h2>Step 1: Verify Color Ink Levels</h2>
+<ol>
+  <li>In the HP Smart app, select your OfficeJet Pro 8025e and tap <strong>Supplies</strong>.</li>
+  <li>Check the levels for cyan, magenta, and yellow individually. A single empty color cartridge causes the entire color output to fail — the printer cannot mix colors if one component is missing.</li>
+  <li>If any color is at 0%, replace that cartridge before troubleshooting further.</li>
+</ol>
+
+<h2>Step 2: Check the Print Quality Settings</h2>
+<p>Color printing can be accidentally disabled via the print driver:</p>
+<ol>
+  <li>When printing, click <strong>More Settings</strong> or <strong>Printer Properties</strong> in the print dialog.</li>
+  <li>Look for a <strong>Color</strong> tab or a <strong>Grayscale / Black &amp; White</strong> checkbox. Ensure "Print in Color" is selected and the grayscale option is unchecked.</li>
+  <li>If you use a PDF viewer, check its print settings separately — Adobe Acrobat, for example, has its own independent color/grayscale toggle.</li>
+</ol>
+
+<h2>Step 3: Run a Printhead Cleaning Cycle</h2>
+<p>Dried ink in the printhead nozzles is the most common cause of missing color output on the 8025e:</p>
+<ol>
+  <li>On the printer touchscreen: tap the gear icon &gt; <strong>Printer Maintenance</strong> &gt; <strong>Clean Printhead</strong>.</li>
+  <li>The cleaning cycle takes about 2 minutes. After it completes, print a test page.</li>
+  <li>If one or two colors are still missing, run a second cleaning cycle.</li>
+  <li>Do not run more than 3 consecutive cleaning cycles without printing — this wastes ink without additional benefit.</li>
+</ol>
+
+<h2>Step 4: Print a Nozzle Check Pattern</h2>
+<p>The nozzle check pattern shows exactly which ink channels are working and which are clogged:</p>
+<ol>
+  <li>Touchscreen: Setup &gt; Reports &gt; <strong>Print Quality Diagnostics</strong>.</li>
+  <li>The printed page shows a series of colored bars. Missing sections in the cyan bar mean the cyan nozzles are clogged. Missing sections in magenta means magenta nozzles are clogged, etc.</li>
+  <li>Run cleaning cycles targeting the specific colors shown as missing in the pattern.</li>
+</ol>
+
+<h2>Step 5: Reseat the Color Cartridges</h2>
+<ol>
+  <li>Open the ink cartridge access door. Wait for the carriage to center.</li>
+  <li>Remove all three color cartridges (cyan, magenta, yellow).</li>
+  <li>Inspect the copper contacts on each cartridge. Wipe with a lint-free cloth dampened with distilled water. Allow to dry 5 minutes.</li>
+  <li>Wipe the matching contacts inside the carriage.</li>
+  <li>Firmly reinsert each cartridge until it clicks. Close the access door.</li>
+  <li>Print a test page.</li>
+</ol>
+
+<h2>Advanced: Extended Cleaning</h2>
+<p>If standard cleaning cycles have not restored color output after 3 attempts, run an Extended Cleaning from the printer maintenance menu. This pushes a high-pressure flush through the nozzle channels and can clear dried ink that resists standard cleaning. Note: extended cleaning uses a significant amount of ink.</p>
+
+<h2>Frequently Asked Questions</h2>
+<details>
+  <summary>My printer prints black perfectly but all colors are completely absent — why?</summary>
+  <p>This pattern strongly suggests the color cartridges' copper contacts are not making proper electrical contact with the carriage. The black channel has its own dedicated slot and contacts, so it works independently. Reseat all color cartridges and clean their contacts as described in Step 5.</p>
+</details>
+<details>
+  <summary>I replaced all the color cartridges and color still won't print — what's wrong?</summary>
+  <p>If brand-new color cartridges do not resolve the issue after cleaning the carriage contacts, the problem is in the printhead assembly itself. On the 8025e, the printhead is not replaceable as a standalone unit — the printer would need professional service or replacement.</p>
+</details>
+<details>
+  <summary>Can I disable color printing to save ink and print black only?</summary>
+  <p>Yes. In the print driver, select Grayscale mode or Black Only in the Color settings. This forces the printer to use only the black cartridge, preserving your color ink. Note: HP's color cartridges can dry out if unused for extended periods, even if the printer is on. Run a test print in color monthly to keep the nozzles primed.</p>
+</details>
+
+<h2>When to Contact HP Support</h2>
+<p>If new genuine HP cartridges, multiple cleaning cycles, and contact cleaning have not restored color printing, the printhead has a hardware failure. Contact HP Support at support.hp.com. The OfficeJet Pro 8025e has a 1-year warranty (or 2 years with HP+).</p>
+
+<h2>Deep-Dive Troubleshooting for Missing Color on HP OfficeJet Pro 8025e</h2>
+<p>The HP OfficeJet Pro 8025e utilizes four separate HP 910/910XL ink cartridges and an integrated multi-channel thermal printhead. When color output fails, systematic isolation of the print driver, ink supply tubes, and nozzle firing chambers is essential.</p>
+
+<h2>Advanced Color Restoration Protocol</h2>
+<ol>
+  <li><strong>Perform a Triple-Stage Level 2 Printhead Cleaning:</strong>
+    <p>From the HP Smart app or printer touchscreen, navigate to <strong>Tools &gt; Clean Printhead</strong>. If the initial cycle does not restore cyan, magenta, or yellow, execute the deeper "Level 2" cleaning cycle. Allow the printer 10 minutes between cycles to let ink saturate the internal manifold.</p>
+  </li>
+  <li><strong>Inspect Cartridge Vent Ports:</strong>
+    <p>Ensure the protective tape has been cleanly removed from the top air vents of the 910 color cartridges. A blocked vent creates a vacuum that starves the color nozzles.</p>
+  </li>
+  <li><strong>Check Windows Driver Print Quality Settings:</strong>
+    <p>In Windows Printer Properties, verify that <strong>"Print in Grayscale"</strong> or <strong>"Black &amp; White Only"</strong> is NOT toggled on by default in your printing preferences.</p>
+  </li>
+</ol>

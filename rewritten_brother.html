@@ -1,0 +1,51 @@
+<p>                     <strong>     </strong> No detection issue, no security mismatch — just a password that didn't match.</p>
+
+<h2>   </h2>
+<p>Your printer successfully detected your router and tried to authenticate using the Wi-Fi password (network key) you entered during setup. And that password didn't work.This is usually a straightforward typing issue. But there's a specific, common source of confusion worth knowing about before you assume you're typing your real password correctly.</p>
+
+<h2>       </h2>
+<p>Many routers display two different pieces of information on their label. In their settings — a general "network password" and a separate Wi-Fi-specific password that can differ from it.      <strong>  </strong>, not an admin login password or a different credential entirely.</p>
+<p><strong>  </strong>it's a genuinely common mix-up, especially on routers provided by internet service providers that print multiple different credentials on the same label. And entering the wrong one produces exactly this "incorrect network key" result even though you typed something correctly.</p>
+
+<h2>       </h2>
+<p>If your Wi-Fi password includes hyphens. Symbols, or a mix of characters that are easy to mistype. Enter it carefully and deliberately, checking character by character rather than typing quickly from memory. Case matters too — many passwords are case-sensitive.</p>
+<p><strong>  </strong>this specific confusion comes up often enough to be worth calling out directly — some router-provided passwords include hyphens as separators that are easy to miss or mistype. Especially when entering a long, unfamiliar string of characters on a printer's small control panel rather than a full keyboard.</p>
+
+<h2>        </h2>
+<p>Rather than relying on a password you have written down or remembered. Log into your router's admin page or check its physical label directly, and copy the current password exactly as shown.</p>
+<p><strong>  </strong>passwords sometimes get changed — by an internet provider during a service visit. By another household member, or during a router replacement —. A password that worked previously may simply no longer be current. Checking the source directly removes any doubt.</p>
+
+<h2>        </h2>
+<p>                   <strong> </strong> app on your phone or computer instead, where a full keyboard makes accurate entry considerably easier.</p>
+<p><strong>  </strong>small printer control panels, especially button-based navigation without a full keyboard. Are a common source of entry mistakes on long passwords. A proper keyboard removes that friction entirely.</p>
+
+<h2>    </h2>
+<p>If you've confirmed the exact current password directly from the router and entered it carefully through both the control panel and the app. And TS-07 still appears consistently, this is worth checking with Brother support. Since it may point toward a deeper wireless authentication issue beyond a simple password mismatch.</p>
+
+<h2>     </h2>
+<p>    <strong>TS-07</strong> indicates an active WPA/WPA2/WPA3 4-Way Handshake Failure.The printer successfully detected the SSID. Negotiated the beacon frame, and transmitted the Pre-Shared Key (PSK). But the wireless router explicitly sent back an "Authentication Rejected" packet.  <a href="/brother/error-codes-alerts/brother-printer-error-ts-02" title="Fix Brother Printer Error TS-02: Cannot Detect Router">TS-02</a> (no signal) or TS-03 (DHCP failure), TS-07 means your credentials or encryption handshakes failed.</p>
+
+<h2>      </h2>
+<ol>
+  <li><strong>WPA3-SAE vs.  </strong> Many modern Wi-Fi 6 routers default to WPA3-Personal (SAE) mode. Older Brother network cards (manufactured before 2021) do not support WPA3 cryptographic handshakes. Log into your router admin panel and set the 2.    <strong> </strong>  <strong>  </strong>.</li>
+  <li><strong>    </strong> Brother keypad input requires special attention. If your password contains numbers, symbols, or capital letters, verify each character on the Brother screen before confirming. Note that leading/trailing spaces in router passwords will trigger TS-07 immediately.</li>
+  <li><strong>     </strong> If you are connecting the Brother printer to a router's "Guest" network, guest isolation policies may terminate local authentication handshakes. Always connect to the primary private SSID.</li>
+  <li><strong>     </strong>
+    <p>       </p>
+    <ul>
+      <li> <strong>Menu</strong>  <strong>Settings</strong>  <strong>Network</strong>  <strong> </strong>.</li>
+      <li> <strong>1</strong>   <strong>Yes</strong>) to confirm.</li>
+      <li>The machine will restart.   <strong> </strong> to input the Wi-Fi key fresh.</li>
+    </ul>
+  </li>
+</ol>
+
+<h2>  </h2>
+<details>
+  <summary>Why does TS-07 persist even when I am 100% sure my password is correct?</summary>
+  <p>Special characters (such as $, %. &amp;, or spaces) in your Wi-Fi password can be misinterpreted by Brother's internal ASCII character mapping table. If possible, test with a temporary alphanumeric password to confirm.</p>
+</details>
+<details>
+  <summary>Will changing my router's channel resolve TS-07?</summary>
+  <p>    <a href="/brother/connectivity-issues/brother-printer-ts-02-5ghz-vs-2.4ghz" title="Brother Printer Can't See Wi-Fi: TS-02 2.4GHz vs 5GHz Fix">TS-02</a> packet drops, setting your router's 2.    <strong> </strong> (instead of 40 MHz or Auto) helps older Brother network adapters complete the timing-critical 4-way WPA handshake without timeout rejections.</p>
+</details>

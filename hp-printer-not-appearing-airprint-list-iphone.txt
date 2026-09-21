@@ -1,0 +1,69 @@
+<h2>Why Your HP Printer Isn't Showing Up in AirPrint on iPhone</h2>
+<p>AirPrint is Apple's built-in wireless printing protocol. When you tap Print on an iPhone or iPad, iOS automatically discovers compatible printers on the same Wi-Fi network — no app or driver installation required. If your HP printer doesn't appear in the AirPrint printer list, it means iOS cannot discover it, the printer is on a different network segment, or the AirPrint service on the printer has stalled.</p>
+
+<h2>Step 1: Verify Both Devices Are on the Same Wi-Fi Network</h2>
+<p>This is the most common cause. AirPrint uses mDNS (Bonjour) for discovery, which only works within the same network subnet:</p>
+<ol>
+  <li>On your iPhone: Settings &gt; Wi-Fi. Note the network name your phone is connected to.</li>
+  <li>On your HP printer: Print a Network Configuration Page (Settings &gt; Reports &gt; Network Configuration) and check the SSID field.</li>
+  <li>Both must show the <strong>exact same network name</strong>. If your router broadcasts separate 2.4GHz and 5GHz networks with different names, your phone may be on 5GHz while the HP printer is on 2.4GHz — they appear separate to AirPrint discovery even though it is the same physical router.</li>
+</ol>
+
+<h2>Step 2: Restart the Printer and iPhone</h2>
+<ol>
+  <li>Turn the HP printer completely off using the power button. Wait 30 seconds. Turn it back on.</li>
+  <li>On your iPhone: Settings &gt; General &gt; Shut Down (or press and hold the side button). Power it off completely, wait 10 seconds, then turn it on.</li>
+  <li>Try printing again after both devices have fully restarted. AirPrint discovery caches can become stale and a fresh restart clears them.</li>
+</ol>
+
+<h2>Step 3: Check That AirPrint Is Enabled on the HP Printer</h2>
+<p>AirPrint is enabled by default on most HP printers but can be accidentally disabled via the Embedded Web Server:</p>
+<ol>
+  <li>Type the printer's IP address into a browser to open HP EWS.</li>
+  <li>Navigate to <strong>Network &gt; AirPrint</strong>.</li>
+  <li>Ensure AirPrint is set to <strong>Enabled</strong>.</li>
+  <li>Click Apply and restart the printer.</li>
+</ol>
+
+<h2>Step 4: Check Your Router for mDNS/Bonjour Issues</h2>
+<p>AirPrint uses mDNS (multicast DNS, also called Bonjour) to broadcast the printer's presence on the network. Some routers block multicast traffic by default:</p>
+<ul>
+  <li>Log into your router admin panel and look for a setting called <strong>mDNS proxy</strong>, <strong>Bonjour proxy</strong>, or <strong>Multicast forwarding</strong>.</li>
+  <li>If you have both 2.4GHz and 5GHz networks, look for an <strong>AP Isolation</strong> or <strong>Client Isolation</strong> setting. When enabled, devices on the same Wi-Fi network cannot discover each other — including AirPrint discovery. <strong>Disable AP Isolation.</strong></li>
+  <li>If you have a mesh Wi-Fi system (Eero, Google Nest, Orbi), ensure the printer and iPhone are associated with the same mesh node, or that the mesh system has mDNS roaming enabled.</li>
+</ul>
+
+<h2>Step 5: Update HP Printer Firmware</h2>
+<p>Firmware updates frequently include AirPrint compatibility improvements:</p>
+<ol>
+  <li>On the HP Smart app: select your printer &gt; Printer Details &gt; Update Printer.</li>
+  <li>Or via EWS: General &gt; Firmware Update &gt; Check for Updates.</li>
+  <li>Install any available updates and restart the printer.</li>
+  <li>Try AirPrint again after the update completes.</li>
+</ol>
+
+<h2>Advanced: Assign a Static IP to the HP Printer</h2>
+<p>If the printer's IP address changes frequently due to DHCP lease renewals, AirPrint discovery can break because iOS cached the old IP. Setting a static IP prevents this:</p>
+<ol>
+  <li>In HP EWS: Network &gt; IPv4 Configuration &gt; change to Manual.</li>
+  <li>Enter a static IP outside your router's DHCP range (e.g., 192.168.1.200).</li>
+  <li>Set the gateway to your router's IP and use 8.8.8.8 as the DNS server.</li>
+  <li>Apply and restart the printer.</li>
+</ol>
+
+<h2>Frequently Asked Questions</h2>
+<details>
+  <summary>Does AirPrint work over mobile data (cellular)?</summary>
+  <p>No. AirPrint requires both your iPhone and the HP printer to be on the same local Wi-Fi network. It does not work over cellular data. However, HP Smart app supports remote printing via HP's cloud servers even when you are away from home.</p>
+</details>
+<details>
+  <summary>Which HP printers support AirPrint?</summary>
+  <p>The vast majority of HP printers released after 2012 support AirPrint. The full list is available on Apple's website at support.apple.com/en-us/HT201311. If your printer is very old (pre-2012), it may not support AirPrint even with firmware updates.</p>
+</details>
+<details>
+  <summary>AirPrint worked yesterday but stopped today — what happened?</summary>
+  <p>This is almost always a DHCP IP address change. The printer got a new IP from your router and iOS still remembers the old one. Restart both the printer and your iPhone. If it keeps recurring, set a static IP (see Step 5 above) or a DHCP reservation on your router.</p>
+</details>
+
+<h2>When to Contact HP Support</h2>
+<p>If your HP printer appears in HP Smart app but not in AirPrint, there is likely a firmware bug with the AirPrint mDNS broadcast on your specific printer model. Contact HP Support at support.hp.com with your printer's exact model number and firmware version (both found on the Network Configuration Page).</p>

@@ -1,0 +1,54 @@
+<h2>The Quick Answer</h2>
+<p><strong>HP Envy 6455e stuck on setup or can't be found by HP Smart? A repair tech explains a Bluetooth requirement almost nobody expects for a Wi-Fi printer.</strong></p>
+
+"Finalizing installation" that never finalizes, or HP Smart that finds your printer once out of every five tries — this is one of the more common setup complaints I hear about the Envy 6455e, and it's frustrating specifically because everything looks right. Laptop, printer, and router sitting a few feet apart, signal strength fine, and setup still stalls or the app simply can't see the printer at all. There's a specific requirement almost nobody expects for what looks like a straightforward Wi-Fi printer, and it's usually the actual answer.
+
+<h2>Quick-Fix Summary</h2>
+<p>Fast version:</p>
+<ol>
+  <li><strong>Enable Bluetooth on your setup device</strong> — my uncommon tip, and the fix most people never try.</li>
+  <li><strong>Connect to 2.4GHz specifically</strong>, not 5GHz, despite what some official videos show.</li>
+  <li><strong>Reset the printer's wireless settings</strong> and start setup completely fresh.</li>
+  <li><strong>Disconnect any VPN</strong> before running setup.</li>
+  <li><strong>Install the Full Feature Software</strong>, not just the HP Smart app alone.</li>
+</ol>
+
+<h2>Fix 1: Enable Bluetooth on Your Setup Device (My Uncommon Tip)</h2>
+<p>Here's the requirement that resolves more "HP Smart can't find my printer" complaints on this model than anything network-related, and it makes no intuitive sense until you understand what's actually happening during setup.</p>
+<p>The Envy 6455e is a Wi-Fi printer, not a Bluetooth one — you'll never print over Bluetooth, and it plays no role in day-to-day use. <strong>But HP Smart uses Bluetooth as part of its initial discovery process during setup</strong>, even for a printer that will ultimately run entirely over Wi-Fi. If Bluetooth is turned off on the laptop, phone, or computer you're using to run setup, HP Smart can lose its ability to detect the printer during the critical early handshake, even though the printer itself, your Wi-Fi network, and your internet connection are all completely fine.</p>
+<p>To check: on your setup device, confirm Bluetooth is turned <strong>on</strong> — Windows: Settings → Bluetooth &amp; devices; Mac: System Settings → Bluetooth; mobile: the quick settings panel. Leave it on throughout the entire setup process, not just at the start.</p>
+<p><strong>Why this works:</strong> Bluetooth gives HP Smart a secondary, more immediate discovery channel to locate a nearby printer before the Wi-Fi connection is fully established, which is particularly useful during those first uncertain moments of setup when the printer hasn't yet joined your network. Without it, the app is relying solely on network-based discovery, which can be slower or less reliable during this specific early phase — and this requirement is confirmed directly in HP's own setup troubleshooting guidance for this printer, even though it's easy to miss entirely if you assumed Bluetooth was irrelevant to a Wi-Fi-only device.</p>
+
+<h2>Fix 2: Use 2.4GHz, Despite What Some Official Videos Show</h2>
+<p>If your router broadcasts both 2.4GHz and 5GHz networks, connect the Envy 6455e to <strong>2.4GHz</strong> specifically during setup. You may come across HP's own official setup videos for this printer family that walk through connecting to 5GHz — the printer does support both bands, but in practice, 2.4GHz produces more consistent, successful setup completions, particularly for anyone experiencing the "stuck on finalizing" symptom.</p>
+<p><strong>Why this works:</strong> 2.4GHz has better range and tolerates interference and distance more gracefully than 5GHz, and a printer struggling to hold a stable connection during the more demanding final registration step of setup is more likely to succeed on the more forgiving band, regardless of what any single official video happens to demonstrate.</p>
+
+<h2>Fix 3: Reset Wireless Settings and Start Completely Fresh</h2>
+<p>On the printer's control panel, find the network or wireless settings menu and choose to reset wireless settings (or press and hold the Wireless and Cancel buttons together for about 5 seconds until you see a reset confirmation). This clears any previous, possibly corrupted setup attempt. Start the entire setup process again from scratch afterward, rather than trying to resume a partial attempt.</p>
+<p><strong>Why this works:</strong> a setup process that failed partway through can leave the printer holding onto a half-completed network configuration that interferes with subsequent attempts, even after you've fixed the actual underlying cause. Wiping it clean and starting fresh removes that leftover baggage entirely.</p>
+
+<h2>Fix 4: Disconnect Any VPN Before Setup</h2>
+<p>If your computer or phone is running a VPN, disconnect it completely before starting or retrying setup.</p>
+<p><strong>Why this works:</strong> setup involves your device communicating directly with the printer and, for HP+ features, with HP's own servers — a VPN can route or delay that traffic in ways that interfere with the handshake, even when your general internet access through the VPN works perfectly fine for everything else you do.</p>
+
+<h2>Fix 5: Install the Full Feature Software</h2>
+<p>Rather than relying solely on the HP Smart app, also install the <strong>Full Feature Software</strong> for your exact printer model from HP's support site.</p>
+<p><strong>Why this works:</strong> the Full Feature Software and HP Smart serve somewhat different roles, and installing the full driver package supports printing and scanning directly, independent of whatever HP Smart is doing during its own setup flow. If HP Smart is struggling specifically, having the full software installed gives you a working path to actual printing even while you continue troubleshooting the app itself.</p>
+
+<h2>When to Call a Professional</h2>
+<p>If you've confirmed Bluetooth is on, connected via 2.4GHz, reset wireless settings and started fresh, disconnected any VPN, and installed the Full Feature Software — and setup still won't complete — contact HP support directly with your printer's serial number and describe exactly which step it fails at, since HP's own documentation on this specific "stuck on finalizing installation" pattern indicates their support team has additional diagnostic steps beyond general troubleshooting. For more on how HP's cartridge authentication system works on this HP+ model, see <a href="https://hp.com/learn/ds" target="_blank" rel="noopener noreferrer">HP's official Dynamic Security information</a>.</p>
+
+<h2>FAQ</h2>
+<h3>Why would Bluetooth matter for a Wi-Fi-only printer?</h3>
+<p>HP Smart uses Bluetooth as part of its discovery process during initial setup specifically, even though the printer itself never uses Bluetooth for actual printing. Turning Bluetooth off on your setup device can prevent HP Smart from finding the printer during this early phase.</p>
+
+<h3>Should I connect my Envy 6455e to 2.4GHz or 5GHz?</h3>
+<p>The printer supports both, but 2.4GHz tends to produce more reliable setup completion in practice, even though some of HP's own official setup videos demonstrate 5GHz. If setup keeps failing, try 2.4GHz specifically.</p>
+
+<h3>Why does setup get stuck specifically on "Finalizing Installation"?</h3>
+<p>This is a commonly reported symptom on this model, often tied to the printer failing to complete its final network registration step. Resetting wireless settings and starting completely fresh, combined with confirming Bluetooth is enabled, resolves this for most people.</p>
+
+<h3>Do I need both HP Smart and the Full Feature Software installed?</h3>
+<p>It's worth having both — the Full Feature Software provides a reliable printing and scanning path independent of the app, which is particularly useful if HP Smart itself is having setup trouble.</p>
+
+<p>HP Envy 6455e setup problems usually trace back to one of a short list of specific requirements, and the Bluetooth one catches nearly everyone off guard, since nothing about a Wi-Fi printer suggests you'd need it turned on. Enable Bluetooth on your setup device, favor 2.4GHz over 5GHz, and start fresh with a wireless reset if a previous attempt left things tangled. Most setups that seemed impossible complete cleanly on the very next try once that Bluetooth requirement is met.</p>

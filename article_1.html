@@ -1,0 +1,60 @@
+<p>Nearly every piece of network troubleshooting advice for a Brother printer eventually asks for the same thing: your printer's network configuration page. It's the single most useful diagnostic printout your machine can produce, and it takes about ten seconds once you know where the option lives.</p>
+
+<h2>What This Page Actually Shows You</h2>
+<p>A network configuration page is a printout generated directly by the printer itself, listing its current network status in detail — IP address, MAC (Ethernet) address, wireless network name it's connected to (if any), signal status, and several other technical details that live nowhere else in the printer's normal display.</p>
+<p><strong>Why this matters:</strong> whether you're troubleshooting a wireless connection, checking for a MAC address filtering issue, confirming the printer's current IP address for manual setup, or working with Brother support, this page is almost always the first thing you'll be asked to check or provide.</p>
+
+<h2>How to Print It</h2>
+<p><strong>On models with a menu display:</strong> navigate to <strong>Settings → All Settings → Print Reports → Network Configuration</strong> (menu wording and exact path can vary slightly by model), and select print.</p>
+<p><strong>On button-only models without a display:</strong> the specific button combination varies by model — commonly a held combination involving the <strong>Go</strong> or <strong>Menu</strong> button, sometimes paired with a specific number of presses. Check your exact model's quick reference guide for the precise sequence, since this differs meaningfully across Brother's product lines.</p>
+<p><strong>Why this works:</strong> either method triggers the printer's internal system to generate and print its own current network status report immediately, independent of any computer or app.</p>
+
+<h2>What to Look For Once You Have It</h2>
+<ul>
+  <li><strong>MAC Address (or Node Name):</strong> the unique hardware identifier you'd need if setting up MAC address filtering on your router.</li>
+  <li><strong>IP Address:</strong> the printer's current network address, useful for manual printer setup on a computer or for confirming whether it's successfully joined your network at all (an address starting with 169.254 typically indicates it hasn't obtained a proper address from your router).</li>
+  <li><strong>Wireless status/SSID:</strong> confirms which network name the printer currently believes it's connected to, useful for catching a printer that's connected to the wrong network entirely, such as an old network name that hasn't been updated.</li>
+  <li><strong>Signal strength/quality:</strong> gives you a general sense of connection strength, useful context if you're troubleshooting intermittent drops rather than a complete failure to connect.</li>
+</ul>
+<p><strong>Why this matters:</strong> having this specific information in hand before troubleshooting further — or before contacting Brother support — considerably speeds up diagnosing what's actually happening, rather than working from guesses about the printer's current network state.</p>
+
+<h2>When to Call a Professional</h2>
+<p>This page itself doesn't require any professional involvement to obtain, but if it reveals something you're unsure how to interpret — an unexpected IP address range, a signal quality reading that seems consistently poor, or a MAC address you need help correctly entering into <a href="/brother/error-codes-alerts/brother-printer-error-ts-04" title="Fix Brother Printer Error TS-04: WPA3 Security Mismatch">router settings</a> — bringing this printout to Brother support or whoever manages your network gives them exactly the detail they need to help quickly.</p>
+
+<h2>How to Decode the Network Configuration Report</h2>
+<p>Once your Brother printer spits out the 2-page or 3-page Network Configuration Report, don't just stare at the wall of technical jargon. Here are the five mission-critical fields you must locate:</p>
+
+<ol>
+  <li><strong><node name=""> or <host name="">:</host></node></strong> This is the internal network name of your printer (typically formatted like <code>BRN30055C82A1B4</code>). You can use this hostname in your browser or ping utilities instead of an IP address.</li>
+  <li><strong>IP Address:</strong> Look under the <code><ip settings=""></ip></code> or <code><tcp ip=""></tcp></code> section. If you see <code>169.254.x.x</code>, this is an APIPA (Automatic Private IP Addressing) address, meaning your Brother printer failed to receive an IP from your router's DHCP pool. If it reads <code>0.0.0.0</code>, the network interface is completely disconnected.</li>
+  <li><strong>Subnet Mask &amp; Default Gateway:</strong> The Default Gateway must match your router's local IP address (usually <code>192.168.1.1</code> or <code>192.168.0.1</code>). If the gateway is blank or wrong, your printer cannot communicate across subnets or receive cloud print jobs.</li>
+  <li><strong>Wireless Link Status &amp; Signal Strength:</strong> Under the <code><wireless></wireless></code> section, check <strong>Link Status</strong> (must say <code>Active</code> or <code>OK</code>) and <strong>Signal Strength</strong>. If signal strength is below 40% or marked <code>Weak</code>, intermittent offline drops will occur regardless of your PC settings.</li>
+  <li><strong>MAC Address (Ethernet / Wireless):</strong> A 12-digit hexadecimal identifier (e.g., <code>30:05:5C:82:A1:B4</code>). This is required if you want to configure a DHCP reservation on your router or if your network uses MAC address filtering.</li>
+</ol>
+
+<h2>Assigning a Static IP Using the Configuration Data</h2>
+<p>Dynamic DHCP leases frequently expire, causing Windows and macOS to report the Brother printer as "Offline" because the printer silently hopped to a new IP address. Use the data from your printed report to lock in a permanent Static IP:</p>
+
+<ol>
+  <li>Open a web browser on a computer connected to the same network.</li>
+  <li>Type the printer's current <strong>IP Address</strong> into the URL bar and press Enter to open the Brother Embedded Web Server (EWS).</li>
+  <li>Log in with the administrator password (on modern Brother machines, this is printed on the serial number label on the back of the chassis).</li>
+  <li>Navigate to the <strong>Administrator</strong> or <strong>Network</strong> tab &gt; <strong>Wireless</strong> or <strong>Wired</strong> &gt; <strong>TCP/IP</strong>.</li>
+  <li>Change the <strong>Boot Method</strong> or <strong>IP Config</strong> from <code>Auto / DHCP</code> to <code>Static</code>.</li>
+  <li>Enter an IP address outside your router's active DHCP range (e.g., if DHCP gives out .2 to .100, set the printer to <code>.210</code>). Copy the Subnet Mask, Gateway, and DNS servers directly from your printed report.</li>
+  <li>Click <strong>Submit</strong> to save. Your printer will never change IP addresses again.</li>
+</ol>
+
+<h2>Frequently Asked Questions</h2>
+<details>
+  <summary>Why is my Brother printer's IP address showing 169.254.x.x on the report?</summary>
+  <p>An IP starting with 169.254 indicates an APIPA self-assigned address. The printer's physical network adapter is functioning, but your router's DHCP server did not respond to its request. Check router connectivity, restart the router, or assign a manual static IP within your router's actual subnet.</p>
+</details>
+<details>
+  <summary>How many pages is a Brother Network Configuration report?</summary>
+  <p>Depending on the model (basic mono laser vs. multifunction color MFC), the report is between 1 and 3 pages. Page 1 contains core TCP/IP and wireless status, while subsequent pages detail security protocols, IPv6 tables, and active ports.</p>
+</details>
+<details>
+  <summary>Can I print the network configuration sheet if my touchscreen is unresponsive?</summary>
+  <p>Yes. On most Brother machines without screens or with locked screens, pressing the physical <strong>Go</strong> button 3 times consecutively within 2 seconds will force the printer engine to print the configuration and status sheets directly from internal ROM.</p>
+</details>

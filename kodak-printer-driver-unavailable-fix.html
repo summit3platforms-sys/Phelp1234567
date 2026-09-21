@@ -1,0 +1,97 @@
+<p>When Windows 10 or Windows 11 displays a "Driver Unavailable" status for a Kodak ESP or Hero printer, it means the operating system was unable to find a compatible driver within the online Windows Update database. Because Kodak officially exited the printer market in 2012, no modern drivers have been signed or submitted to Microsoft for recent Windows builds. To get the printer working, you must manually download, extract, and inject the legacy driver packages into the Windows print subsystem.</p>
+
+<h2>The Legacy Software Dilemma</h2>
+<p>Official Kodak installation packages (like the old KODAK <a href="/kodak/setup-installation/kodak-printer-software-crashes-windows-11" title="Fix Kodak All-in-One Software Crashes on Windows 11/10">Home Center software</a>) often fail during installation on Windows 10 and 11, crashing with compatibility errors. This happens because the installer packages try to register background services that are blocked by modern Windows security. To bypass this, we must avoid the installer entirely and perform a manual INF file driver injection.</p>
+
+<h2>Step 1: Extract the Driver Cabinet Files</h2>
+<p>Instead of running the installer executable, we will unpack it to access the raw driver files.</p>
+<ol>
+  <li>Download the archived Kodak All-in-One Printer Software setup file (often named aiobps_v12.exe or similar from trusted archive mirrors).</li>
+  <li>Download and install <strong>7-Zip</strong> (a free, open-source file compression tool).</li>
+  <li>Locate the downloaded Kodak setup file, right-click it, select <strong>7-Zip</strong>, and click <strong>Extract to '[Folder Name]'</strong>.</li>
+  <li>Open the newly created folder. Inside, you will see several folders and files, including a driver subfolder (often containing files ending in <strong>.inf</strong>, <strong>.sys</strong>, and <strong>.cat</strong>). This is the driver core.</li>
+</ol>
+
+<h2>Step 2: Manual Driver Injection via Device Manager</h2>
+<p>With the files unpacked, we can instruct Windows to read the hardware definitions directly:</p>
+<ol>
+  <li>Connect your Kodak printer to your PC using a USB cable. Turn the printer on.</li>
+  <li>Right-click the Start button and select <strong>Device Manager</strong>.</li>
+  <li>Look for your printer. It will likely be under "Other Devices" or "Printers" listed with a yellow warning icon, named <strong>KODAK ESP [Model]</strong> or <strong>KODAK Hero [Model]</strong>.</li>
+  <li>Right-click the yellow-flagged device and select <strong>Update driver</strong>.</li>
+  <li>On the next screen, click <strong>Browse my computer for drivers</strong>.</li>
+  <li>Do not search the default path. Click <strong>Browse...</strong> and select the folder where you extracted the setup file in Step 1. Ensure the checkbox for 'Include subfolders' is checked. Click Next.</li>
+  <li>Windows will scan the folder, locate the matching '.inf' driver file (which lists all Kodak hardware IDs), and install the driver directly.</li>
+</ol>
+
+<div class="warning-box warning" style="background:#fffbeb; border-left:4px solid #d97706; padding:1rem; margin:1.5rem 0;">
+  <strong>Driver Signature Warning:</strong> If Windows prompts you with a warning indicating the driver lacks a digital signature, select 'Install this driver software anyway'. Because these drivers were compiled prior to modern driver signing enforcement, Windows flags them as unsigned, but they are safe to run.
+</div>
+
+<h2>Step 3: Alternative Manual Printer Addition</h2>
+<p>If Device Manager fails to find the device, you can add it through the legacy Control Panel:</p>
+<ol>
+  <li>Open the Start menu, type <strong>Control Panel</strong>, and select it.</li>
+  <li>Click <strong>Devices and Printers</strong> (or view by Small Icons and select it).</li>
+  <li>Click <strong>Add a printer</strong> at the top.</li>
+  <li>Click <strong>The printer that I want isn't listed</strong> at the bottom of the discovery window.</li>
+  <li>Select <strong>Add a local printer or network printer with manual settings</strong> and click Next.</li>
+  <li>For USB, select <strong>USB001 (Virtual printer port for USB)</strong>. For network, select the TCP/IP port created for your printer. Click Next.</li>
+  <li>On the Manufacturer/Printers screen, click <strong>Have Disk...</strong>.</li>
+  <li>Click <strong>Browse...</strong>, navigate to your extracted folder, locate the driver folder, and select the first file ending in '.inf' (often named <strong>ekcaps.inf</strong> or <strong>ekpxd.inf</strong>). Click Open, then click OK.</li>
+  <li>Select your exact Kodak model from the newly populated list. Click Next to finish the installation.</li>
+</ol>
+
+<h2>Step 4: Registry Port Monitor Fix (Advanced)</h2>
+<p>If you get an error saying 'The printer driver is not compatible with a policy enabled on your computer,' you must temporarily disable driver isolation settings via registry:</p>
+<ol>
+  <li>Press <strong>Windows Key + R</strong>, type <strong>regedit</strong>, and press Enter.</li>
+  <li>Navigate to: <strong>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Print</strong>.</li>
+  <li>Look for a DWORD named <strong>DisablePrinterDriverIsolation</strong>. If it exists, double-click it and set the value to <strong>1</strong>. If not, right-click, select New &gt; DWORD (32-bit) Value, name it <strong>DisablePrinterDriverIsolation</strong>, and set it to <strong>1</strong>.</li>
+  <li>Restart your computer and try Step 3 again.</li>
+</ol>
+
+<h2>Related Kodak Troubleshooting Guides</h2>
+<ul class="related-articles">
+    <li>How to Fix a Kodak Printer Showing Offline on Windows 11</li>
+    <li>How to Run KODAK All-in-One Printer Software on Windows 11</li>
+    <li>How to Print from macOS to a Legacy Kodak Printer</li>
+    <li>Kodak ESP vs Hero <a href="/kodak/setup-installation/kodak-esp-hero-printer-models-comparison" title="Kodak ESP vs Hero Printers: Model Comparison &amp; Specs Guide">Printer Models</a>: Complete Comparison Guide</li>
+</ul>
+
+<h2>Why Windows 10 &amp; 11 Report "Driver is Unavailable" for Kodak Printers</h2>
+<p>When Windows displays the "Driver is unavailable" error under Printers &amp; Scanners, it signifies that Windows detected the hardware plug-and-play ID over USB or Wi-Fi, but the Windows Update driver repository lacks a certified signed driver package for your specific legacy Kodak model.</p>
+
+<h2>Complete 4-Step Driver Restoration Protocol</h2>
+<ol>
+  <li><strong>Install the Official Kodak Driver in Windows 7 <a href="/kodak/ink-toner-issues/kodak-ink-cartridge-compatibility-guide-series-10-vs-30" title="Kodak Ink Cartridge Compatibility Chart: Series 10, 30, Verite 5">Compatibility</a> Mode:</strong>
+    <ul>
+      <li>Download the final release of the Kodak All-in-One Software suite (v8.3).</li>
+      <li>Right-click the downloaded setup file &gt; <strong>Properties &gt; Compatibility</strong>.</li>
+      <li>Check <strong>"Run this program in compatibility mode for Windows 7"</strong>.</li>
+      <li>Check <strong>"Run as administrator"</strong>. Click Apply and execute the installer.</li>
+    </ul>
+  </li>
+  <li><strong>Manually Select the Microsoft Generic WIA/IPP Class Driver:</strong>
+    <ul>
+      <li>Open Control Panel &gt; Devices and Printers &gt; <strong>Add Printer</strong>.</li>
+      <li>Click "The printer that I want isn't listed".</li>
+      <li>Select "Add a local printer or network printer with manual settings".</li>
+      <li>Choose the USB001 virtual printer port or your TCP/IP port.</li>
+      <li>Under Manufacturer, select <strong>Generic</strong>, and under Printers, select <strong>Generic / Text Only</strong> or <strong>Microsoft IPP Class Driver</strong>.</li>
+    </ul>
+  </li>
+  <li><strong>Clear Corrupted Driver Packages from Print Management:</strong>
+    <p>Press <strong>Windows Key + R</strong>, type <code>printmanagement.msc</code>, and press Enter. Under Custom Filters &gt; All Drivers, right-click any ghosted or corrupted Kodak driver packages and select <strong>Remove Driver Package</strong>.</p>
+  </li>
+</ol>
+
+<h2>Frequently Asked Questions</h2>
+<details>
+  <summary>Does Kodak still update drivers for new Windows 11 updates?</summary>
+  <p>Official software updates ended when Kodak restructured its consumer printing division. However, existing drivers run reliably on Windows 11 using Compatibility Mode settings.</p>
+</details>
+<details>
+  <summary>Can I print using third-party software like VueScan?</summary>
+  <p>Yes. For scanning, the popular third-party utility <strong>VueScan</strong> contains built-in reverse-engineered reverse drivers for almost all Kodak ESP and HERO all-in-one scanners without needing any Kodak drivers installed.</p>
+</details>

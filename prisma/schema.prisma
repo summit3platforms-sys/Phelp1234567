@@ -29,47 +29,46 @@ model Category {
 }
 
 model Article {
-  id                   String    @id @default(uuid())
+  id                   String     @id @default(uuid())
   title                String
-  slug                 String    @unique
+  slug                 String     @unique
   content              String
   featuredImage        String?
-  featuredImageAlt     String?
-  featuredImageTitle   String?
-  featuredImageCaption String?
   errorCode            String?
   printerModel         String?
   tags                 String?
   seoTitle             String?
   metaDescription      String?
+  status               String     @default("draft")
+  brandId              String?
+  categoryId           String?
+  publishedAt          DateTime?
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+  authorId             String?
+  featuredImageAlt     String?
+  featuredImageTitle   String?
+  featuredImageCaption String?
   canonicalUrl         String?
   wordCount            Int?
   excerpt              String?
   featuredSnippet      String?
-  faqs                 String?   // JSON string representing FAQs: [{question, answer, order}]
-  status               String    @default("draft")
-  uploadedImages       String?   // JSON string representing uploaded images list: [{id, src, name, alt, caption}]
-  brandId              String?
-  categoryId           String?
-  publishedAt          DateTime?
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-  authorId             String?
-  reviewerId           String?
+  faqs                 String?
+  uploadedImages       String?
+  difficultyLevel      String?    @default("Intermediate")
   reviewedAt           DateTime?
-  difficultyLevel      String?   @default("Intermediate")
-  timeToFix            String?   @default("15 minutes")
-  author               Author?   @relation("ArticleAuthor", fields: [authorId], references: [id])
-  reviewer             Author?   @relation("ArticleReviewer", fields: [reviewerId], references: [id])
-  brand                Brand?    @relation(fields: [brandId], references: [id])
-  category             Category? @relation(fields: [categoryId], references: [id])
+  reviewerId           String?
+  timeToFix            String?    @default("15 minutes")
+  author               Author?    @relation("ArticleAuthor", fields: [authorId], references: [id])
+  brand                Brand?     @relation(fields: [brandId], references: [id])
+  category             Category?  @relation(fields: [categoryId], references: [id])
+  reviewer             Author?    @relation("ArticleReviewer", fields: [reviewerId], references: [id])
   revisions            Revision[]
 }
 
 model Revision {
   id                   String   @id @default(uuid())
   articleId            String
-  article              Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
   version              Int
   title                String
   content              String
@@ -82,8 +81,9 @@ model Revision {
   featuredImageCaption String?
   excerpt              String?
   featuredSnippet      String?
-  uploadedImages       String?
   createdAt            DateTime @default(now())
+  uploadedImages       String?
+  article              Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
 }
 
 model Redirect {
@@ -109,26 +109,25 @@ model Lead {
   phone            String
   printerBrand     String
   status           String   @default("new")
-  ipAddress        String?
-  country          String?
-  issueDescription String?
   createdAt        DateTime @default(now())
+  country          String?
+  ipAddress        String?
+  issueDescription String?
 }
 
 model Author {
-  id        String    @id @default(uuid())
-  name      String
-  slug      String    @unique
-  bio       String?
-  image     String?
-  role            String?   @default("Technical Expert")
-  experienceYears Int?      @default(10)
-  linkedinUrl     String?
-  twitterUrl      String?
-  credentialsUrl  String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  articles        Article[] @relation("ArticleAuthor")
+  id               String    @id @default(uuid())
+  name             String
+  slug             String    @unique
+  bio              String?
+  image            String?
+  role             String?   @default("Technical Expert")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  experienceYears  Int?      @default(10)
+  credentialsUrl   String?
+  linkedinUrl      String?
+  twitterUrl       String?
+  articles         Article[] @relation("ArticleAuthor")
   reviewedArticles Article[] @relation("ArticleReviewer")
 }
-

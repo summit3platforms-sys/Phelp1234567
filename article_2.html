@@ -1,0 +1,61 @@
+<h2>The Quick Answer</h2>
+<p><strong>HP Envy 7855 duplex printing <a href="/kodak/connectivity-issues/kodak-printer-scanner-not-working" title="Fix Kodak Printer Scanner Not Working: WIA Driver &amp; Firewall Guide">not working</a>? A repair tech explains driver settings, the duplexer unit, and the borderless printing conflict nobody mentions.</strong></p>
+
+<p>Two-sided printing is supposed to be the easy part — click a checkbox, save some paper, done. When HP Envy 7855 duplex printing is <a href="/canon/drivers-software-firmware/canon-ij-scan-utility-not-working" title="Fix Canon IJ Scan Utility Not Working (Windows &amp; Mac)">not working</a>, either silently printing single-sided anyway or throwing an error the moment you try, the cause is almost always a setting fighting against another setting, not a broken part. Duplex printing has more moving pieces than people expect, both literally and in software, and this guide walks through every one of them.</p>
+
+<h2>Quick-Fix Summary</h2>
+<p>Fast version:</p>
+<ol>
+  <li><strong>Enable duplex in the <a href="/dymo/setup-installation/dymo-labelwriter-4xl-5xl-setup-driver-guide" title="DYMO LabelWriter 4XL &amp; 5XL Driver Download &amp; Setup">driver</a></strong>, not just in the app you're printing from.</li>
+  <li><strong>Check paper size and weight</strong> — auto-<a href="/kodak/paper-handling-issues/kodak-printer-paper-feed-jam-fix" title="How to Clear Kodak Printer Paper Feed Jams Safely">duplex</a> has real limits.</li>
+  <li><strong>Confirm the <a href="/canon/error-codes-alerts/canon-printer-error-6000-paper-jam-fix" title="Fix Canon Error 6000 (Paper Jam Sensor &amp; Feed Fault)">duplexer</a> unit is seated</strong> if your printer uses a removable one.</li>
+  <li><strong>Turn off borderless/full-bleed printing</strong> — my uncommon tip, and a genuine technical conflict.</li>
+  <li><strong>Update the print driver</strong> if the duplex option is <a href="/kodak/ink-toner-issues/kodak-printer-missing-or-faulty-cartridge-error" title="Fix Kodak Printer Missing or Faulty Cartridge Error">missing</a> entirely.</li>
+</ol>
+
+<h2>Fix 1: Enable Duplex in the Right Place</h2>
+<p>Open <strong>Settings → <a href="/kodak/connectivity-issues/kodak-photo-printer-bluetooth-pairing-failed" title="Kodak Printer Bluetooth Pairing Failed: Android &amp; iOS Fixes">Bluetooth</a> &amp; devices → Printers &amp; scanners → your Envy 7855 → Printing preferences</strong>, and look for a <strong>Print on Both Sides</strong> or <strong>Two-Sided Printing</strong> option, usually under a Finishing or Layout tab. Set your preferred flip style (long edge or short edge) and save.</p>
+<p><strong>Why this works:</strong> many apps have their own separate duplex checkbox in the print dialog itself, and that per-document setting can override — or simply forget to check — the <a href="/kodak/setup-installation/kodak-printer-driver-unavailable-fix" title="Fix Kodak Printer Driver Unavailable on Windows 10 &amp; 11">printer driver</a>'s own default. Setting duplex as the driver's default means every print job starts from the right assumption, even from apps that don't offer their own duplex control.</p>
+
+<h2>Fix 2: Check Your Paper Size and Weight</h2>
+<p>Confirm you're using standard letter or A4 paper, and check the weight — very heavy cardstock or thick <a href="/epson/error-codes-alerts/epson-et-8550-foreign-material-error" title="Fix Epson ET-8550 Foreign Material Error (Paper Jams)">photo paper</a> often exceeds what the printer's automatic duplexer can safely flip. If you're using anything heavier than standard printer paper, duplex may be automatically disabled or may fail partway through the flip.</p>
+<p><strong>Why this works:</strong> the mechanism that flips a page for automatic <a href="/kodak/paper-handling-issues/kodak-printer-paper-feed-jam-fix" title="How to Clear Kodak Printer Paper Feed Jams Safely">duplex</a> printing has real physical limits on paper thickness and length. Paper that's too heavy or too small doesn't feed through the flip path correctly, and the printer often disables the option rather than risk a jam.</p>
+
+<h2>Fix 3: Confirm the Duplexer Unit Is Properly Seated</h2>
+<p>If your Envy 7855 has a removable rear <a href="/canon/error-codes-alerts/canon-printer-error-6000-paper-jam-fix" title="Fix Canon Error 6000 (Paper Jam Sensor &amp; Feed Fault)">duplexer</a> unit (a small module that attaches to the back of the printer), power off, remove it, and reinstall it firmly until it clicks into place.</p>
+<p><strong>Why this works:</strong> the printer detects whether a duplex unit is physically present and communicating correctly before it offers or attempts two-sided printing at all. A <a href="/canon/error-codes-alerts/canon-printer-error-6000-paper-jam-fix" title="Fix Canon Error 6000 (Paper Jam Sensor &amp; Feed Fault)">duplexer</a> that's slightly unseated can be invisible to the printer's own detection, silently disabling the feature with no obvious error message pointing to why.</p>
+
+<h2>Fix 4: Turn Off Borderless Printing (My Uncommon Tip)</h2>
+<p>Here's the conflict almost nobody explains, because the two settings involved don't sound like they should have anything to do with each other.</p>
+<p>If you have <strong>borderless</strong> or <strong>full-bleed printing</strong> enabled — a setting that removes all margins so an image prints edge-to-edge with no white border — check whether <a href="/kodak/paper-handling-issues/kodak-printer-paper-feed-jam-fix" title="How to Clear Kodak Printer Paper Feed Jams Safely">duplex</a> is unavailable or grayed out while that's active. If so, turn borderless off and try duplex again.</p>
+<p><strong>Why this works:</strong> the duplexer mechanism needs a small amount of margin space along at least one edge of the page to physically grip and flip it without dragging across ink that's still wet or freshly laid down. Borderless printing, by design, eliminates exactly that margin — so the two <a href="/kodak/setup-installation/kodak-esp-hero-printer-models-comparison" title="Kodak ESP vs Hero Printers: Model Comparison &amp; Specs Guide">features</a> are frequently mutually exclusive on inkjet printers like the Envy line, and the printer disables duplex automatically rather than risk smearing a borderless print or misfeeding the flip. This isn't a bug or a setting you're missing; it's a genuine mechanical trade-off between two features that both want the same edge of the paper. Once you know they compete for the same physical space, the "missing" duplex option makes complete sense.</p>
+
+<h2>Fix 5: Update the Print Driver</h2>
+<p>If the duplex option is missing from your printing preferences entirely — not just grayed out, but nowhere to be found — <a href="/dymo/setup-installation/dymo-labelwriter-4xl-5xl-setup-driver-guide" title="DYMO LabelWriter 4XL &amp; 5XL Driver Download &amp; Setup">download</a> and install the latest driver for your exact model from HP's support site, removing the old driver first if the reinstall doesn't resolve it on its own.</p>
+<p><strong>Why this works:</strong> an outdated, <a href="/dymo/drivers-software-firmware/dymo-550-rfid-drm-third-party-labels-compatibility" title="DYMO 550 RFID DRM &amp; Third-Party Labels Compatibility">generic</a>, or incorrectly matched driver can simply omit interface options the printer actually supports, even though the hardware itself is fully capable of automatic duplex. The correct, current driver exposes every feature the printer was built with; a mismatched one might not.</p>
+
+<h2>When to Call a Professional</h2>
+<p>If duplex is enabled in the <a href="/dymo/setup-installation/dymo-labelwriter-4xl-5xl-setup-driver-guide" title="DYMO LabelWriter 4XL &amp; 5XL Driver Download &amp; Setup">driver</a>, your paper is standard weight and size, the duplexer unit is properly seated, borderless printing is off, and you're running the current driver — and two-sided printing still fails partway through every time, often jamming mid-flip — the duplexer mechanism itself may have a physical fault. Contact HP support with your serial number and describe exactly where in the process it fails (does it print side one and stop, or fail during the flip itself); that detail helps narrow down whether it's a sensor, a roller, or the unit's internal mechanism. Check warranty status before pursuing any paid repair, since duplexer faults are a recognized support category on this printer line.</p>
+
+<h2>FAQ</h2>
+<h3>Why is the duplex option grayed out on my HP Envy 7855?</h3>
+<p>Check whether borderless or full-bleed printing is currently enabled — the two <a href="/kodak/setup-installation/kodak-esp-hero-printer-models-comparison" title="Kodak ESP vs Hero Printers: Model Comparison &amp; Specs Guide">features</a> often conflict, since the duplexer needs page margin space to grip and flip paper that borderless printing removes.</p>
+
+<h3>My printer has duplex enabled but keeps printing single-sided anyway. Why?</h3>
+<p>Check the print dialog of the specific app you're printing from — it may have its own duplex toggle that's overriding the <a href="/kodak/setup-installation/kodak-printer-driver-unavailable-fix" title="Fix Kodak Printer Driver Unavailable on Windows 10 &amp; 11">printer driver</a>'s default setting. Set duplex in both places to be safe.</p>
+
+<h3>Can I use duplex printing with photo paper?</h3>
+<p>Usually not reliably. Automatic <a href="/kodak/paper-handling-issues/kodak-printer-paper-feed-jam-fix" title="How to Clear Kodak Printer Paper Feed Jams Safely">duplex</a> has real limits on paper thickness, and heavy photo or cardstock often exceeds what the flip mechanism can handle safely. Stick to standard paper weight for two-sided printing.</p>
+
+<h3>Do I need a separate duplexer attachment for the Envy 7855?</h3>
+<p>Check your specific unit — some Envy 7855 configurations include a removable rear <a href="/canon/error-codes-alerts/canon-printer-error-6000-paper-jam-fix" title="Fix Canon Error 6000 (Paper Jam Sensor &amp; Feed Fault)">duplexer</a> module. If yours does, confirm it's firmly seated; if it's not detected as attached, the printer won't offer automatic duplex at all.</p>
+
+<p>HP Envy 7855 duplex printing <a href="/kodak/connectivity-issues/kodak-printer-scanner-not-working" title="Fix Kodak Printer Scanner Not Working: WIA Driver &amp; Firewall Guide">not working</a> almost always comes down to a setting conflict rather than a broken printer. Enable it in the driver, respect paper weight limits, confirm the duplexer's seated, and remember that borderless printing and automatic duplex are quietly fighting for the same edge of the page — turn one off, and the other usually comes right back.</p>
+
+
+<h3 id="additional-resources">Additional Resources</h3>
+<p>If you are still experiencing issues after trying the steps above, you may need to consult the official documentation or download the latest <a href="/epson/error-codes-alerts/epson-controller-error-printer-fix" title="Fix Epson Controller Error (Motherboard &amp; Firmware)">firmware</a> for your specific printer model. We recommend checking the following official resources:</p>
+<ul>
+  <li><a href="https://support.hp.com/" target="_blank" rel="noopener noreferrer">Official HP Customer Support Knowledge Base</a></li>
+  <li><a href="https://support.hp.com/us-en/drivers/printers" target="_blank" rel="noopener noreferrer">HP Printer Drivers &amp; Official Software Downloads</a></li>
+</ul>
