@@ -5,6 +5,7 @@ import { Metadata } from "next";
 import Image from "next/image";
 import parse, { domToReact, Element } from 'html-react-parser';
 import LeadCaptureForm from "@/components/LeadCaptureForm";
+import FeedbackWidget from "@/components/FeedbackWidget";
 import EeatBox from "@/components/EeatBox";
 import QuickAnswerBox from "@/components/QuickAnswerBox";
 import FieldBenchmarkBox from "@/components/FieldBenchmarkBox";
