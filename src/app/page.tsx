@@ -55,6 +55,7 @@ export default async function Home() {
 
   const getCategoryEmoji = (name: string): string => {
     const key = name.toLowerCase();
+    if (key.includes('email') || key.includes('mail')) return '✉️';
     if (key.includes('error') || key.includes('alert')) return '⚠️';
     if (key.includes('wifi') || key.includes('wireless') || key.includes('connect')) return '📶';
     if (key.includes('paper') || key.includes('jam')) return '📄';
@@ -70,6 +71,7 @@ export default async function Home() {
   };
 
   const categoryDescriptions: Record<string, string> = {
+    "Email Printing": "Step-by-step guides and solutions for printing emails, conversation threads, attachments, and batch printing across Gmail, Outlook, Apple Mail, and webmail services.",
     "Connectivity Issues": "Resolve Wi-Fi, network, offline printer, and connection-related problems to restore seamless communication between your printer and devices.",
     "Printing Problems": "Get solutions for print failures, incomplete print jobs, slow printing, and other document output issues.",
     "Paper Handling Issues": "Find fixes for paper jams, feeding errors, paper detection problems, and other paper-related concerns.",
