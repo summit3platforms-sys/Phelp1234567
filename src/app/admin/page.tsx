@@ -7,13 +7,17 @@ export default async function AdminDashboard() {
     publishedArticles,
     draftArticles,
     brandsCount,
-    categoriesCount
+    categoriesCount,
+    totalLeads,
+    newLeadsCount,
   ] = await Promise.all([
     prisma.article.count(),
     prisma.article.count({ where: { status: 'published' } }),
     prisma.article.count({ where: { status: 'draft' } }),
     prisma.brand.count(),
     prisma.category.count(),
+    prisma.lead.count(),
+    prisma.lead.count({ where: { status: 'new' } }),
   ]);
 
   const statNumberStyle = {
@@ -48,8 +52,18 @@ export default async function AdminDashboard() {
           <h3>Categories</h3>
           <div style={statNumberStyle}>{categoriesCount}</div>
         </Link>
+        <Link href="/admin/leads" className="admin-dashboard-card">
+          <h3>Support Leads</h3>
+          <div style={statNumberStyle}>
+            {totalLeads}
+            {newLeadsCount > 0 && (
+              <span style={{ fontSize: '0.85rem', color: '#16a34a', marginLeft: '0.5rem' }}>
+                ({newLeadsCount} new)
+              </span>
+            )}
+          </div>
+        </Link>
       </div>
     </div>
   );
 }
-
