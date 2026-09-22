@@ -11,6 +11,7 @@ import QuickAnswerBox from "@/components/QuickAnswerBox";
 import FieldBenchmarkBox from "@/components/FieldBenchmarkBox";
 import DiagnosticDecisionTree from "@/components/DiagnosticDecisionTree";
 import { getBrandEntity } from "@/lib/brandEntities";
+import { getArticleBenchmark } from "@/lib/benchmarkMetrics";
 
 type PageParams = { params: Promise<{ brandSlug: string; categorySlug: string; articleSlug: string }> };
 
@@ -143,6 +144,20 @@ export default async function ArticlePage({ params }: PageParams) {
   const wordCount = article.wordCount || 300;
   const readingTime = Math.ceil(wordCount / 200);
 
+  // Dynamic technician benchmark telemetry
+  const benchmark = getArticleBenchmark({
+    slug: article.slug,
+    title: article.title,
+    categorySlug: article.category?.slug,
+    categoryName: article.category?.name,
+    brandName: article.brand?.name,
+    printerModel: article.printerModel,
+    errorCode: article.errorCode,
+    difficultyLevel: article.difficultyLevel,
+    timeToFix: article.timeToFix,
+    wordCount: article.wordCount,
+  });
+
   // Add IDs to Headings and Extract TOC
   const { newHtml: processedContent, toc } = addHeadingIdsAndExtractToc(article.content);
 
@@ -258,7 +273,7 @@ export default async function ArticlePage({ params }: PageParams) {
         "@type": "HowTo",
         "name": `How to Fix: ${article.title}`,
         "description": article.metaDescription || article.excerpt || `Step-by-step diagnostic and repair instructions for ${article.title}.`,
-        "totalTime": article.timeToFix ? `PT${article.timeToFix.replace(/[^0-9]/g, '') || '15'}M` : "PT15M",
+        "totalTime": `PT${(article.timeToFix && article.timeToFix !== '15 minutes' ? article.timeToFix : benchmark.benchTime).replace(/[^0-9]/g, '') || '15'}M`,
         "tool": [
           { "@type": "HowToTool", "name": "99% Anhydrous Isopropyl Alcohol" },
           { "@type": "HowToTool", "name": "Lint-Free Microfiber Cleaning Swabs" },
@@ -487,27 +502,32 @@ export default async function ArticlePage({ params }: PageParams) {
               errorCode={article.errorCode}
               summary={article.metaDescription || article.excerpt}
               quickSteps={quickStepsList}
-              timeToFix={article.timeToFix}
-              difficulty={article.difficultyLevel}
+              timeToFix={article.timeToFix && article.timeToFix !== '15 minutes' ? article.timeToFix : benchmark.benchTime}
+              difficulty={article.difficultyLevel || benchmark.difficulty}
             />
 
             <EeatBox 
               author={article.author}
               reviewer={article.reviewer}
               reviewedAt={article.reviewedAt}
-              difficultyLevel={article.difficultyLevel}
-              timeToFix={article.timeToFix}
+              difficultyLevel={article.difficultyLevel || benchmark.difficulty}
+              timeToFix={article.timeToFix && article.timeToFix !== '15 minutes' ? article.timeToFix : benchmark.benchTime}
               brandName={article.brand?.name || null}
               printerModel={article.printerModel}
               wordCount={article.wordCount}
             />
 
             <FieldBenchmarkBox
+              slug={article.slug}
+              title={article.title}
+              categorySlug={article.category?.slug}
+              categoryName={article.category?.name}
               brandName={article.brand?.name}
               printerModel={article.printerModel}
               errorCode={article.errorCode}
               difficulty={article.difficultyLevel}
               timeToFix={article.timeToFix}
+              wordCount={article.wordCount}
             />
 
             {/* Featured Image */}
