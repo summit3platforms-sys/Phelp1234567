@@ -30,7 +30,7 @@ export function toIso(date: Date | string): string {
 
 export interface SitemapUrl {
   loc: string;
-  lastmod: Date | string;
+  lastmod?: Date | string;
   image?: {
     loc: string;
     title?: string;
@@ -38,7 +38,10 @@ export interface SitemapUrl {
 }
 
 export function buildUrlEntry({ loc, lastmod, image }: SitemapUrl): string {
-  let entry = `  <url>\n    <loc>${escapeXml(loc)}</loc>\n    <lastmod>${toIso(lastmod)}</lastmod>`;
+  let entry = `  <url>\n    <loc>${escapeXml(loc)}</loc>`;
+  if (lastmod) {
+    entry += `\n    <lastmod>${toIso(lastmod)}</lastmod>`;
+  }
   if (image && image.loc) {
     entry += `\n    <image:image>\n      <image:loc>${escapeXml(image.loc)}</image:loc>`;
     if (image.title) {

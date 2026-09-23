@@ -8,6 +8,9 @@ type PageParams = { params: Promise<{ brandSlug: string }> };
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
   const resolvedParams = await params;
+  if (resolvedParams.brandSlug.includes('.')) {
+    notFound();
+  }
   const brand = await prisma.brand.findUnique({ where: { slug: resolvedParams.brandSlug } });
   if (!brand) {
     const currentPath = `/${resolvedParams.brandSlug}`;
@@ -27,6 +30,9 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
 
 export default async function BrandPage({ params }: PageParams) {
   const resolvedParams = await params;
+  if (resolvedParams.brandSlug.includes('.')) {
+    notFound();
+  }
   const brand = await prisma.brand.findUnique({
     where: { slug: resolvedParams.brandSlug },
     include: {

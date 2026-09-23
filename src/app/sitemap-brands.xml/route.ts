@@ -1,6 +1,6 @@
 // /sitemap-brands.xml — Brand landing pages
 // Only brands with at least one published article.
-// lastmod = MAX(updatedAt) of published articles for that brand.
+// lastmod = MAX real content date (getArticleEffectiveDates) of articles for that brand.
 
 import { prisma } from '@/lib/prisma';
 import {
@@ -9,46 +9,53 @@ import {
   SitemapUrl,
   xmlResponse,
 } from '@/lib/sitemap-utils';
+import { getArticleEffectiveDates } from '@/lib/article-date';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 export async function GET(): Promise<Response> {
-  // Group published articles by brand, get max updatedAt per brand
-  const brandStats = await prisma.article.groupBy({
-    by: ['brandId'],
-    where: {
-      status: 'published',
-      brandId: { not: null },
-    },
-    _max: { updatedAt: true },
-  });
+  const [brands, articles] = await Promise.all([
+    prisma.brand.findMany({ select: { id: true, slug: true } }),
+    prisma.article.findMany({
+      where: {
+        status: 'published',
+        brandId: { not: null },
+      },
+      select: {
+        brandId: true,
+        createdAt: true,
+        publishedAt: true,
+        reviewedAt: true,
+        revisions: { select: { createdAt: true }, orderBy: { createdAt: 'desc' }, take: 1 },
+      },
+    }),
+  ]);
 
-  if (brandStats.length === 0) {
-    return xmlResponse(buildSitemapXml([]));
+  // Compute maximum real content date per brand
+  const brandLatestDate = new Map<string, Date>();
+  for (const article of articles) {
+    if (!article.brandId) continue;
+    const { modifiedDate } = getArticleEffectiveDates(article);
+    const existing = brandLatestDate.get(article.brandId);
+    if (!existing || modifiedDate.getTime() > existing.getTime()) {
+      brandLatestDate.set(article.brandId, modifiedDate);
+    }
   }
 
-  // Fetch brand slugs for the qualifying brandIds
-  const brandIds = brandStats
-    .map((s) => s.brandId)
-    .filter((id): id is string => id !== null);
+  const brandMap = new Map(brands.map((b) => [b.id, b.slug]));
 
-  const brands = await prisma.brand.findMany({
-    where: { id: { in: brandIds } },
-    select: { id: true, slug: true },
-  });
-
-  const brandSlugMap = new Map(brands.map((b) => [b.id, b.slug]));
-
-  const urls: SitemapUrl[] = brandStats
-    .flatMap((stat) => {
-      const slug = brandSlugMap.get(stat.brandId!);
-      if (!slug) return []; // skip if brand no longer exists
-      const entry: SitemapUrl = {
-        loc: `${BASE_URL}/${slug}`,
-        lastmod: stat._max.updatedAt ?? new Date(),
-      };
-      return [entry];
+  const urls: SitemapUrl[] = [];
+  for (const [brandId, lastmod] of brandLatestDate.entries()) {
+    const slug = brandMap.get(brandId);
+    if (!slug) continue;
+    urls.push({
+      loc: `${BASE_URL}/${slug.toLowerCase()}`,
+      lastmod,
     });
+  }
+
+  // Sort by loc for deterministic output
+  urls.sort((a, b) => a.loc.localeCompare(b.loc));
 
   return xmlResponse(buildSitemapXml(urls));
 }

@@ -1,40 +1,46 @@
-// /sitemap-pages.xml — Static pages only
-// Homepage lastmod = newest published article.
-// Other pages use site launch date.
+// /sitemap-pages.xml — Static pages
+// Homepage lastmod = newest real article date.
+// Other static pages omit <lastmod> as no real editorial date exists.
 
 import { prisma } from '@/lib/prisma';
 import {
   BASE_URL,
   buildSitemapXml,
+  SitemapUrl,
   xmlResponse,
 } from '@/lib/sitemap-utils';
+import { getArticleEffectiveDates } from '@/lib/article-date';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
-// Known static pages (only pages that actually exist in the app)
 const STATIC_PAGES = [
-  { path: '/brands',         lastmodFixed: '2025-01-01' },
-  { path: '/about',          lastmodFixed: '2025-01-01' },
-  { path: '/contact',        lastmodFixed: '2025-01-01' },
-  { path: '/privacy-policy', lastmodFixed: '2025-01-01' },
+  '/brands',
+  '/about',
+  '/contact',
+  '/privacy-policy',
 ];
 
 export async function GET(): Promise<Response> {
-  // Homepage lastmod = most recently published article date
-  const latest = await prisma.article.aggregate({
+  const latestArticle = await prisma.article.findFirst({
     where: { status: 'published' },
-    _max: { publishedAt: true },
+    select: {
+      publishedAt: true,
+      createdAt: true,
+      reviewedAt: true,
+      revisions: { select: { createdAt: true }, orderBy: { createdAt: 'desc' }, take: 1 },
+    },
+    orderBy: { publishedAt: 'desc' },
   });
 
-  const homepageLastmod = latest._max.publishedAt ?? new Date('2025-01-01');
+  const homepageLastmod = latestArticle
+    ? getArticleEffectiveDates(latestArticle).modifiedDate
+    : undefined;
 
-  const urls = [
-    // Homepage
+  const urls: SitemapUrl[] = [
     { loc: BASE_URL, lastmod: homepageLastmod },
-    // Other static pages
-    ...STATIC_PAGES.map(({ path, lastmodFixed }) => ({
+    ...STATIC_PAGES.map((path) => ({
       loc: `${BASE_URL}${path}`,
-      lastmod: lastmodFixed,
+      // omit lastmod rather than inventing placeholder dates
     })),
   ];
 
