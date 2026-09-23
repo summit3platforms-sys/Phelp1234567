@@ -6,7 +6,7 @@
 
 ---
 
-## 1. Summary of Changes
+## 1. Summary of Changes (Sitemap Reliability)
 
 - **Direct Article Sitemap (`/sitemap-articles.xml`)**:
   - Replaced the redirect/paginated approach with a direct, single `<urlset>` containing all 630 published, indexable articles.
@@ -30,7 +30,31 @@
 
 ---
 
-## 2. Files Modified & Deleted
+## 2. Navigation Link Optimization (Eliminate `/search?q=` Links)
+
+- **Homepage Hub Grid**:
+  - Replaced the generic category cards linking to `/search?q=...` with the **top 12 brand×category hubs** by published article count.
+  - Anchor text format: `"{Brand} {Category} ({n} guides)"` dynamically pulled from a live query (`_count: { id: 'desc' }`).
+  - Section heading: `"Most-used troubleshooting hubs"`.
+- **Homepage Quick Tags**:
+  - Updated all 4 quick tags to point to specific canonical hubs matching their labels:
+    - `"HP error codes"` → `/hp/error-codes-alerts`
+    - `"HP printer offline"` → `/hp/connectivity-issues`
+    - `"HP Wi-Fi setup"` → `/hp/setup-installation`
+    - `"HP paper jams"` → `/hp/paper-handling-issues`
+- **View All Link**:
+  - Changed `"All Articles ➔"` linking to `/search?q=` to `"All brands ➔"` linking to `/brands`.
+- **Footer Cleanup (Option B)**:
+  - Removed the `"Common Topics"` footer column entirely to avoid linking to `/search?q=...` URLs.
+  - Adjusted `.footer-grid` in `src/app/globals.css` to `grid-template-columns: 2fr 1fr 1fr;` for a balanced 3-column desktop layout.
+  - Preserved utility link `"Search Guides"` pointing to `/search`.
+- **Accessibility on Article Cards**:
+  - Added `aria-label={article.title}` to thumbnail image links.
+  - Added `aria-label={`Read guide: ${article.title}`}` to "Read Guide ➔" links.
+
+---
+
+## 3. Files Modified & Deleted
 
 - `modified`: [`src/app/[brandSlug]/page.tsx`](file:///Users/agentkuldeep/.gemini/antigravity/scratch/printer-kb-cms/src/app/[brandSlug]/page.tsx) (Brand guard)
 - `modified`: [`src/app/sitemap.xml/route.ts`](file:///Users/agentkuldeep/.gemini/antigravity/scratch/printer-kb-cms/src/app/sitemap.xml/route.ts) (Sitemap index & real lastmod)
@@ -39,13 +63,16 @@
 - `modified`: [`src/app/sitemap-brands.xml/route.ts`](file:///Users/agentkuldeep/.gemini/antigravity/scratch/printer-kb-cms/src/app/sitemap-brands.xml/route.ts) (Real article content dates)
 - `modified`: [`src/app/sitemap-categories.xml/route.ts`](file:///Users/agentkuldeep/.gemini/antigravity/scratch/printer-kb-cms/src/app/sitemap-categories.xml/route.ts) (Real article content dates)
 - `modified`: [`src/lib/sitemap-utils.ts`](file:///Users/agentkuldeep/.gemini/antigravity/scratch/printer-kb-cms/src/lib/sitemap-utils.ts) (Optional lastmod support in `buildUrlEntry`)
+- `modified`: [`src/app/page.tsx`](file:///Users/agentkuldeep/.gemini/antigravity/scratch/printer-kb-cms/src/app/page.tsx) (Top 12 hubs, quick tags, aria-labels)
+- `modified`: [`src/app/layout.tsx`](file:///Users/agentkuldeep/.gemini/antigravity/scratch/printer-kb-cms/src/app/layout.tsx) (Footer cleanup)
+- `modified`: [`src/app/globals.css`](file:///Users/agentkuldeep/.gemini/antigravity/scratch/printer-kb-cms/src/app/globals.css) (Footer 3-column layout)
 - `modified`: [`next.config.ts`](file:///Users/agentkuldeep/.gemini/antigravity/scratch/printer-kb-cms/next.config.ts) (Cleaned up rewrites)
 - `deleted`: `src/app/api/sitemaps/articles/route.ts`
 - `deleted`: `src/lib/sitemap-articles.ts`
 
 ---
 
-## 3. Acceptance Verification Results
+## 4. Acceptance Verification Results
 
 1. **Check 1** (`curl -sI .../sitemap-articles.xml`): HTTP 200 OK, `Content-Type: application/xml; charset=utf-8`.
 2. **Check 2** (`curl -s .../sitemap-articles.xml | grep -c "<loc>"`): Exactly 630 URLs (matching the 630 valid published articles from DB).
@@ -54,3 +81,5 @@
 5. **Check 5** (`xmllint --noout` on all 5 sitemaps): Exit code 0 for all 5 XML documents.
 6. **Check 6** (5 Random Articles): All returned HTTP 200 with `<loc>` exactly matching `<link rel="canonical">`.
 7. **Check 7** (No Artificial Dates): 0 articles contain today's date (`2026-09-24` or `2026-09-23`).
+8. **Check 8** (`grep -o 'href="/search[^"]*"'` on Homepage): 0 links to `/search?q=` (only search form action `<form action="/search">` and footer utility link `/search` exist).
+9. **Check 9** (Homepage Links Status & Sitemap Inclusion): All 12 hubs, 4 quick tags, and all-brands link return HTTP 200 and are present in `sitemap-categories.xml` / `sitemap-pages.xml`.

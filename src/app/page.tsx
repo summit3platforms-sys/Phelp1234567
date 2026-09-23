@@ -15,10 +15,46 @@ export default async function Home() {
     take: 9
   });
 
-  // Fetch categories
-  const categories = await prisma.category.findMany({
-    orderBy: { name: 'asc' }
+  // Fetch top 12 brand x category hubs with highest article count
+  const hubStats = await prisma.article.groupBy({
+    by: ['brandId', 'categoryId'],
+    where: {
+      status: 'published',
+      brandId: { not: null },
+      categoryId: { not: null },
+    },
+    _count: { id: true },
+    orderBy: {
+      _count: { id: 'desc' },
+    },
+    take: 12,
   });
+
+  const hubBrandIds = [...new Set(hubStats.map((s) => s.brandId).filter((id): id is string => id !== null))];
+  const hubCatIds = [...new Set(hubStats.map((s) => s.categoryId).filter((id): id is string => id !== null))];
+
+  const [hubBrands, hubCategories] = await Promise.all([
+    prisma.brand.findMany({ where: { id: { in: hubBrandIds } }, select: { id: true, name: true, slug: true } }),
+    prisma.category.findMany({ where: { id: { in: hubCatIds } }, select: { id: true, name: true, slug: true } }),
+  ]);
+
+  const hubBrandMap = new Map(hubBrands.map((b) => [b.id, b]));
+  const hubCategoryMap = new Map(hubCategories.map((c) => [c.id, c]));
+
+  const topHubs = hubStats
+    .map((stat) => {
+      const brand = hubBrandMap.get(stat.brandId!);
+      const category = hubCategoryMap.get(stat.categoryId!);
+      if (!brand || !category) return null;
+      return {
+        url: `/${brand.slug}/${category.slug}`,
+        brandName: brand.name,
+        categoryName: category.name,
+        count: stat._count.id,
+        label: `${brand.name} ${category.name} (${stat._count.id} guides)`,
+      };
+    })
+    .filter((h): h is NonNullable<typeof h> => h !== null);
 
   // Fetch recent articles
   const recentArticles = await prisma.article.findMany({
@@ -150,10 +186,10 @@ export default async function Home() {
             {/* Quick Tags */}
             <div className="quick-tags" style={{ justifyContent: 'flex-start' }}>
               <span className="quick-tag-label">Popular Searches:</span>
-              <Link href="/search?q=0x6100004a" className="quick-tag">HP 0x6100004a</Link>
-              <Link href="/search?q=offline" className="quick-tag">Printer Offline</Link>
-              <Link href="/search?q=jam" className="quick-tag">Paper Jam</Link>
-              <Link href="/search?q=setup" className="quick-tag">Wi-Fi Setup</Link>
+              <Link href="/hp/error-codes-alerts" className="quick-tag">HP error codes</Link>
+              <Link href="/hp/connectivity-issues" className="quick-tag">HP printer offline</Link>
+              <Link href="/hp/setup-installation" className="quick-tag">HP Wi-Fi setup</Link>
+              <Link href="/hp/paper-handling-issues" className="quick-tag">HP paper jams</Link>
             </div>
           </div>
 
@@ -236,24 +272,30 @@ export default async function Home() {
           )}
         </section>
 
-        {/* Categories Section */}
+        {/* Most-used Troubleshooting Hubs Section */}
         <section style={{ marginBottom: '4rem' }}>
           <div className="section-title-container">
             <div>
-              <h2 className="section-title">Common Topics &amp; Categories</h2>
-              <p className="section-desc">Explore help guides grouped by typical printer issues.</p>
+              <h2 className="section-title">Most-used troubleshooting hubs</h2>
+              <p className="section-desc">Explore our most comprehensive troubleshooting directories by brand and issue.</p>
             </div>
           </div>
           <div className="category-grid">
-            {categories.map(category => (
-              <Link href={`/search?q=${encodeURIComponent(category.name)}`} key={category.id}>
+            {topHubs.map((hub) => (
+              <Link href={hub.url} key={hub.url}>
                 <div className="card category-card" style={{ height: '100%' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div className="card-emoji" style={{ width: '44px', height: '44px', fontSize: '1.4rem' }}>{getCategoryEmoji(category.name)}</div>
-                    <h3 className="card-title" style={{ margin: 0 }}>{category.name}</h3>
+                    <div className="card-emoji" style={{ width: '44px', height: '44px', fontSize: '1.4rem' }}>
+                      {getBrandEmoji(hub.brandName)}
+                    </div>
+                    <div>
+                      <h3 className="card-title" style={{ margin: 0, fontSize: '1.05rem', lineHeight: 1.3 }}>
+                        {hub.label}
+                      </h3>
+                    </div>
                   </div>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem', lineHeight: '1.5' }}>
-                    {categoryDescriptions[category.name] || "Find solutions, error guides, and setup steps for this topic."}
+                    {categoryDescriptions[hub.categoryName] || `Comprehensive diagnostics and verified solutions for ${hub.brandName} ${hub.categoryName.toLowerCase()}.`}
                   </p>
                 </div>
               </Link>
@@ -268,8 +310,8 @@ export default async function Home() {
               <h2 className="section-title">Recently Published Guides</h2>
               <p className="section-desc">Our latest solutions to newly reported error codes and printer problems.</p>
             </div>
-            <Link href="/search?q=" className="view-all-link">
-              All Articles ➔
+            <Link href="/brands" className="view-all-link">
+              All brands ➔
             </Link>
           </div>
 
@@ -284,7 +326,7 @@ export default async function Home() {
                 <div key={article.id} className="article-item">
                   <div>
                     {article.featuredImage && (
-                      <Link href={`/${brandSlug}/${categorySlug}/${article.slug}`} style={{ display: 'block', position: 'relative', overflow: 'hidden', borderRadius: '6px', aspectRatio: '16/9', background: '#f1f5f9', marginBottom: '1rem' }}>
+                      <Link href={`/${brandSlug}/${categorySlug}/${article.slug}`} aria-label={article.title} style={{ display: 'block', position: 'relative', overflow: 'hidden', borderRadius: '6px', aspectRatio: '16/9', background: '#f1f5f9', marginBottom: '1rem' }}>
                         <Image 
                           src={article.featuredImage} 
                           alt={article.title} 
@@ -312,7 +354,7 @@ export default async function Home() {
                     <span className="article-date">
                       {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'}
                     </span>
-                    <Link href={`/${brandSlug}/${categorySlug}/${article.slug}`} className="read-more">
+                    <Link href={`/${brandSlug}/${categorySlug}/${article.slug}`} className="read-more" aria-label={`Read guide: ${article.title}`}>
                       Read Guide ➔
                     </Link>
                   </div>

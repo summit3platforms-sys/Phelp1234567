@@ -191,16 +191,6 @@ export default function RootLayout({
                 </div>
               </div>
 
-              <div className="footer-col">
-                <h2 className="footer-col-title">Common Topics</h2>
-                <div className="footer-col-links">
-                  <Link href="/search?q=Connectivity%20Issues">Connectivity Issues</Link>
-                  <Link href="/search?q=Setup%20%26%20Installation">Setup & Installation</Link>
-                  <Link href="/search?q=Printing%20Problems">Printing Problems</Link>
-                  <Link href="/search?q=Paper%20Handling%20Issues">Paper Handling</Link>
-                  <Link href="/search?q=Ink%20%26%20Toner%20Issues">Ink & Toner</Link>
-                </div>
-              </div>
 
               <div className="footer-col">
                 <h2 className="footer-col-title">Legal & Help</h2>
