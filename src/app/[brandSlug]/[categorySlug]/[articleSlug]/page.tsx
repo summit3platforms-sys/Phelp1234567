@@ -12,6 +12,7 @@ import FieldBenchmarkBox from "@/components/FieldBenchmarkBox";
 import DiagnosticDecisionTree from "@/components/DiagnosticDecisionTree";
 import { getBrandEntity } from "@/lib/brandEntities";
 import { getArticleBenchmark } from "@/lib/benchmarkMetrics";
+import { getArticleEffectiveDates } from "@/lib/article-date";
 
 type PageParams = { params: Promise<{ brandSlug: string; categorySlug: string; articleSlug: string }> };
 
@@ -52,7 +53,12 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
   const resolvedParams = await params;
   const article = await prisma.article.findUnique({
     where: { slug: resolvedParams.articleSlug },
-    include: { brand: true, category: true, author: true }
+    include: {
+      brand: true,
+      category: true,
+      author: true,
+      revisions: { select: { createdAt: true }, orderBy: { createdAt: 'desc' }, take: 1 },
+    }
   });
 
   const currentPath = `/${resolvedParams.brandSlug}/${resolvedParams.categorySlug}/${resolvedParams.articleSlug}`;
@@ -65,6 +71,8 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
     }
     return { title: 'Not Found' };
   }
+
+  const { publishedDate, modifiedDate } = getArticleEffectiveDates(article);
 
   return {
     title: article.seoTitle || `${article.title} - ${article.brand?.name || "Support"}`,
@@ -92,8 +100,8 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
       ],
       locale: 'en_US',
       type: 'article',
-      publishedTime: article.publishedAt?.toISOString(),
-      modifiedTime: article.updatedAt.toISOString(),
+      publishedTime: publishedDate.toISOString(),
+      modifiedTime: modifiedDate.toISOString(),
       authors: article.author?.name ? [article.author.name] : undefined,
     },
     twitter: {
@@ -116,6 +124,7 @@ export default async function ArticlePage({ params }: PageParams) {
       category: true,
       author: true,
       reviewer: true,
+      revisions: { select: { createdAt: true }, orderBy: { createdAt: 'desc' }, take: 1 },
     }
   });
 
@@ -127,6 +136,8 @@ export default async function ArticlePage({ params }: PageParams) {
     }
     notFound();
   }
+
+  const articleDates = getArticleEffectiveDates(article);
 
   // Fetch related articles (same brand, excluding current guide)
   const relatedArticles = await prisma.article.findMany({
@@ -196,8 +207,8 @@ export default async function ArticlePage({ params }: PageParams) {
       "headline": article.title,
       "description": article.metaDescription || article.excerpt,
       "image": article.featuredImage ? [article.featuredImage] : ['https://libertyprinterfix.com/logo.png'],
-      "datePublished": article.publishedAt?.toISOString() || article.createdAt.toISOString(),
-      "dateModified": article.updatedAt.toISOString(),
+      "datePublished": articleDates.publishedDate.toISOString(),
+      "dateModified": articleDates.modifiedDate.toISOString(),
       "proficiencyLevel": article.difficultyLevel || "Intermediate",
       "dependencies": "Standard tools, 99% isopropyl alcohol, lint-free cloth, screwdriver",
       "about": {
@@ -488,8 +499,10 @@ export default async function ArticlePage({ params }: PageParams) {
                     <span>By <Link href={`/author/${article.author.slug}`} style={{ color: 'inherit', textDecoration: 'none', borderBottom: '1px dotted #94a3b8' }}><strong>{article.author.name}</strong></Link></span>
                   </div>
                 )}
-                <span>Published: <time dateTime={article.publishedAt ? new Date(article.publishedAt).toISOString() : new Date(article.createdAt).toISOString()}>{new Date(article.publishedAt || article.createdAt).toLocaleDateString()}</time></span>
-                <span>Updated: <time dateTime={new Date(article.updatedAt).toISOString()}>{new Date(article.updatedAt).toLocaleDateString()}</time></span>
+                <span>Published: <time dateTime={articleDates.publishedDate.toISOString()}>{articleDates.formattedPublished}</time></span>
+                {articleDates.hasRealContentUpdate && (
+                  <span>Updated: <time dateTime={articleDates.modifiedDate.toISOString()}>{articleDates.formattedModified}</time></span>
+                )}
                 <span>Reading Time: <strong>{readingTime} min read</strong></span>
                 {article.errorCode && <span>Error Code: <strong style={{ color: '#c2185b' }}>{article.errorCode}</strong></span>}
                 {article.printerModel && <span>Model: <strong>{article.printerModel}</strong></span>}

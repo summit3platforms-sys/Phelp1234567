@@ -3,6 +3,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
 import Image from "next/image";
+import { getArticleEffectiveDates } from "@/lib/article-date";
 
 type PageParams = { params: Promise<{ brandSlug: string; categorySlug: string }>; searchParams: Promise<{ page?: string }> };
 
@@ -61,6 +62,9 @@ export default async function BrandCategoryPage({ params, searchParams }: PagePa
         brandId: brand.id,
         categoryId: category.id,
         status: 'published'
+      },
+      include: {
+        revisions: { select: { createdAt: true }, orderBy: { createdAt: 'desc' }, take: 1 }
       },
       orderBy: { publishedAt: 'desc' },
       skip,
@@ -174,7 +178,7 @@ export default async function BrandCategoryPage({ params, searchParams }: PagePa
                 </p>
                 <div className="article-footer" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
                   <span className="article-date" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    Updated: {new Date(article.updatedAt).toLocaleDateString()}
+                    {getArticleEffectiveDates(article).displayLabel}
                   </span>
                   <Link href={`/${brand.slug}/${category.slug}/${article.slug}`} className="read-more" style={{ fontSize: '0.85rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                     Read Guide ➔

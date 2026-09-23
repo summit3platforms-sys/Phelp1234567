@@ -11,6 +11,7 @@ import {
   SitemapUrl,
   xmlResponse,
 } from '@/lib/sitemap-utils';
+import { getArticleEffectiveDates } from '@/lib/article-date';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,11 +50,15 @@ export async function GET(
       title: true,
       slug: true,
       featuredImage: true,
+      createdAt: true,
+      publishedAt: true,
       updatedAt: true,
+      reviewedAt: true,
+      revisions: { select: { createdAt: true }, orderBy: { createdAt: 'desc' }, take: 1 },
       brand: { select: { slug: true } },
       category: { select: { slug: true } },
     },
-    orderBy: { updatedAt: 'desc' },
+    orderBy: { publishedAt: 'desc' },
     skip: (page - 1) * CHUNK_SIZE,
     take: CHUNK_SIZE,
   });
@@ -62,7 +67,7 @@ export async function GET(
     .filter((a) => a.brand?.slug && a.category?.slug && a.slug)
     .map((a) => ({
       loc: `${BASE_URL}/${a.brand!.slug}/${a.category!.slug}/${a.slug}`,
-      lastmod: a.updatedAt,
+      lastmod: getArticleEffectiveDates(a).modifiedDate,
       image: a.featuredImage ? {
         loc: a.featuredImage.startsWith('http') ? a.featuredImage : `${BASE_URL}${a.featuredImage}`,
         title: a.title,
