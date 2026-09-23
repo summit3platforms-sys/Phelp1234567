@@ -14,6 +14,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/sitemap-articles-:page.xml',
+        destination: '/api/sitemaps/articles?page=:page',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

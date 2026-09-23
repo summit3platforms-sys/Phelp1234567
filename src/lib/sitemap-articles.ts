@@ -1,8 +1,3 @@
-// /sitemap-articles-[page].xml — Paginated article sitemaps
-// Page numbers are 1-indexed. Returns 404 if out of range.
-// Only published articles with valid brand + category slugs are included.
-// lastmod = article's own updatedAt timestamp.
-
 import { prisma } from '@/lib/prisma';
 import {
   BASE_URL,
@@ -13,17 +8,8 @@ import {
 } from '@/lib/sitemap-utils';
 import { getArticleEffectiveDates } from '@/lib/article-date';
 
-export const dynamic = 'force-dynamic';
-
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<Record<string, string>> }
-): Promise<Response> {
-  const resolved = await params;
-  const pageParam = resolved['page'] ?? '1';
-
-  // Parse and validate page number
-  const page = parseInt(pageParam, 10);
+export async function generateArticlesSitemap(pageParam: string | number = 1): Promise<Response> {
+  const page = typeof pageParam === 'number' ? pageParam : parseInt(pageParam, 10);
   if (isNaN(page) || page < 1) {
     return new Response('Not Found', { status: 404 });
   }

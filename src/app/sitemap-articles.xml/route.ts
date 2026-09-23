@@ -1,12 +1,10 @@
-// /sitemap-articles.xml — Redirects to /sitemap-articles-1.xml
-// This ensures the sitemap index entry always works even though the
-// actual content is served from the paginated dynamic route.
+// /sitemap-articles.xml — Directly serves published articles sitemap (Page 1)
+// compliant with sitemaps.org, no redirects
 
-import { BASE_URL } from '@/lib/sitemap-utils';
-import { redirect } from 'next/navigation';
+import { generateArticlesSitemap } from '@/lib/sitemap-articles';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(): never {
-  redirect(`${BASE_URL}/sitemap-articles-1.xml`);
+export async function GET(): Promise<Response> {
+  return generateArticlesSitemap(1);
 }
