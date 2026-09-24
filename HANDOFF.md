@@ -83,3 +83,33 @@
 7. **Check 7** (No Artificial Dates): 0 articles contain today's date (`2026-09-24` or `2026-09-23`).
 8. **Check 8** (`grep -o 'href="/search[^"]*"'` on Homepage): 0 links to `/search?q=` (only search form action `<form action="/search">` and footer utility link `/search` exist).
 9. **Check 9** (Homepage Links Status & Sitemap Inclusion): All 12 hubs, 4 quick tags, and all-brands link return HTTP 200 and are present in `sitemap-categories.xml` / `sitemap-pages.xml`.
+
+---
+
+## 5. Real OEM Source Citations Architecture
+
+- **Prisma Data Model (`ArticleSource`)**:
+  - Added `SourceType` enum: `manual`, `support_article`, `driver_page`, `spec_sheet`, `official_community`.
+  - Added `ArticleSource` model with required fields: `articleId`, `url`, `title`, `anchorText`, `publisher`, `sourceType`, `verifiedAt`, `httpStatus`.
+  - Relation to `Article` with `onDelete: Cascade` and uniqueness constraint `@@unique([articleId, url])`.
+- **Article Template (`src/app/[brandSlug]/[categorySlug]/[articleSlug]/page.tsx`)**:
+  - Included `sources: { orderBy: { createdAt: 'asc' } }` in article query.
+  - Renders `<h2>Sources</h2>` after the last troubleshooting step (`article-content`) and before the FAQ accordion.
+  - Format: `<a href="{url}" target="_blank" rel="noopener">{anchorText}</a> – {publisher}, checked {Mon YYYY}`.
+  - Plain editorial links (no `nofollow`/`sponsored`).
+  - If an article has 0 sources, renders nothing (no empty heading or container).
+- **Domain Allowlist Validation (`scripts/backfill-sources.ts`)**:
+  - Strictly checks hostname against approved official OEM domains: `host === d || host.endsWith('.' + d)`.
+  - Rejects any forums, Reddit, YouTube, retailers, or third-party content farms.
+- **Verification Rules**:
+  - Follows redirects and stores the final destination URL.
+  - Verifies HTTP 200 status.
+  - Extracts text from HTML or via `pdf-parse` (for PDF manuals) and verifies presence of the model number/series or error code.
+  - Verifies page is not a generic homepage, search result, or login wall.
+- **Scripts**:
+  - `scripts/backfill-sources.ts`: Finds, verifies, and upserts OEM sources for articles; writes a comprehensive CSV report.
+  - `scripts/check-sources.ts`: Re-fetches all stored sources, updates `httpStatus` and `verifiedAt`, and alerts on any non-200 status codes.
+- **Verification Results**:
+  - Initial 20 articles (6 Bixolon, 7 HP, 7 Epson) tested and backfilled with 100% verified OEM manuals and support guides.
+  - Monthly health check `scripts/check-sources.ts` tested: 20/20 sources returned HTTP 200 OK.
+

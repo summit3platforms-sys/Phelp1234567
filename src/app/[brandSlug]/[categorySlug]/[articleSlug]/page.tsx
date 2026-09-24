@@ -78,6 +78,10 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
     title: article.seoTitle || `${article.title} - ${article.brand?.name || "Support"}`,
     description: article.metaDescription || `Troubleshooting guide for ${article.title}.`,
     alternates: { canonical: article.canonicalUrl || `https://libertyprinterfix.com${currentPath}` },
+    robots: (article.tags?.includes('noindex') || !article.content || article.content.trim().length === 0) ? {
+      index: false,
+      follow: false,
+    } : undefined,
     openGraph: {
       title: article.seoTitle || `${article.title} - ${article.brand?.name || "Support"}`,
       description: article.metaDescription || `Troubleshooting guide for ${article.title}.`,
@@ -125,6 +129,7 @@ export default async function ArticlePage({ params }: PageParams) {
       author: true,
       reviewer: true,
       revisions: { select: { createdAt: true }, orderBy: { createdAt: 'desc' }, take: 1 },
+      sources: { orderBy: { createdAt: 'asc' } },
     }
   });
 
@@ -597,6 +602,28 @@ export default async function ArticlePage({ params }: PageParams) {
             >
               {parse(processedContent, parseOptions)}
             </div>
+
+            {/* Sources Section */}
+            {article.sources && article.sources.length > 0 && (
+              <section className="article-sources" style={{ marginTop: '2.5rem', marginBottom: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e2e8f0' }}>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#0f172a', marginBottom: '1rem' }}>Sources</h2>
+                <ul style={{ listStyleType: 'disc', paddingLeft: '1.5rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  {article.sources.map((source) => (
+                    <li key={source.id} style={{ fontSize: '0.95rem', color: '#475569', lineHeight: 1.6 }}>
+                      <a 
+                        href={source.url} 
+                        target="_blank" 
+                        rel="noopener" 
+                        style={{ color: 'var(--primary-color)', fontWeight: 600, textDecoration: 'underline' }}
+                      >
+                        {source.anchorText}
+                      </a>
+                      {' '}– {source.publisher}, checked {new Date(source.verifiedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
             {/* FAQ Accordion Section */}
             {faqsArray.length > 0 && (
