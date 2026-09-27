@@ -161,7 +161,18 @@ export default async function AboutPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.5rem', marginTop: '1.5rem' }}>
         {authors.map((member) => (
           <Link href={`/author/${member.slug}`} key={member.id} style={{ textDecoration: 'none' }}>
-            <div style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '6px', background: '#f8fafc', transition: 'box-shadow 0.15s', cursor: 'pointer' }}>
+            <div style={{ padding: '1.25rem', border: '1px solid var(--border-color)', borderRadius: '8px', background: '#f8fafc', transition: 'box-shadow 0.15s', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+              {member.image ? (
+                <img
+                  src={member.image}
+                  alt={member.name}
+                  style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', marginBottom: '0.75rem', border: '2px solid #e2e8f0' }}
+                />
+              ) : (
+                <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.75rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.75rem' }}>
+                  {member.name.charAt(0)}
+                </div>
+              )}
               <h4 style={{ margin: '0 0 0.25rem 0', color: '#0f172a', fontWeight: 'bold' }}>{member.name}</h4>
               <p style={{ margin: '0 0 0.5rem 0', color: 'var(--primary-color)', fontSize: '0.85rem', fontWeight: 600 }}>
                 {member.role || 'Technical Expert'} {member.experienceYears ? `• ${member.experienceYears}+ Yrs` : ''}
