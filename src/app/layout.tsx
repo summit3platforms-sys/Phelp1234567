@@ -44,6 +44,9 @@ export const metadata: Metadata = {
     description: "Find solutions, error codes, and troubleshooting steps for all major printer brands including HP, Canon, Epson, and Brother.",
     images: ['https://libertyprinterfix.com/logo.png'],
   },
+  other: {
+    'google-adsense-account': 'ca-pub-3176537766200391',
+  },
 };
 
 export default function RootLayout({
@@ -54,6 +57,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta name="google-adsense-account" content="ca-pub-3176537766200391" />
         {/* Tawk.to Chat Widget */}
         <Script 
           id="tawk-to" 
