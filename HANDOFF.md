@@ -113,3 +113,45 @@
   - Initial 20 articles (6 Bixolon, 7 HP, 7 Epson) tested and backfilled with 100% verified OEM manuals and support guides.
   - Monthly health check `scripts/check-sources.ts` tested: 20/20 sources returned HTTP 200 OK.
 
+
+---
+
+## ISR Caching Fix (2026-09-30, commit b458c1a)
+
+### Root Causes Found
+| File | Line | Cause |
+|---|---|---|
+| `src/app/page.tsx` | 5 | `export const dynamic = "force-dynamic"` — forced homepage to never cache |
+| `src/middleware.ts` | 4 | Middleware matcher caught all public routes → Vercel CDN bypassed, returned `private, no-store` |
+| `src/app/[brandSlug]/[categorySlug]/page.tsx` | 12 | `searchParams` read in `generateMetadata` → Next.js forced dynamic rendering on every category page |
+| `src/app/admin/articles/actions.ts` | 238 | `revalidatePath` only hit article path + admin list; brand hub, category hub, homepage never invalidated |
+
+### Fixes Applied
+1. **`src/app/page.tsx`** — Replaced `export const dynamic = "force-dynamic"` with `export const revalidate = 3600`. Homepage now builds as a static page (`○`) with 1-hour ISR.
+2. **`src/app/[brandSlug]/page.tsx`** — Added `export const revalidate = 3600`.
+3. **`src/app/[brandSlug]/[categorySlug]/page.tsx`** — Added `export const revalidate = 3600`. Removed `searchParams` from `generateMetadata` (it was only used for paginated canonicals which are noindex anyway).
+4. **`src/app/[brandSlug]/[categorySlug]/[articleSlug]/page.tsx`** — Added `export const revalidate = 3600`.
+5. **`src/middleware.ts`** — Added `Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400` header to the `NextResponse.next()` for all non-admin, non-redirect public routes. Vercel's CDN was stripping cache headers because middleware responses were treated as private without this.
+6. **`src/app/admin/articles/actions.ts`** — `updateArticle`: Added `revalidatePath` for brand hub, category hub, and homepage. `createArticle`: Added same revalidations when `status === "published"`.
+
+### Expected Results After Deploy
+| Route | Before | After |
+|---|---|---|
+| `/` | `ƒ Dynamic`, `cache-control: private, no-cache` | `○ Static`, `s-maxage=3600`, `x-vercel-cache: HIT` |
+| `/hp` | `ƒ Dynamic`, MISS | ISR, `s-maxage=3600`, HIT after first request |
+| `/hp/connectivity-issues` | `ƒ Dynamic`, MISS | ISR, HIT |
+| `/hp/connectivity-issues/my-article` | `ƒ Dynamic`, MISS | ISR, HIT |
+
+### Verify on Production
+```bash
+# Homepage should show HIT on second request
+curl -sI https://libertyprinterfix.com/ | grep -i 'cache-control\|x-vercel-cache'
+curl -sI https://libertyprinterfix.com/ | grep -i 'cache-control\|x-vercel-cache'
+
+# Article page
+curl -sI https://libertyprinterfix.com/hp/connectivity-issues/fix-hp-printer-offline-wireless | grep -i 'cache-control\|x-vercel-cache'
+curl -sI https://libertyprinterfix.com/hp/connectivity-issues/fix-hp-printer-offline-wireless | grep -i 'cache-control\|x-vercel-cache'
+```
+
+### Note on Build Route Table
+Dynamic segments (`[brandSlug]`, `[categorySlug]`, `[articleSlug]`) still show `ƒ` in the build table — this is expected. Without `generateStaticParams` pre-rendering all URLs at build time, Next.js labels them dynamic (ISR). They are rendered on first request then cached by Vercel CDN for `revalidate` seconds. Adding `generateStaticParams` for 600+ articles would make builds very slow and is not recommended.
