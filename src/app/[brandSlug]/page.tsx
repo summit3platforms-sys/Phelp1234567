@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Metadata } from "next";
 import Image from "next/image";
 
+export const revalidate = 3600; // ISR: regenerate at most once per hour
+
 type PageParams = { params: Promise<{ brandSlug: string }> };
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {

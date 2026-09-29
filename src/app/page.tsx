@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import Image from "next/image";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
-export const dynamic = "force-dynamic";
+export const revalidate = 3600; // ISR: regenerate at most once per hour
 
 
 export default async function Home() {

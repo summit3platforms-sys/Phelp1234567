@@ -5,11 +5,12 @@ import { Metadata } from "next";
 import Image from "next/image";
 import { getArticleEffectiveDates } from "@/lib/article-date";
 
+export const revalidate = 3600; // ISR: regenerate at most once per hour
+
 type PageParams = { params: Promise<{ brandSlug: string; categorySlug: string }>; searchParams: Promise<{ page?: string }> };
 
-export async function generateMetadata({ params, searchParams }: PageParams): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ brandSlug: string; categorySlug: string }> }): Promise<Metadata> {
   const resolvedParams = await params;
-  const resolvedSearchParams = await searchParams;
   const brand = await prisma.brand.findUnique({ where: { slug: resolvedParams.brandSlug } });
   const category = await prisma.category.findUnique({ where: { slug: resolvedParams.categorySlug } });
   
@@ -20,15 +21,10 @@ export async function generateMetadata({ params, searchParams }: PageParams): Pr
     return { title: 'Not Found' };
   }
   
-  const page = parseInt(resolvedSearchParams.page || '1', 10);
-  const canonicalUrl = page > 1
-    ? `https://libertyprinterfix.com/${brand.slug}/${category.slug}?page=${page}`
-    : `https://libertyprinterfix.com/${brand.slug}/${category.slug}`;
-
   return {
-    title: `${brand.name} Printer ${category.name} - Troubleshooting Guides${page > 1 ? ` (Page ${page})` : ''}`,
+    title: `${brand.name} Printer ${category.name} - Troubleshooting Guides`,
     description: `Resolve ${brand.name} printer issues related to ${category.name.toLowerCase()}. Find step-by-step guides, error code solutions, and help.`,
-    alternates: { canonical: canonicalUrl },
+    alternates: { canonical: `https://libertyprinterfix.com/${brand.slug}/${category.slug}` },
   };
 }
 

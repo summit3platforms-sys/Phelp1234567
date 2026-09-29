@@ -14,6 +14,8 @@ import { getBrandEntity } from "@/lib/brandEntities";
 import { getArticleBenchmark } from "@/lib/benchmarkMetrics";
 import { getArticleEffectiveDates } from "@/lib/article-date";
 
+export const revalidate = 3600; // ISR: regenerate at most once per hour
+
 type PageParams = { params: Promise<{ brandSlug: string; categorySlug: string; articleSlug: string }> };
 
 // Helper function to dynamically add heading IDs and extract headings list for TOC

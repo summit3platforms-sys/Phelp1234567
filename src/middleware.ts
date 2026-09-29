@@ -102,5 +102,8 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL(target, req.url), 301);
   }
 
-  return NextResponse.next();
+  // Public route: let it through with CDN-cacheable headers
+  const res = NextResponse.next();
+  res.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+  return res;
 }

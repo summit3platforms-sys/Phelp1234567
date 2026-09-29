@@ -92,6 +92,17 @@ export async function createArticle(formData: FormData) {
   });
 
   revalidatePath("/admin/articles");
+  // If published immediately, bust relevant hub pages and homepage
+  if (status === "published" && brandId && categoryId) {
+    const newBrand = await prisma.brand.findUnique({ where: { id: brandId } });
+    const newCategory = await prisma.category.findUnique({ where: { id: categoryId } });
+    if (newBrand && newCategory) {
+      revalidatePath(`/${newBrand.slug}/${newCategory.slug}/${article.slug}`);
+      revalidatePath(`/${newBrand.slug}/${newCategory.slug}`);
+      revalidatePath(`/${newBrand.slug}`);
+      revalidatePath("/");
+    }
+  }
   return article;
 }
 
@@ -238,6 +249,14 @@ export async function updateArticle(id: string, formData: FormData) {
   revalidatePath("/admin/articles");
   revalidatePath(`/${oldBrandSlug}/${oldCategorySlug}/${oldArticle.slug}`);
   revalidatePath(`/${newBrandSlug}/${newCategorySlug}/${slug}`);
+  // Invalidate hub pages and homepage so ISR picks up the change immediately
+  revalidatePath(`/${newBrandSlug}/${newCategorySlug}`);
+  revalidatePath(`/${newBrandSlug}`);
+  revalidatePath("/");
+  if (oldBrandSlug !== newBrandSlug || oldCategorySlug !== newCategorySlug) {
+    revalidatePath(`/${oldBrandSlug}/${oldCategorySlug}`);
+    revalidatePath(`/${oldBrandSlug}`);
+  }
 }
 
 export async function rollbackRevision(articleId: string, revisionId: string) {
