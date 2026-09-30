@@ -146,17 +146,146 @@ export default async function ArticlePage({ params }: PageParams) {
 
   const articleDates = getArticleEffectiveDates(article);
 
-  // Fetch related articles (same brand, excluding current guide)
-  const relatedArticles = await prisma.article.findMany({
-    where: {
-      brandId: article.brandId,
-      status: 'published',
-      NOT: { id: article.id }
-    },
-    orderBy: { publishedAt: 'desc' },
-    take: 5,
-    include: { category: true }
-  });
+  // Fetch related articles by relevance: same model -> series -> error family -> brand+category
+  // Exclude current article, noindex pages, and redirected URLs
+  const redirects = await prisma.redirect.findMany({ select: { oldUrl: true } });
+  const redirectedSlugs = new Set(redirects.map(r => r.oldUrl.split('/').pop()).filter(Boolean));
+
+  const baseWhere: any = {
+    status: 'published',
+    id: { not: article.id },
+    NOT: [
+      { tags: { contains: 'noindex' } },
+      { slug: { in: Array.from(redirectedSlugs) } }
+    ]
+  };
+  if (article.brandId) {
+    baseWhere.brandId = article.brandId;
+  }
+
+  const relatedArticles: any[] = [];
+  const selectedIds = new Set<string>([article.id]);
+
+  // 1. Same exact model
+  if (article.printerModel) {
+    const sameModel = await prisma.article.findMany({
+      where: {
+        ...baseWhere,
+        id: { notIn: Array.from(selectedIds) },
+        printerModel: { equals: article.printerModel, mode: 'insensitive' }
+      },
+      take: 5,
+      include: { category: true }
+    });
+    for (const a of sameModel) {
+      if (relatedArticles.length < 5 && !selectedIds.has(a.id)) {
+        relatedArticles.push(a);
+        selectedIds.add(a.id);
+      }
+    }
+  }
+
+  // 2. Same series / model family (e.g. 3700 series, EcoTank ET-2800, etc.)
+  if (relatedArticles.length < 5) {
+    const seriesPatterns = [
+      /deskjet\s*(?:plus\s*)?(\d{4})/i,
+      /envy\s*(?:photo\s*|inspire\s*|pro\s*)?(\d{4})/i,
+      /officejet\s*(?:pro\s*)?(\d{4})/i,
+      /laserjet\s*(?:pro\s*|enterprise\s*)?([a-z0-9\-]+)/i,
+      /photosmart\s*([a-z0-9\-]+)/i,
+      /ecotank\s*(?:et|l|m)?[\s\-]*(\d{3,4})/i,
+      /pixma\s*([a-z]{2,4}[\s\-]*\d{3,4})/i,
+      /maxify\s*([a-z]{2}[\s\-]*\d{3,4})/i,
+      /hl[\s\-]*([a-z]?\d{4}[a-z]*)/i,
+      /mfc[\s\-]*([a-z]?\d{4}[a-z]*)/i,
+      /instax\s*mini\s*link(?:\s*2)?/i,
+      /hi[\s\-]*print/i,
+      /itpp\s*(\d{3})/i,
+      /tsp\s*(\d{3})/i,
+      /srp\s*(\d{3})/i,
+    ];
+    let seriesMatch = '';
+    for (const p of seriesPatterns) {
+      const m = article.title.match(p);
+      if (m) {
+        seriesMatch = m[0];
+        break;
+      }
+    }
+    if (seriesMatch) {
+      const sameSeries = await prisma.article.findMany({
+        where: {
+          ...baseWhere,
+          id: { notIn: Array.from(selectedIds) },
+          title: { contains: seriesMatch, mode: 'insensitive' }
+        },
+        take: 5 - relatedArticles.length,
+        include: { category: true }
+      });
+      for (const a of sameSeries) {
+        if (relatedArticles.length < 5 && !selectedIds.has(a.id)) {
+          relatedArticles.push(a);
+          selectedIds.add(a.id);
+        }
+      }
+    }
+  }
+
+  // 3. Same error / code family on same brand
+  if (relatedArticles.length < 5 && article.errorCode) {
+    const sameError = await prisma.article.findMany({
+      where: {
+        ...baseWhere,
+        id: { notIn: Array.from(selectedIds) },
+        errorCode: { equals: article.errorCode, mode: 'insensitive' }
+      },
+      take: 5 - relatedArticles.length,
+      include: { category: true }
+    });
+    for (const a of sameError) {
+      if (relatedArticles.length < 5 && !selectedIds.has(a.id)) {
+        relatedArticles.push(a);
+        selectedIds.add(a.id);
+      }
+    }
+  }
+
+  // 4. Same brand + category
+  if (relatedArticles.length < 5 && article.categoryId) {
+    const sameCat = await prisma.article.findMany({
+      where: {
+        ...baseWhere,
+        id: { notIn: Array.from(selectedIds) },
+        categoryId: article.categoryId
+      },
+      take: 5 - relatedArticles.length,
+      include: { category: true }
+    });
+    for (const a of sameCat) {
+      if (relatedArticles.length < 5 && !selectedIds.has(a.id)) {
+        relatedArticles.push(a);
+        selectedIds.add(a.id);
+      }
+    }
+  }
+
+  // 5. Fallback within same brand
+  if (relatedArticles.length < 5) {
+    const fallback = await prisma.article.findMany({
+      where: {
+        ...baseWhere,
+        id: { notIn: Array.from(selectedIds) }
+      },
+      take: 5 - relatedArticles.length,
+      include: { category: true }
+    });
+    for (const a of fallback) {
+      if (relatedArticles.length < 5 && !selectedIds.has(a.id)) {
+        relatedArticles.push(a);
+        selectedIds.add(a.id);
+      }
+    }
+  }
 
   // Calculate dynamic reading time
   const wordCount = article.wordCount || 300;
