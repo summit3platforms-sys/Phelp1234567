@@ -155,3 +155,59 @@ curl -sI https://libertyprinterfix.com/hp/connectivity-issues/fix-hp-printer-off
 
 ### Note on Build Route Table
 Dynamic segments (`[brandSlug]`, `[categorySlug]`, `[articleSlug]`) still show `ƒ` in the build table — this is expected. Without `generateStaticParams` pre-rendering all URLs at build time, Next.js labels them dynamic (ISR). They are rendered on first request then cached by Vercel CDN for `revalidate` seconds. Adding `generateStaticParams` for 600+ articles would make builds very slow and is not recommended.
+
+---
+
+## 8. WebSite JSON-LD SearchAction Removal
+
+- **Files Updated**: [`src/app/layout.tsx`](file:///Users/agentkuldeep/.gemini/antigravity/scratch/printer-kb-cms/src/app/layout.tsx) and [`src/app/page.tsx`](file:///Users/agentkuldeep/.gemini/antigravity/scratch/printer-kb-cms/src/app/page.tsx).
+- **Change**: Removed the `potentialAction: SearchAction` object from the `WebSite` schema on every page. Kept schema strictly to `@type: "WebSite"`, `name`, `url`, and `@id`.
+- **Production Verification**:
+  ```bash
+  curl -s https://libertyprinterfix.com/ | grep -c search_term_string
+  # Output: 0
+  ```
+
+---
+
+## 9. Internal Linking Engine & Related Guides Architecture
+
+**Date**: 2026-09-30  
+**Status**: Applied & Verified on Production  
+
+### A. Priority Targets Coverage (`data/discovered.csv`)
+- **Input**: 129 URLs exported from Search Console ("Discovered – currently not indexed" category hubs).
+- **Rule**: Every URL in `discovered.csv` must receive $\ge 3$ in-body links from published articles.
+- **Coverage Result**:
+  - Total discovered targets: 129
+  - Targets with 0 inbound links: 0
+  - Targets with 1–2 inbound links: 0
+  - Targets with $\ge 3$ inbound links: 129 (100% complete)
+
+### B. In-Body Contextual Linking Rules & Placement
+- **Distribution**: Every published article has 1–4 internal links (average 2–3, max 4 internal links).
+- **Anchors**: Natural, descriptive phrases (model + problem or specific diagnostic terms, e.g. "PageWide banding", "nozzle check", "mesh router band steering"). The same anchor to the same target is limited to $\le 3$ instances site-wide. No generic anchors ("click here", "read more").
+- **Strict Placement Rules**:
+  - Placed strictly in body paragraphs (`<p>`) and list items (`<li>`).
+  - Never placed in headings (`<h1>`, `<h2>`, `<h3>`), never in FAQ questions (`<summary>`), never in first intro sentences, never inside menu paths (`>` or `&gt;`), and never inside `<code>` / `<pre>`.
+  - Sentence repair guard: Skipped broken sentences (`\b(the|a|an|your...)\.\s+[A-Z]`) and glued words (`PrinterOpen`, `2.4GHzand`).
+- **Date & Revision Integrity**:
+  - Injected directly into the database using raw SQL without triggering Prisma `updatedAt` updates or creating `Revision` records.
+  - Truthful editorial dates (`publishedAt`, `effectiveModifiedDate`) remain 100% untouched.
+
+### C. Sidebar Related Guides Widget
+- **File**: [`src/app/[brandSlug]/[categorySlug]/[articleSlug]/page.tsx`](file:///Users/agentkuldeep/.gemini/antigravity/scratch/printer-kb-cms/src/app/[brandSlug]/[categorySlug]/[articleSlug]/page.tsx)
+- **Algorithm**: Replaced static "latest from brand" query with a 5-item hierarchical relevance algorithm:
+  1. Exact Model match (score 100)
+  2. Model Series / Family match (score 50)
+  3. Diagnostic Error Code family match (score 40)
+  4. Brand + Category match (score 20)
+- **Filters**: Excludes current article, non-indexable articles, and redirects.
+- **Rendering**: Fully server-rendered `<a href>` with the target article's H1 title as anchor text.
+
+### D. Orphan & Weak-Path Check
+- **Audit**: Analyzed inbound paths across all 628 published articles (brand hubs, category hubs, related guides blocks, and in-body links).
+- **Final Result**:
+  - Articles with fewer than 2 internal links from indexable pages: **0**
+  - Articles whose only inbound links come from noindexed hubs: **0**
+
