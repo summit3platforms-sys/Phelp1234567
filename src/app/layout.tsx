@@ -131,15 +131,7 @@ export default function RootLayout({
                 "@id": "https://libertyprinterfix.com/#website",
                 "name": "LibertyPrinterFix",
                 "url": "https://libertyprinterfix.com",
-                "publisher": { "@id": "https://libertyprinterfix.com/#organization" },
-                "potentialAction": {
-                  "@type": "SearchAction",
-                  "target": {
-                    "@type": "EntryPoint",
-                    "urlTemplate": "https://libertyprinterfix.com/search?q={search_term_string}"
-                  },
-                  "query-input": "required name=search_term_string"
-                }
+                "publisher": { "@id": "https://libertyprinterfix.com/#organization" }
               }
             ]
           }) }}

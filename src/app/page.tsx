@@ -126,16 +126,9 @@ export default async function Home() {
     "@graph": [
       {
         "@type": "WebSite",
+        "@id": "https://libertyprinterfix.com/#website",
         "name": "LibertyPrinterFix",
-        "url": "https://libertyprinterfix.com",
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": {
-            "@type": "EntryPoint",
-            "urlTemplate": "https://libertyprinterfix.com/search?q={search_term_string}"
-          },
-          "query-input": "required name=search_term_string"
-        }
+        "url": "https://libertyprinterfix.com"
       },
       {
         "@type": "Organization",
