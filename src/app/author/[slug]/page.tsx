@@ -4,6 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { Metadata } from "next";
 
+export const revalidate = 3600; // ISR: regenerate at most once per hour
+
+export async function generateStaticParams() {
+  const authors = await prisma.author.findMany({ select: { slug: true } });
+  return authors.map((a) => ({ slug: a.slug }));
+}
+
 type PageParams = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {

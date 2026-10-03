@@ -16,6 +16,31 @@ import { getArticleEffectiveDates } from "@/lib/article-date";
 
 export const revalidate = 3600; // ISR: regenerate at most once per hour
 
+export async function generateStaticParams() {
+  const articles = await prisma.article.findMany({
+    where: {
+      status: 'published',
+      brand: { isNot: null },
+      category: { isNot: null },
+    },
+    take: 20,
+    orderBy: { createdAt: 'desc' },
+    select: {
+      slug: true,
+      brand: { select: { slug: true } },
+      category: { select: { slug: true } },
+    },
+  });
+
+  return articles
+    .filter((a) => a.brand?.slug && a.category?.slug && a.slug)
+    .map((a) => ({
+      brandSlug: a.brand!.slug,
+      categorySlug: a.category!.slug,
+      articleSlug: a.slug,
+    }));
+}
+
 type PageParams = { params: Promise<{ brandSlug: string; categorySlug: string; articleSlug: string }> };
 
 // Helper function to dynamically add heading IDs and extract headings list for TOC

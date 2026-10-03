@@ -6,6 +6,11 @@ import Image from "next/image";
 
 export const revalidate = 3600; // ISR: regenerate at most once per hour
 
+export async function generateStaticParams() {
+  const brands = await prisma.brand.findMany({ select: { slug: true } });
+  return brands.map((b) => ({ brandSlug: b.slug }));
+}
+
 type PageParams = { params: Promise<{ brandSlug: string }> };
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
