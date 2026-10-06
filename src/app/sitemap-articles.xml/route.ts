@@ -24,6 +24,7 @@ export async function GET(): Promise<Response> {
         categoryId: { not: null },
         brand: { isNot: null },
         category: { isNot: null },
+        wordCount: { gt: 0 },
       },
       select: {
         title: true,
@@ -36,7 +37,6 @@ export async function GET(): Promise<Response> {
         revisions: { select: { createdAt: true }, orderBy: { createdAt: 'desc' }, take: 1 },
         brand: { select: { slug: true } },
         category: { select: { slug: true } },
-        content: true,
         tags: true,
       },
       orderBy: { publishedAt: 'desc' },
@@ -48,7 +48,6 @@ export async function GET(): Promise<Response> {
   const urls: SitemapUrl[] = articles
     .filter((a) => {
       if (!a.brand?.slug || !a.category?.slug || !a.slug) return false;
-      if (!a.content || a.content.trim().length === 0) return false;
       if (a.tags && a.tags.toLowerCase().includes('noindex')) return false;
       const canonicalPath = `/${a.brand.slug.toLowerCase()}/${a.category.slug.toLowerCase()}/${a.slug.toLowerCase()}`;
       return !redirectSet.has(canonicalPath);

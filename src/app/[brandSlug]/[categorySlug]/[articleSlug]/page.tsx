@@ -5,6 +5,7 @@ import { Metadata } from "next";
 import Image from "next/image";
 import parse, { domToReact, Element } from 'html-react-parser';
 import LeadCaptureForm from "@/components/LeadCaptureForm";
+import SidebarChatWidget from "@/components/SidebarChatWidget";
 import FeedbackWidget from "@/components/FeedbackWidget";
 import EeatBox from "@/components/EeatBox";
 import QuickAnswerBox from "@/components/QuickAnswerBox";
@@ -854,6 +855,9 @@ export default async function ArticlePage({ params }: PageParams) {
 
         {/* Sidebar Column */}
         <aside className="article-sidebar-col">
+          {/* Live Chat with Cathy Widget */}
+          <SidebarChatWidget />
+
           {/* Lead Capture Form Widget */}
           <div style={{ width: '100%' }}>
             <LeadCaptureForm />
