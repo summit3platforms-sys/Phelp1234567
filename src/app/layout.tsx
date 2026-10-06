@@ -4,7 +4,6 @@ import "./globals.css";
 import Link from "next/link";
 import Script from "next/script";
 import Image from "next/image";
-import FloatingChatButton from "@/components/FloatingChatButton";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -59,6 +58,24 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta name="google-adsense-account" content="ca-pub-3176537766200391" />
+        {/* Tawk.to Chat Widget */}
+        <Script 
+          id="tawk-to" 
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+              (function(){
+              var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+              s1.async=true;
+              s1.src='https://embed.tawk.to/6aa16d88a9c2983442420a77/1k2397net';
+              s1.charset='UTF-8';
+              s1.setAttribute('crossorigin','*');
+              s0.parentNode.insertBefore(s1,s0);
+              })();
+            `
+          }}
+        />
         {/* Google tag (gtag.js) */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-HW217Z2WG0"
@@ -204,7 +221,6 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
-        <FloatingChatButton />
       </body>
     </html>
   );
