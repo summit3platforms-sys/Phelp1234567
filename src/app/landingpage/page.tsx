@@ -1,10 +1,12 @@
 import { Metadata } from 'next';
 import LandingPageForm from '@/components/LandingPageForm';
+import ProblemCards from '@/components/ProblemCards';
+import MobileStickyCTA from '@/components/MobileStickyCTA';
 
 export const metadata: Metadata = {
-  title: 'Printer Troubleshooting & Technical Support | LibertyPrinterFix',
+  title: 'Printer Not Working? Straightforward Printer Help | Liberty Printer Fix',
   description:
-    'Fast, expert technical troubleshooting for HP, Canon, Epson, Brother & thermal printers. Fix offline errors, paper jams, blinking error codes, and driver issues.',
+    'Having trouble printing, connecting to Wi-Fi, or getting your printer back online? Liberty Printer Fix provides independent, easy-to-understand printer assistance for HP, Canon, Epson, Brother and more.',
   robots: {
     index: false,
     follow: false,
@@ -22,304 +24,337 @@ export const metadata: Metadata = {
 };
 
 export default function LandingPage() {
-  const brands = [
-    { name: 'HP', desc: 'LaserJet, OfficeJet, DeskJet, Envy' },
-    { name: 'Canon', desc: 'PIXMA, imageCLASS, MAXIFY' },
-    { name: 'Epson', desc: 'EcoTank, WorkForce, Expression' },
-    { name: 'Brother', desc: 'HL, MFC, DCP, PocketJet' },
-    { name: 'Munbyn', desc: 'ITPP941, ITPP130, RealWriter' },
-    { name: 'Rollo', desc: 'Wireless & USB Thermal' },
-    { name: 'Zebra', desc: 'ZD420, ZD620, GX420, GK420' },
-    { name: 'DYMO', desc: 'LabelWriter 450, 550, 4XL' },
-    { name: 'Xerox', desc: 'Phaser, VersaLink, AltaLink' },
-    { name: 'Lexmark', desc: 'MS, MX, CS, CX series' },
-  ];
-
-  const commonIssues = [
-    {
-      icon: '📴',
-      title: 'Printer Shows "Offline" or Disconnected',
-      desc: 'Fix Windows 11/10 and macOS offline status, SNMP port conflicts, WSD port drift, and router WiFi reconnect issues.',
-    },
-    {
-      icon: '🚨',
-      title: 'Blinking Error Lights & Error Codes',
-      desc: 'Decode flashing orange/amber lights, Canon B200/5100, HP 59.F0/50.4, Epson 0x97, and continuous paper sensor errors.',
-    },
-    {
-      icon: '📄',
-      title: 'Faded, Streaked, or Blank Pages',
-      desc: 'Clear stubborn dried printhead nozzles, adjust thermal density, fix roller slipping, and restore sharp text alignment.',
-    },
-    {
-      icon: '⚙️',
-      title: 'Driver Installs & Spooler Crashes',
-      desc: 'Resolve Windows Print Spooler service shutdowns, corrupt driver packages, USB communication errors, and generic driver setup.',
-    },
-  ];
-
-  const testimonials = [
-    {
-      quote:
-        'My HP LaserJet was stuck in Offline mode for two straight days right before payroll. The specialist identified our router IP conflict within 5 minutes. Amazing service!',
-      author: 'Mark T.',
-      role: 'Small Business Owner, Chicago, IL',
-      rating: '★★★★★',
-    },
-    {
-      quote:
-        'Our Munbyn shipping printer started spitting blank labels right in the middle of our holiday Etsy rush. The calibration and sensor instructions saved our shipping day.',
-      author: 'Amanda R.',
-      role: 'E-Commerce Seller, Austin, TX',
-      rating: '★★★★★',
-    },
-    {
-      quote:
-        'Canon support told me my PIXMA B200 error meant buying a brand new printer. LibertyPrinterFix showed me the carriage reset trick that brought it right back to life.',
-      author: 'Greg S.',
-      role: 'Freelance Graphic Designer, Seattle, WA',
-      rating: '★★★★★',
-    },
-  ];
-
   const faqs = [
     {
-      q: 'How fast will I receive assistance after submitting the form?',
-      a: 'Our dispatch team reviews submissions immediately. In most cases, a printer specialist will follow up via email or phone within 10 minutes during active support hours.',
+      q: 'Can you help if my printer is offline?',
+      a: 'Yes. An "offline" status is one of the most common printer issues we handle. We help you check your connection, computer settings, and printer queue step-by-step so your computer can communicate with your printer again.',
     },
     {
-      q: 'Can you help with both Windows and Mac operating systems?',
-      a: 'Yes. We support Windows 11, Windows 10, macOS (including macOS Sequoia and Sonoma), ChromeOS, iOS AirPrint, and Android printing environments.',
+      q: 'Can you help with HP, Canon, Epson and Brother printers?',
+      a: 'Yes. We assist with all major consumer and office printer brands including HP, Canon, Epson, Brother, and many others, whether you have an inkjet, laser, or wireless model.',
     },
     {
-      q: 'What types of printers do you handle?',
-      a: 'We troubleshoot consumer and commercial inkjets, color and monochrome laser printers, all-in-one multifunction units, and 4x6 thermal shipping/barcode label printers.',
+      q: 'Do I need to know what is wrong with my printer?',
+      a: 'Not at all. You do not need to be a technical expert. Just describe what you see happening—such as "nothing prints," "it says offline," or "a light is blinking"—and we will help you figure out what to do.',
     },
     {
-      q: 'What if I need immediate help without waiting?',
-      a: 'You can launch our Live Chat with Cathy directly using the chat button in the top menu or on the page to speak with a technician in real time.',
+      q: 'Can you help with Wi-Fi printer problems?',
+      a: 'Yes. Wireless connection dropouts, router password changes, and new Wi-Fi setups are common. We guide you through reconnecting your printer to your home or office wireless network.',
+    },
+    {
+      q: 'Can you help with Windows and Mac?',
+      a: 'Yes. We assist users on Windows 11, Windows 10, Apple Mac (macOS), as well as iPads, iPhones, and Android devices.',
+    },
+    {
+      q: 'Are you affiliated with HP, Canon, Epson or Brother?',
+      a: 'No. Liberty Printer Fix is an independent printer assistance service. We are not the manufacturer, and we are not affiliated with or endorsed by HP, Canon, Epson, Brother, or any other printer brand. We provide third-party assistance to help users troubleshoot and resolve printer problems.',
     },
   ];
 
   return (
-    <div className="lp-container">
+    <div className="landing-sales-page">
+      {/* Trust bar at top of landing page */}
+      <div className="landing-top-bar">
+        <div className="landing-top-inner">
+          <span className="landing-top-tag">🇺🇸 INDEPENDENT AMERICAN PRINTER ASSISTANCE</span>
+          <span className="landing-top-divider">•</span>
+          <span className="landing-top-phone">Simple, Human Help For Your Printer</span>
+          <span className="landing-top-divider">•</span>
+          <a
+            href="https://vm.providesupport.com/0hfjufu6eccq70z7w7kmktp1rf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="landing-top-chat-link"
+          >
+            💬 Talk to Cathy (Live Chat)
+          </a>
+        </div>
+      </div>
+
       {/* HERO SECTION */}
-      <section className="lp-hero-section">
-        <div className="lp-hero-content">
-          <div className="lp-pill-badge">
-            <span className="lp-pill-dot" /> FAST PRINTER DIAGNOSTICS &amp; REPAIR ASSISTANCE
-          </div>
+      <section className="sales-hero-section">
+        <div className="sales-hero-container">
+          {/* Left Column: Reassuring Human Messaging */}
+          <div className="sales-hero-left">
+            <h1 className="sales-hero-headline">
+              Printer Not Working? Let Us Help.
+            </h1>
 
-          <h1 className="lp-hero-headline">
-            Printer Offline, Jammed, or Showing Error Codes?
-          </h1>
-
-          <p className="lp-hero-subhead">
-            Connect with experienced printer technical specialists for fast, accurate diagnosis. We resolve driver conflicts, network dropouts, paper feed errors, and cryptic blinking lights across all major printer brands.
-          </p>
-
-          <div className="lp-hero-features">
-            <div className="lp-feature-item">
-              <span className="lp-check-icon">✓</span>
-              <span><strong>Average 10-Minute Response:</strong> Prompt expert review of your printer problem.</span>
-            </div>
-            <div className="lp-feature-item">
-              <span className="lp-check-icon">✓</span>
-              <span><strong>Hardware &amp; Network Coverage:</strong> WiFi drops, IP conflicts, printhead clogs &amp; error codes.</span>
-            </div>
-            <div className="lp-feature-item">
-              <span className="lp-check-icon">✓</span>
-              <span><strong>All Major Brands:</strong> HP, Canon, Epson, Brother, Munbyn, Rollo, Zebra &amp; more.</span>
-            </div>
-            <div className="lp-feature-item">
-              <span className="lp-check-icon">✓</span>
-              <span><strong>No-Obligation Diagnostic:</strong> Clear, human guidance tailored to your specific model.</span>
-            </div>
-          </div>
-
-          {/* Real-time chat alternative card */}
-          <div className="lp-chat-alternative">
-            <div className="lp-chat-alt-avatar">
-              👩‍💻
-              <span className="lp-chat-alt-pulse" />
-            </div>
-            <div className="lp-chat-alt-text">
-              <strong>Prefer live assistance right now?</strong>
-              <p>You can talk to Cathy on Live Chat for real-time troubleshooting.</p>
-            </div>
-            <a
-              href="https://vm.providesupport.com/0hfjufu6eccq70z7w7kmktp1rf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="lp-chat-alt-btn"
-            >
-              <span>💬</span> Live Chat
-            </a>
-          </div>
-
-          {/* Social Proof Stats */}
-          <div className="lp-social-stats">
-            <div className="lp-stat-box">
-              <span className="lp-stat-number">15,000+</span>
-              <span className="lp-stat-label">Printer Issues Resolved</span>
-            </div>
-            <div className="lp-stat-divider" />
-            <div className="lp-stat-box">
-              <span className="lp-stat-number">4.9 / 5</span>
-              <span className="lp-stat-label">★★★★★ Customer Rating</span>
-            </div>
-            <div className="lp-stat-divider" />
-            <div className="lp-stat-box">
-              <span className="lp-stat-number">&lt; 10 min</span>
-              <span className="lp-stat-label">Average Response Time</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Lead Capture Form Card */}
-        <div className="lp-hero-form-wrapper">
-          <LandingPageForm />
-        </div>
-      </section>
-
-      {/* SUPPORTED BRANDS TICKER/GRID */}
-      <section className="lp-brands-section">
-        <h2 className="lp-section-subtitle">COMPREHENSIVE SUPPORT ACROSS ALL MAJOR BRANDS</h2>
-        <div className="lp-brands-grid">
-          {brands.map((b) => (
-            <div key={b.name} className="lp-brand-card">
-              <strong className="lp-brand-name">{b.name}</strong>
-              <span className="lp-brand-models">{b.desc}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* COMMON ISSUES SECTION */}
-      <section className="lp-issues-section">
-        <div className="lp-section-header">
-          <span className="lp-section-tag">COMMON PRINTER FAILURES</span>
-          <h2 className="lp-section-title">Common Printer Problems We Help You Solve</h2>
-          <p className="lp-section-desc">
-            Whether your printer stopped working after an operating system update or refuses to feed paper, our technicians diagnose the root cause immediately.
-          </p>
-        </div>
-
-        <div className="lp-issues-grid">
-          {commonIssues.map((issue) => (
-            <div key={issue.title} className="lp-issue-card">
-              <div className="lp-issue-icon">{issue.icon}</div>
-              <h3 className="lp-issue-title">{issue.title}</h3>
-              <p className="lp-issue-desc">{issue.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 3-STEP RESOLUTION PROCESS */}
-      <section className="lp-process-section">
-        <div className="lp-section-header">
-          <span className="lp-section-tag">FAST &amp; SIMPLE PROCESS</span>
-          <h2 className="lp-section-title">How Our Diagnostic Service Works</h2>
-        </div>
-
-        <div className="lp-process-grid">
-          <div className="lp-process-card">
-            <div className="lp-process-badge">STEP 1</div>
-            <h3 className="lp-process-title">Submit Your Problem</h3>
-            <p className="lp-process-desc">
-              Fill out the short form with your printer model, connection type (USB or WiFi), and symptoms.
+            <p className="sales-hero-lead">
+              Having trouble printing, connecting to Wi-Fi, or getting your printer back online? Tell us what&apos;s happening and get straightforward help with your printer problem.
             </p>
-          </div>
 
-          <div className="lp-process-card">
-            <div className="lp-process-badge">STEP 2</div>
-            <h3 className="lp-process-title">Specialist Triage</h3>
-            <p className="lp-process-desc">
-              A certified technician examines the error profile, known driver bugs, and hardware sensor telemetry.
-            </p>
-          </div>
+            <div className="sales-hero-cta-block">
+              <a href="#get-help-form" className="sales-btn-primary">
+                GET HELP WITH MY PRINTER
+              </a>
+              <p className="sales-hero-reassurance">
+                Fast response • Major printer brands • Independent printer assistance
+              </p>
+            </div>
 
-          <div className="lp-process-card">
-            <div className="lp-process-badge">STEP 3</div>
-            <h3 className="lp-process-title">Step-by-Step Fix</h3>
-            <p className="lp-process-desc">
-              Receive verified, actionable instructions via email or phone, or connect with our support agents for interactive guidance.
-            </p>
-          </div>
-        </div>
-      </section>
+            {/* Clear Independent Disclosure */}
+            <div className="sales-hero-disclosure">
+              <p>
+                <strong>Please Note:</strong> Liberty Printer Fix is an independent printer assistance service and is not affiliated with HP, Canon, Epson, Brother, or other printer manufacturers.
+              </p>
+            </div>
 
-      {/* TESTIMONIALS SECTION */}
-      <section className="lp-testimonials-section">
-        <div className="lp-section-header">
-          <span className="lp-section-tag">REAL CUSTOMER FEEDBACK</span>
-          <h2 className="lp-section-title">Trusted by Home Offices &amp; Businesses</h2>
-        </div>
-
-        <div className="lp-testimonials-grid">
-          {testimonials.map((t, idx) => (
-            <div key={idx} className="lp-testimonial-card">
-              <div className="lp-stars">{t.rating}</div>
-              <p className="lp-quote">&ldquo;{t.quote}&rdquo;</p>
-              <div className="lp-author-info">
-                <strong>{t.author}</strong>
-                <span>{t.role}</span>
+            {/* Reassuring Key Points for 50+ Audience */}
+            <div className="sales-hero-bullets">
+              <div className="sales-bullet-item">
+                <span className="sales-bullet-check">✓</span>
+                <div>
+                  <strong>No Technical Jargon:</strong> We explain things in plain, everyday English.
+                </div>
+              </div>
+              <div className="sales-bullet-item">
+                <span className="sales-bullet-check">✓</span>
+                <div>
+                  <strong>Patient, Human Assistance:</strong> We take the time to understand your specific issue.
+                </div>
+              </div>
+              <div className="sales-bullet-item">
+                <span className="sales-bullet-check">✓</span>
+                <div>
+                  <strong>All Common Issues:</strong> Offline status, Wi-Fi drops, paper jams, and error lights.
+                </div>
               </div>
             </div>
-          ))}
+          </div>
+
+          {/* Right Column: Prominent, Simple Lead Form */}
+          <div className="sales-hero-right">
+            <LandingPageForm />
+          </div>
+        </div>
+      </section>
+
+      {/* PROBLEM SECTION */}
+      <section className="sales-problems-section">
+        <div className="sales-section-container">
+          <div className="sales-section-header">
+            <h2 className="sales-section-title">What Problem Are You Having?</h2>
+            <p className="sales-section-desc">
+              Select the problem that best describes your situation, or fill out the form above to get help.
+            </p>
+          </div>
+
+          <ProblemCards />
+
+          <div className="sales-mid-cta">
+            <a href="#get-help-form" className="sales-btn-secondary">
+              GET HELP NOW
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="sales-steps-section">
+        <div className="sales-section-container">
+          <div className="sales-section-header">
+            <h2 className="sales-section-title">How It Works</h2>
+            <p className="sales-section-desc">
+              Three simple steps to get your printer working properly again.
+            </p>
+          </div>
+
+          <div className="sales-steps-grid">
+            <div className="sales-step-card">
+              <div className="sales-step-circle">1</div>
+              <h3 className="sales-step-name">Tell Us What&apos;s Wrong</h3>
+              <p className="sales-step-text">
+                Choose your printer brand and describe the problem in a few words.
+              </p>
+            </div>
+
+            <div className="sales-step-card">
+              <div className="sales-step-circle">2</div>
+              <h3 className="sales-step-name">Get Personalized Assistance</h3>
+              <p className="sales-step-text">
+                Get guidance based on your specific printer problem, model, and setup.
+              </p>
+            </div>
+
+            <div className="sales-step-card">
+              <div className="sales-step-circle">3</div>
+              <h3 className="sales-step-name">Get Back to Printing</h3>
+              <p className="sales-step-text">
+                Follow the recommended steps to troubleshoot your printer without frustration.
+              </p>
+            </div>
+          </div>
+
+          <div className="sales-mid-cta">
+            <a href="#get-help-form" className="sales-btn-primary">
+              GET HELP WITH MY PRINTER
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* TRUST SECTION */}
+      <section className="sales-trust-section">
+        <div className="sales-section-container">
+          <div className="sales-trust-box">
+            <div className="sales-trust-content">
+              <h2 className="sales-trust-title">
+                Printer Help Without the Technical Jargon
+              </h2>
+              <p className="sales-trust-lead">
+                You don&apos;t need to be a computer expert. Tell us what you&apos;re seeing and we&apos;ll help you understand what may be wrong and what to do next.
+              </p>
+
+              <div className="sales-trust-checklist">
+                <div className="sales-trust-check-item">
+                  <span className="sales-trust-check-icon">✓</span>
+                  <span><strong>Easy-to-follow guidance</strong> step by step</span>
+                </div>
+                <div className="sales-trust-check-item">
+                  <span className="sales-trust-check-icon">✓</span>
+                  <span><strong>Help with common printer problems</strong> (offline, won&apos;t print, Wi-Fi)</span>
+                </div>
+                <div className="sales-trust-check-item">
+                  <span className="sales-trust-check-icon">✓</span>
+                  <span><strong>Major printer brands supported</strong> (HP, Canon, Epson, Brother &amp; more)</span>
+                </div>
+                <div className="sales-trust-check-item">
+                  <span className="sales-trust-check-icon">✓</span>
+                  <span><strong>Windows and Mac assistance</strong> for all modern operating systems</span>
+                </div>
+                <div className="sales-trust-check-item">
+                  <span className="sales-trust-check-icon">✓</span>
+                  <span><strong>Independent support</strong> focused entirely on solving your problem</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* BRANDS SECTION */}
+      <section className="sales-brands-section">
+        <div className="sales-section-container">
+          <div className="sales-section-header">
+            <h2 className="sales-section-title">Help With Popular Printer Brands</h2>
+            <p className="sales-section-desc">
+              We assist with all major brands and models used in homes and offices across the United States.
+            </p>
+          </div>
+
+          <div className="sales-brands-grid">
+            <div className="sales-brand-box">
+              <strong className="sales-brand-name">HP</strong>
+              <span className="sales-brand-note">DeskJet, Envy, LaserJet, OfficeJet</span>
+            </div>
+            <div className="sales-brand-box">
+              <strong className="sales-brand-name">Canon</strong>
+              <span className="sales-brand-note">PIXMA, imageCLASS, MAXIFY</span>
+            </div>
+            <div className="sales-brand-box">
+              <strong className="sales-brand-name">Epson</strong>
+              <span className="sales-brand-note">EcoTank, WorkForce, Expression</span>
+            </div>
+            <div className="sales-brand-box">
+              <strong className="sales-brand-name">Brother</strong>
+              <span className="sales-brand-note">HL Series, MFC Series, DCP Series</span>
+            </div>
+          </div>
+
+          <p className="sales-brands-other">
+            And many other printer brands including Munbyn, Rollo, Zebra, Xerox, and Lexmark.
+          </p>
+
+          <p className="sales-brands-disclaimer">
+            *All brand names, trademarks, and model numbers are the property of their respective owners and are used here solely to describe the printers we support. Liberty Printer Fix is an independent service provider and is not affiliated with these manufacturers.
+          </p>
+        </div>
+      </section>
+
+      {/* SERVICE / CONVERSION SECTION (before FAQ) */}
+      <section className="sales-ready-section">
+        <div className="sales-section-container">
+          <div className="sales-ready-card">
+            <h2 className="sales-ready-title">
+              Ready to Get Your Printer Working Again?
+            </h2>
+            <p className="sales-ready-lead">
+              Tell us what&apos;s happening with your printer and we&apos;ll help you determine the next step.
+            </p>
+
+            <div className="sales-ready-explanation">
+              <h3>What Happens Next:</h3>
+              <ol className="sales-ready-list">
+                <li>You submit your printer brand and a brief note about what is happening.</li>
+                <li>We review your issue against known fixes for your specific model and setup.</li>
+                <li>You receive simple, straightforward troubleshooting guidance via email (or phone if requested).</li>
+              </ol>
+            </div>
+
+            <a href="#get-help-form" className="sales-btn-primary sales-btn-large">
+              GET HELP WITH MY PRINTER
+            </a>
+          </div>
         </div>
       </section>
 
       {/* FAQ SECTION */}
-      <section className="lp-faq-section">
-        <div className="lp-section-header">
-          <span className="lp-section-tag">ANSWERS TO COMMON QUESTIONS</span>
-          <h2 className="lp-section-title">Frequently Asked Questions</h2>
-        </div>
+      <section className="sales-faq-section">
+        <div className="sales-section-container">
+          <div className="sales-section-header">
+            <h2 className="sales-section-title">Frequently Asked Questions</h2>
+            <p className="sales-section-desc">
+              Clear answers to the most common questions from our visitors.
+            </p>
+          </div>
 
-        <div className="lp-faq-grid">
-          {faqs.map((f, idx) => (
-            <div key={idx} className="lp-faq-card">
-              <h3 className="lp-faq-question">{f.q}</h3>
-              <p className="lp-faq-answer">{f.a}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* SECONDARY BOTTOM CTA */}
-      <section className="lp-bottom-cta">
-        <div className="lp-bottom-cta-content">
-          <h2 className="lp-bottom-cta-title">Ready to Get Your Printer Back Online?</h2>
-          <p className="lp-bottom-cta-desc">
-            Don&apos;t spend another hour wrestling with driver errors or flashing lights. Submit your issue now or launch Live Chat with Cathy.
-          </p>
-          <div className="lp-bottom-cta-buttons">
-            <a href="#lead-form" className="lp-bottom-btn-primary">
-              Submit Your Printer Issue ➔
-            </a>
-            <a
-              href="https://vm.providesupport.com/0hfjufu6eccq70z7w7kmktp1rf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="lp-bottom-btn-chat"
-            >
-              <span>💬</span> Talk to Cathy Live
-            </a>
+          <div className="sales-faq-list">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="sales-faq-item">
+                <h3 className="sales-faq-q">{faq.q}</h3>
+                <p className="sales-faq-a">{faq.a}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* GOOGLE ADS LEGAL & INDEPENDENT THIRD-PARTY NOTICE */}
-      <section className="lp-compliance-section">
-        <div className="lp-compliance-card">
-          <h4>Consumer Protection Notice &amp; Disclaimer of Non-Affiliation</h4>
-          <p>
-            LibertyPrinterFix is an independent provider of technical support diagnostic guides, software troubleshooting tutorials, and customer assistance. We are <strong>not affiliated with, endorsed by, sponsored by, or an authorized representative of</strong> Hewlett-Packard (HP), Canon Inc., Seiko Epson Corporation, Brother Industries, Zebra Technologies, Munbyn, Rollo, DYMO, or any other original equipment manufacturer (OEM). All brand names, trademarks, logos, and model designations mentioned on this page are used strictly for nominative, descriptive, and identification purposes under fair use.
-          </p>
+      {/* FINAL SECTION */}
+      <section className="sales-final-section">
+        <div className="sales-section-container">
+          <div className="sales-final-card">
+            <h2 className="sales-final-title">Don&apos;t Let a Stubborn Printer Ruin Your Day</h2>
+            <p className="sales-final-text">
+              Whether your printer won&apos;t connect to Wi-Fi, refuses to print, or shows a confusing error message, let us help you get back on track.
+            </p>
+            <div className="sales-final-buttons">
+              <a href="#get-help-form" className="sales-btn-primary sales-btn-large">
+                GET HELP WITH MY PRINTER
+              </a>
+              <a
+                href="https://vm.providesupport.com/0hfjufu6eccq70z7w7kmktp1rf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="sales-btn-chat"
+              >
+                <span>💬</span> Talk to Cathy on Live Chat
+              </a>
+            </div>
+          </div>
+
+          {/* Prominent Legal Disclaimer Footer */}
+          <div className="sales-legal-disclaimer">
+            <h4>Important Notice of Independence:</h4>
+            <p>
+              Liberty Printer Fix is an independent technical assistance service provider. We are not affiliated with, endorsed by, sponsored by, or partnered with Hewlett-Packard (HP), Canon, Epson, Brother, or any other printer manufacturer. Any use of brand names or trademarks is strictly for descriptive and informational purposes to help users identify their printer model.
+            </p>
+          </div>
         </div>
       </section>
+
+      {/* Mobile Sticky CTA Bar */}
+      <MobileStickyCTA />
     </div>
   );
 }
