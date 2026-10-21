@@ -148,15 +148,6 @@ export default function RootLayout({
               <Link href="/privacy-policy" className="nav-link">Privacy Policy</Link>
               <Link href="/about" className="nav-link">About</Link>
               <Link href="/contact" className="nav-link">Contact</Link>
-              <a
-                href="https://vm.providesupport.com/0hfjufu6eccq70z7w7kmktp1rf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="header-chat-btn"
-                title="Live Chat - You can talk to Cathy"
-              >
-                <span>💬</span> Live Chat
-              </a>
             </nav>
           </div>
         </header>
