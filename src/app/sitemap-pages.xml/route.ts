@@ -18,6 +18,7 @@ const STATIC_PAGES = [
   '/about',
   '/contact',
   '/privacy-policy',
+  '/terms',
 ];
 
 export async function GET(): Promise<Response> {

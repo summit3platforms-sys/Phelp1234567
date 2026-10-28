@@ -89,7 +89,7 @@ export default function ContactForm() {
           Message Received!
         </h2>
         <p style={{ color: '#475569', fontSize: '1rem', lineHeight: '1.6', marginBottom: '1.5rem', maxWidth: '440px', margin: '0 auto 1.5rem' }}>
-          Thank you, <strong>{formData.name}</strong>. Your message has been saved into our support queue. A specialist will review your inquiry and follow up shortly at <strong>{formData.email}</strong>.
+          Thank you, <strong>{formData.name}</strong>. Your message has been received. Our team will review your inquiry and follow up at <strong>{formData.email}</strong> within 24–48 business hours.
         </p>
         <button
           onClick={handleReset}
@@ -176,7 +176,7 @@ export default function ContactForm() {
       {/* Phone Number (Optional) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
         <label htmlFor="phone" style={{ fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>
-          Phone Number <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 400 }}>(Optional, for callback)</span>
+          Phone Number <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 400 }}>(Optional)</span>
         </label>
         <input
           type="tel"
@@ -242,7 +242,7 @@ export default function ContactForm() {
           rows={5}
           value={formData.message}
           onChange={handleChange}
-          placeholder="Describe the issue, error code, or question you have in detail..."
+          placeholder="Describe your inquiry, question, or the specific guide you are referencing in detail..."
           required
           style={{
             padding: '0.75rem',

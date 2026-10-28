@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage() {
     <div className="container" style={{ maxWidth: '800px', padding: '4rem 1rem' }}>
       <div className="article-content">
         <h1>Privacy Policy for Liberty Printer Fix</h1>
-        <p><strong>Last Updated: July 19, 2026</strong></p>
+        <p><strong>Last Updated: October 28, 2026</strong></p>
         
         <p>Welcome to Liberty Printer Fix ("we," "us," "our," or the "Company"), accessible at <a href="https://libertyprinterfix.com">https://libertyprinterfix.com</a> (the "Website" or "Service"). We are a business operating in the State of Florida, United States.</p>
         
@@ -61,8 +61,8 @@ export default function PrivacyPolicyPage() {
         </ul>
         <p>When you access the Website via a mobile device, we may collect certain information automatically, including the type of mobile device you use, your mobile device's unique ID, the IP address of your mobile device, your mobile operating system, and the type of mobile browser you use.</p>
 
-        <h3>2.3 Information from Children Under 13</h3>
-        <p>We may collect information from children under the age of 13. We do so only in compliance with the Children's Online Privacy Protection Act (COPPA). Please see Section 12 (Children's Privacy) for detailed information about our practices, the parental consent we obtain, and the rights of parents and guardians.</p>
+        <h3>2.3 Children's Privacy</h3>
+        <p>Our Website and services are not directed to children under the age of 13. We do not knowingly collect, request, or maintain personal information from children under the age of 13. Please see Section 12 (Children's Privacy) for details.</p>
 
         <h2>3. Tracking Technologies and Cookies</h2>
         <p>We use Cookies and similar tracking technologies (such as web beacons, pixels, tags, and scripts) to track activity on our Service and store certain information.</p>
@@ -190,33 +190,10 @@ export default function PrivacyPolicyPage() {
         <p>Your information, including Personal Data, may be transferred to &mdash; and maintained on &mdash; computers located outside of your state, province, country, or other governmental jurisdiction where the data protection laws may differ from those of your jurisdiction. If you are located outside the United States and choose to provide information to us, please note that we transfer the data, including Personal Data, to the United States and process it there.</p>
         <p>Where required, we implement appropriate safeguards for international transfers of Personal Data, such as Standard Contractual Clauses approved by the European Commission or reliance on adequacy decisions and certified frameworks (such as the EU-U.S. Data Privacy Framework, where our service providers are certified). Your consent to this Privacy Policy followed by your submission of such information represents your agreement to that transfer.</p>
 
-        <h2>12. Children's Privacy (COPPA)</h2>
-        <p>We collect information from children under the age of 13, and we do so in compliance with the Children's Online Privacy Protection Act (COPPA).</p>
-        
-        <h3>12.1 Parental Consent</h3>
-        <p>Before collecting Personal Information from a child under 13, we obtain verifiable parental consent. We will:</p>
-        <ul>
-          <li>Provide direct notice to parents about our information practices before collecting Personal Information from their child;</li>
-          <li>Obtain verifiable parental consent before collecting, using, or disclosing Personal Information from children under 13;</li>
-          <li>Not condition a child's participation in an activity on the child disclosing more Personal Information than is reasonably necessary for that activity.</li>
-        </ul>
-
-        <h3>12.2 What We Collect from Children</h3>
-        <p>The information we may collect from children under 13 is limited to what is reasonably necessary to provide the requested service and may include a first name, email address (or a parent's email address), and content voluntarily submitted through the Service.</p>
-
-        <h3>12.3 Parental Rights</h3>
-        <p>Parents and legal guardians have the right to:</p>
-        <ul>
-          <li><strong>Review</strong> the Personal Information we have collected from their child;</li>
-          <li><strong>Request deletion</strong> of their child's Personal Information;</li>
-          <li><strong>Refuse further collection or use</strong> of their child's Personal Information;</li>
-          <li><strong>Revoke consent</strong> previously given, at any time.</li>
-        </ul>
-        <p>To exercise any of these rights, parents may contact us using the contact details in Section 17. We will take reasonable steps to verify the identity of anyone claiming to be a child's parent or guardian before providing access to the child's information.</p>
-
-        <h3>12.4 No Behavioral Advertising to Children</h3>
-        <p>We do not knowingly serve interest-based (behavioral) advertising to users we know to be under 13, and we do not knowingly permit third parties to collect Personal Information from children under 13 for behavioral advertising purposes.</p>
-        <p>If you believe we have collected Personal Information from a child under 13 without appropriate parental consent, please contact us immediately so that we can investigate and take appropriate action, including deletion of the information.</p>
+        <h2>12. Children's Privacy (COPPA Compliance)</h2>
+        <p>Liberty Printer Fix is an informational technical resource intended for general adult audiences, home office users, and business operators. The Website is not designed for or directed at children under the age of 13.</p>
+        <p>We do not knowingly collect, maintain, or use personal information from children under 13 years of age. No part of our Website is structured or intended to attract anyone under the age of 13.</p>
+        <p>If you are a parent or guardian and believe that your child has provided us with personal information without verifiable parental consent, please contact us immediately at <a href="mailto:privacy@libertyprinterfix.com">privacy@libertyprinterfix.com</a>. If we discover that personal data of a user under 13 has been collected, we will take immediate steps to delete that information from our servers and databases.</p>
 
         <h2>13. Your California Privacy Rights (CCPA as Amended by CPRA)</h2>
         <p>This section applies to California residents and supplements the rest of this Privacy Policy. It is provided pursuant to the California Consumer Privacy Act of 2018 ("CCPA"), as amended by the California Privacy Rights Act of 2020 ("CPRA").</p>
@@ -355,8 +332,9 @@ export default function PrivacyPolicyPage() {
         <p>If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, you can contact us:</p>
         <ul>
           <li><strong>By email:</strong> <a href="mailto:privacy@libertyprinterfix.com">privacy@libertyprinterfix.com</a></li>
+          <li><strong>General Inquiries:</strong> <a href="mailto:info@libertyprinterfix.com">info@libertyprinterfix.com</a></li>
           <li><strong>By visiting this page on our website:</strong> <Link href="/contact">https://libertyprinterfix.com/contact</Link></li>
-          <li><strong>By post mail:</strong> Liberty Printer Fix, 123 Tech Support Way, Miami, Florida 33101, United States</li>
+          <li><strong>By postal mail:</strong> Liberty Printer Fix, Legal &amp; Privacy Department, State of Florida, United States</li>
         </ul>
       </div>
     </div>

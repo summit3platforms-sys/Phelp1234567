@@ -192,6 +192,7 @@ export default function RootLayout({
                 <h2 className="footer-col-title">Legal & Help</h2>
                 <div className="footer-col-links">
                   <Link href="/privacy-policy">Privacy Policy</Link>
+                  <Link href="/terms">Terms of Service</Link>
                   <Link href="/about">About Us</Link>
                   <Link href="/contact">Contact Us</Link>
                   <Link href="/search">Search Guides</Link>
